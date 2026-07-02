@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://server.n8n-mustafa.me; object-src 'none';">
+    <title>Randevu Paneli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+</head>
+
+<body class="dark-theme">
+    <div id="toast-container"></div>
+    <svg class="svg-sprite">
+        <symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </symbol>
+        <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </symbol>
+        <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            <path d="M10 11v6" />
+            <path d="M14 11v6" />
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+        </symbol>
+        <symbol id="icon-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+        </symbol>
+        <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </symbol>
+        <symbol id="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+        </symbol>
+        <symbol id="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+        </symbol>
+    </svg>
+    <div id="page-loader">
+        <div class="loader-logo-pulse">
+            <span class="logo-text">Lumina</span>
+            <div class="logo-subtext">Beauty Dashboard</div>
+        </div>
+        <span class="loading-text">Yükleniyor...</span>
+    </div>
+
+    <!-- MAIN APP WRAPPER -->
+    <div class="app-layout">
+        <!-- LEFT SIDEBAR MENU -->
+        <aside id="left-sidebar" class="left-sidebar">
+            <div class="sidebar-brand">
+                <button id="btnSidebarCollapse" class="sidebar-collapse-btn" title="Menüyü Genişlet/Daralt">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <span class="brand-name">Lumina Beauty</span>
+            </div>
+            <nav class="sidebar-nav">
+                <button id="tabCalendar" class="nav-menu-item active">
+                    <span class="menu-icon">📅</span>
+                    <span class="menu-label">Takvim</span>
+                </button>
+                <button id="tabOverview" class="nav-menu-item">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-label">Genel Görünüm</span>
+                </button>
+                <button id="tabSettings" class="nav-menu-item">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-label">Ayarlar</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-actions">
+                    <button id="btnThemeToggle" class="theme-toggle-btn" title="Temayı Değiştir">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <button id="btnLogout" class="theme-toggle-btn" title="Oturumu Kapat" style="background: var(--danger-dim); color: var(--rose);">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="record-badge" id="sidebarRecordBadge">0 Kayıt</div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="main-content">
+            <!-- Mobile Top Bar -->
+            <div class="mobile-top-bar">
+                <button id="btnMobileMenu" class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <span class="mobile-brand">Lumina Beauty</span>
+            </div>
+
+            <!-- Drawer Backdrops & Sidebars -->
+            <div id="sidebarOverlay" class="sidebar-overlay"></div>
+            
+            <div id="patientSidebar" class="right-sidebar">
+                <div class="sidebar-header">
+                    <div class="flex-1">
+                        <h2 class="sb-title-wrap">
+                            <span id="sbName">-</span>
+                            <button id="btnEditPatient" class="edit-patient-btn"
+                                title="Bilgileri Düzenle">
+                                <svg width="14" height="14">
+                                    <use href="#icon-edit"></use>
+                                </svg>
+                            </button>
+                        </h2>
+                        <p id="sbPhone" class="sb-subtitle-text">-</p>
+                    </div>
+                    <button id="btnCloseSidebar" class="sidebar-close">&times;</button>
+                </div>
+                <div class="sidebar-tabs-nav">
+                    <button id="sbTabOverview" class="sidebar-tab-btn active">Genel Bakış</button>
+                    <button id="sbTabFinance" class="sidebar-tab-btn">Finans & Paketler</button>
+                    <button id="sbTabNotes" class="sidebar-tab-btn">Notlar & Geçmiş</button>
+                </div>
+                <div class="sidebar-content">
+                    <!-- Genel Bakış Sekmesi -->
+                    <div id="sbPanelOverview" class="sidebar-tab-panel active">
+                        <div id="sbWarning" class="warning-box hidden">
+                            ⚠️ <span id="sbWarningText" class="masked-data"></span>
+                            <button id="btnToggleWarning" class="btn-icon-soft" title="Göster/Gizle">
+                                <svg width="14" height="14"><use href="#icon-eye"></use></svg>
+                            </button>
+                        </div>
+                        <div class="info-card bento-widget">
+                            <div class="info-title">Son 3 İşlem</div>
+                            <div id="sbHistory" class="timeline"></div>
+                        </div>
+                    </div>
+
+                    <!-- Finans & Paketler Sekmesi -->
+                    <div id="sbPanelFinance" class="sidebar-tab-panel">
+                        <div class="info-card bento-widget">
+                            <div class="info-title">Paket / Seans Durumu</div>
+                            <div class="flex-row items-center gap-16 mt-8" style="display: flex; align-items: center; gap: 16px; margin-top: 8px;">
+                                <div class="progress-ring">
+                                    <svg viewBox="0 0 60 60">
+                                        <circle class="progress-ring__bg" cx="30" cy="30" r="26"></circle>
+                                        <circle id="sbSessionRing" class="progress-ring__circle" cx="30" cy="30" r="26" stroke-dasharray="163.36" stroke-dashoffset="163.36"></circle>
+                                    </svg>
+                                    <div id="sbSessionRingText" class="progress-ring__text text-accent font-bold">0%</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div id="sbPackageName" class="font-13 font-bold mb-4">Paket Seçilmedi</div>
+                                    <div id="sbSessionCount" class="font-11 text-muted">0 / 0 Seans</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-card bento-widget mt-12" style="margin-top: 12px;">
+                            <div class="info-title">Finansal Özet</div>
+                            <div class="finance-row"><span>Toplam Tutar</span><span id="sbTotal">0 ₺</span></div>
+                            <div class="finance-row"><span>Alınan Ödeme</span><span id="sbPaid" class="text-emerald font-bold">0 ₺</span></div>
+                            <div class="finance-row"><span>Kalan Bakiye</span><span id="sbDebt" class="text-danger font-bold">0 ₺</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Notlar & Geçmiş Sekmesi -->
+                    <div id="sbPanelNotes" class="sidebar-tab-panel">
+                        <div class="info-card bento-widget">
+                            <div class="info-title">Geçmiş Notlar</div>
+                            <div id="sbNotes" class="timeline scroll-y scroll-notes-area" style="max-height: 250px;"></div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-title">Hızlı Not Ekle</div>
+                            <textarea id="sbNoteInput" class="modal-input w-full h-70 no-resize font-12 mb-8"
+                                placeholder="Randevu esnasında hasta için not alın..."></textarea>
+                            <button id="btnSaveNote"
+                                class="modal-btn modal-btn-save w-full font-12">Notu Kaydet</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Container -->
+            <div class="container">
+                <header class="main-header glass">
+                    <div class="header-brand">
+                        <h1>Randevu Paneli</h1>
+                        <p class="subtitle" id="dateRangeText"></p>
+                    </div>
+                    
+                    <!-- MİNİ İSTATİSTİKLER -->
+                    <div class="header-stats">
+                        <div class="header-stat-badge">
+                            <span class="h-stat-label">Bugün</span>
+                            <span id="statToday" class="h-stat-val">0</span>
+                        </div>
+                        <div class="header-stat-badge">
+                            <span class="h-stat-label">Haftalık Başarı</span>
+                            <span id="statSuccess" class="h-stat-val">%0</span>
+                        </div>
+                        <div class="header-stat-badge">
+                            <span class="h-stat-label">Kuyruk</span>
+                            <span id="statWaiting" class="h-stat-val">0</span>
+                        </div>
+                    </div>
+
+                    <div class="search-wrap">
+                        <div class="search-inner">
+                            <div class="search-icon-wrap">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <use href="#icon-search"></use>
+                                </svg>
+                            </div>
+                            <input type="text" id="searchInput" class="focus-glow" autocomplete="off" placeholder="Hasta Arama... (Ad Soyad, Telefon)">
+                            <div class="search-badge">Ctrl+K</div>
+                        </div>
+                        <div id="searchResults" class="hidden"></div>
+                    </div>
+                    <div class="nav-controls">
+                        <button id="btnAddApt" class="btn-add-primary">
+                            <svg width="14" height="14">
+                                <use href="#icon-plus"></use>
+                            </svg>
+                            <span>Yeni Ekle</span>
+                        </button>
+                        <div class="nav-btn-group">
+                            <button id="btnPrevWeek" class="nav-btn">&#10094;</button>
+                            <button id="btnToday" class="nav-btn nav-btn-today">Bugün</button>
+                            <button id="btnNextWeek" class="nav-btn">&#10095;</button>
+                        </div>
+                        <div class="view-toggle-group">
+                            <button id="btnViewDay" class="view-toggle-btn">Gün</button>
+                            <button id="btnViewWeek" class="view-toggle-btn active">Hafta</button>
+                            <button id="btnViewMonth" class="view-toggle-btn">Ay</button>
+                        </div>
+                        <button id="btnToggleAgenda" class="nav-btn" title="Ajandayı Göster/Gizle">Ajanda</button>
+                    </div>
+                </header>
+
+                <!-- Section: Calendar View -->
+                <div id="viewCalendar" class="view-section active">
+
+
+                    <div class="content-layout">
+                        <div class="calendar-wrapper">
+                            <div class="calendar-grid"></div>
+                        </div>
+
+                        <div class="agenda-wrapper glass" id="agendaPanel">
+                            <div class="stat-label agenda-section-title flex-between">
+                                <span>Bugünün Akışı</span>
+                                <div class="daily-success-wrap" title="Günlük Başarı">
+                                    <span class="daily-success-text">Günlük Başarı:</span>
+                                    <span id="dailySuccessRate" class="daily-success-badge text-emerald"></span>
+                                </div>
+                            </div>
+                            <div id="dailyAgendaList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Overview Stats View -->
+                <div id="viewOverview" class="view-section hidden">
+                    <div class="stats-grid" id="overviewKpiGrid"></div>
+                    
+                    <div class="overview-content-layout">
+                        <div class="overview-card glass">
+                            <div class="info-title">Finansal Durum</div>
+                            <div id="ovFinanceChart"></div>
+                        </div>
+                        <div class="overview-card glass">
+                            <div class="info-title">Randevu Akışı & Trendi</div>
+                            <div id="ovTrendChart"></div>
+                        </div>
+                        <div class="overview-card glass">
+                            <div class="info-title">Hizmet Dağılımı</div>
+                            <div id="ovServiceDist" class="ov-service-list"></div>
+                        </div>
+                        <div class="overview-card glass">
+                            <div class="info-title">Son Kayıtlar</div>
+                            <div id="ovRecentPatients" class="ov-recent-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Settings View -->
+                <div id="viewSettings" class="view-section hidden">
+                    <div class="settings-layout">
+                        <div class="glass settings-card">
+                            <div class="flex-between mb-16">
+                                <div class="info-title mb-0">Takvim Ayarları</div>
+                                <div class="stat-icon-wrapper text-pink">📅</div>
+                            </div>
+                            <div class="form-section">
+                                <div class="input-row mb-12">
+                                    <div class="flex-1">
+                                        <label class="form-label">Mesai Başlangıç (Saat)</label>
+                                        <input type="number" id="setCalStart" class="modal-input w-full" min="0" max="23">
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="form-label">Mesai Bitiş (Saat)</label>
+                                        <input type="number" id="setCalEnd" class="modal-input w-full" min="0" max="23">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass settings-card">
+                            <div class="flex-between mb-16">
+                                <div class="info-title mb-0">Hizmet Ayarları</div>
+                                <div class="stat-icon-wrapper text-emerald">⚙️</div>
+                            </div>
+                            <div class="form-section">
+                                <label class="form-label">Hizmet Listesi (Virgülle Ayırın)</label>
+                                <textarea id="setSrvList" class="modal-input w-full h-70 no-resize mb-16" placeholder="Lazer, Cilt Bakımı..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="glass settings-card">
+                            <div class="flex-between mb-16">
+                                <div class="info-title mb-0">Arayüz ve Finans</div>
+                                <div class="stat-icon-wrapper text-main">🎨</div>
+                            </div>
+                            <div class="form-section">
+                                <label class="form-label">Tema Seçimi</label>
+                                <select id="setUiTheme" class="modal-input w-full mb-12 cursor-pointer">
+                                    <option value="light">Gündüz (Light)</option>
+                                    <option value="dark">Gece (Dark)</option>
+                                </select>
+                                <label class="form-label">Para Birimi Sembolü</label>
+                                <input type="text" id="setUiCurrency" class="modal-input w-full mb-12" maxlength="5">
+                                <label class="form-label">Durum Renkleri (Hex Kodları)</label>
+                                <div class="input-row mb-8">
+                                    <div class="flex-1"><label class="form-label font-10">Bekliyor</label><input type="color" id="setColWaiting" class="modal-input w-full p-4 h-auto cursor-pointer"></div>
+                                    <div class="flex-1"><label class="form-label font-10">Tamamlandı</label><input type="color" id="setColCompleted" class="modal-input w-full p-4 h-auto cursor-pointer"></div>
+                                    <div class="flex-1"><label class="form-label font-10">İptal</label><input type="color" id="setColCanceled" class="modal-input w-full p-4 h-auto cursor-pointer"></div>
+                                </div>
+                                <button id="btnResetColors" class="modal-btn btn-secondary-soft w-full font-10 p-4 mt-0" style="padding: 6px; border: 1px dashed var(--border);">
+                                    ↩️ Renkleri Varsayılana Döndür
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-actions">
+                        <button id="btnSaveSettings" class="btn-add-primary" style="display: inline-flex; width: auto; padding: 10px 24px; font-size: 13px;">
+                            <svg width="14" height="14"><use href="#icon-edit"></use></svg>
+                            <span>Tüm Ayarları Kaydet</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS / DRAWERS -->
+    <div id="addAptModal" class="hidden">
+        <div class="modal-panel">
+            <div id="addModalLoading" class="hidden modal-overlay-loader">
+                <div class="spinner"></div><span class="loading-text">Kaydediliyor...</span>
+            </div>
+            <div class="flex-between mb-16">
+                <h2 class="modal-title-bold m-0">Yeni Randevu</h2>
+                <button id="btnCancelAddModal" class="btn-close-x">&times;</button>
+            </div>
+            <div class="tab-container">
+                <button id="tabNew" class="tab-btn tab-btn-active">Sıfırdan Hasta</button>
+                <button id="tabExist" class="tab-btn tab-btn-inactive">Kayıtlı Hasta (Ara)</button>
+            </div>
+            <div class="form-section">
+                <div id="addNewFields">
+                    <label class="form-label">Ad Soyad</label>
+                    <input type="text" id="addName" class="modal-input w-full mb-12">
+                    <label class="form-label">Telefon</label>
+                    <input type="text" id="addPhone" class="modal-input w-full mb-12">
+                </div>
+                <div id="addExistFields" class="hidden mb-12 relative">
+                    <label class="form-label">Kayıtlı Hasta Ara</label>
+                    <input type="text" id="addSearchInput" autocomplete="off" class="modal-input w-full"
+                        placeholder="Hasta Arama... (Ad Soyad, Telefon)">
+                    <div id="addSearchResults" class="hidden search-results-popover"></div>
+                    <div id="selectedPatientCard" class="hidden selected-patient-badge">
+                        <div>
+                            <div id="selPatName" class="font-bold">-</div>
+                            <div id="selPatPhone" class="text-emerald">-</div>
+                        </div>
+                        <button id="btnClearSelectedPatient" class="btn-icon-danger">&times;</button>
+                    </div>
+                </div>
+                <label class="form-label">Hizmet</label>
+                <select id="addService" class="modal-input w-full mb-12 cursor-pointer">
+                    <option value="Lazer">Lazer</option>
+                    <option value="Cilt Bakımı">Cilt Bakımı</option>
+                    <option value="Bölgesel İncelme">Bölgesel İncelme</option>
+                    <option value="Protez">Protez</option>
+                    <option value="Diğer">Diğer</option>
+                </select>
+                <label class="form-label">Tarih & Saat Ayarı</label>
+                <div class="input-row"><input type="date" id="addDate" class="modal-input"><input
+                        type="time" id="addTime" class="modal-input modal-input-sm w-auto"></div>
+            </div>
+            <button id="btnSubmitNewApt" class="modal-btn modal-btn-complete w-full">🚀 Kaydet ve Ekle</button>
+        </div>
+    </div>
+
+    <div id="aptModal" class="hidden">
+        <div class="modal-panel modal-scroll-container">
+            <div id="modalLoading" class="hidden modal-overlay-loader">
+                <div class="spinner"></div><span class="loading-text">İşleniyor...</span>
+            </div>
+            <div class="flex-between mb-16">
+                <div class="flex-gap-8">
+                    <h2 id="modalTitleText" class="modal-title-bold m-0">Detay</h2>
+                    <button id="btnToggleInlineEdit" class="edit-patient-btn p-4" title="Bilgileri Düzenle">
+                        <svg width="14" height="14"><use href="#icon-edit"></use></svg>
+                    </button>
+                </div>
+                <button id="btnXCloseModal" title="Kapat" class="btn-close-x">&times;</button>
+            </div>
+            <p id="modalSub" class="text-muted font-11 mb-16"></p>
+
+            <div id="inlineEditSection" class="hidden inline-edit-box">
+                <h3 class="label-pink-caps">Hasta Bilgileri</h3>
+                <label class="label-uppercase-muted">Ad Soyad</label>
+                <input type="text" id="inlineEditName" class="modal-input w-full mb-8" placeholder="Ad Soyad">
+                <label class="label-uppercase-muted">Telefon</label>
+                <input type="text" id="inlineEditPhone" class="modal-input w-full mb-8" placeholder="Telefon">
+                <label class="label-uppercase-muted">Kronik Rahatsızlık (Varsa)</label>
+                <textarea id="inlineEditChronic" class="modal-input w-full h-70 no-resize mb-8" placeholder="Kronik Rahatsızlık (Varsa)"></textarea>
+                <label class="label-uppercase-muted">Paket Adı</label>
+                <input type="text" id="inlineEditPackage" class="modal-input w-full mb-8" placeholder="Paket Adı">
+                <div class="input-row mb-8">
+                    <div class="flex-1">
+                        <label class="label-uppercase-muted">Toplam Seans</label>
+                        <input type="number" id="inlineEditTotalSession" class="modal-input w-full" placeholder="Toplam Seans" min="0">
+                    </div>
+                    <div class="flex-1">
+                        <label class="label-uppercase-muted">Gelinen</label>
+                        <input type="number" id="inlineEditCurrentSession" class="modal-input w-full" placeholder="Gelinen" min="0">
+                    </div>
+                </div>
+                <div class="input-row mb-12">
+                    <div class="flex-1">
+                        <label class="label-uppercase-muted">Toplam Tutar (₺)</label>
+                        <input type="number" id="inlineEditTotalAmount" class="modal-input w-full" placeholder="Toplam Tutar (₺)" min="0">
+                    </div>
+                    <div class="flex-1">
+                        <label class="label-uppercase-muted">Alınan (₺)</label>
+                        <input type="number" id="inlineEditPaidAmount" class="modal-input w-full" placeholder="Alınan (₺)" min="0">
+                    </div>
+                </div>
+                <button id="btnSaveInlineEdit" class="modal-btn modal-btn-complete w-full p-8">💾 Bilgileri Kaydet</button>
+            </div>
+            
+            <div class="form-section">
+                <label class="form-label">Durum ve Zaman Ayarı</label>
+                <div class="input-row mb-12">
+                    <input type="date" id="newDate" class="modal-input">
+                    <input type="time" id="newTime" class="modal-input modal-input-sm w-auto">
+                </div>
+                <select id="newStatus" class="modal-input w-full cursor-pointer">
+                    <option value="Bekliyor">⏳ Bekliyor</option>
+                    <option value="Tamamlandı">✅ Tamamlandı</option>
+                    <option value="İptal">❌ İptal</option>
+                </select>
+            </div>
+            <div class="input-row mt-auto">
+                <button id="saveBtn" class="modal-btn modal-btn-save flex-1 p-12">💾 Değişiklikleri Kaydet</button>
+                <button id="btnDeleteApt" class="modal-btn modal-btn-cancel p-12 flex-center gap-4 btn-trash-fixed" title="Sil">
+                    <svg width="14" height="14" fill="white">
+                        <use href="#icon-trash"></use>
+                    </svg>
+                    <span>Sil</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editPatientModal" class="hidden">
+        <div class="modal-panel">
+            <div id="editModalLoading" class="hidden modal-overlay-loader">
+                <div class="spinner"></div><span class="loading-text">Kaydediliyor...</span>
+            </div>
+            <div class="flex-between mb-16">
+                <h2 class="modal-title-bold m-0">Hasta Bilgilerini Düzenle</h2>
+                <button id="btnCancelEditPatient" class="btn-close-x">&times;</button>
+            </div>
+            <div class="form-section scroll-y-half">
+                <label class="form-label">Kişisel Bilgiler</label>
+                <input type="text" id="editName" class="modal-input w-full mb-8" placeholder="Ad Soyad">
+                <input type="text" id="editPhone" class="modal-input w-full mb-8" placeholder="Telefon">
+                <textarea id="editChronic" class="modal-input w-full h-70 no-resize mb-12" placeholder="Kronik Rahatsızlık (Varsa)"></textarea>
+                
+                <label class="form-label">Paket ve Seans</label>
+                <input type="text" id="editPackage" class="modal-input w-full mb-8" placeholder="Paket Adı">
+                <div class="input-row mb-12">
+                    <input type="number" id="editTotalSession" class="modal-input flex-1" placeholder="Toplam Seans" min="0">
+                    <input type="number" id="editCurrentSession" class="modal-input flex-1" placeholder="Gelinen" min="0">
+                </div>
+                
+                <label class="form-label">Finansal Bilgiler</label>
+                <div class="input-row mb-12">
+                    <input type="number" id="editTotalAmount" class="modal-input flex-1" placeholder="Toplam Tutar (₺)" min="0">
+                    <input type="number" id="editPaidAmount" class="modal-input flex-1" placeholder="Alınan (₺)" min="0">
+                </div>
+            </div>
+            <button id="btnSubmitEditPatient" class="modal-btn modal-btn-complete w-full mb-8">💾 Değişiklikleri Kaydet</button>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="hidden">
+        <div class="modal-panel confirm-modal-box">
+            <h3 class="modal-title-bold confirm-modal-title">Emin misiniz?</h3>
+            <p id="confirmMessage" class="text-muted font-11 mb-16">Bu işlemi onaylıyor musunuz?</p>
+            <div class="input-row">
+                <button id="confirmNoBtn" class="modal-btn flex-1 btn-secondary-soft">Vazgeç</button>
+                <button id="confirmYesBtn" class="modal-btn modal-btn-cancel flex-1">Evet, Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOVER POPUP -->
+    <div id="aptHoverPopup" class="apt-hover-popup hidden"></div>
+
+    <!-- CUSTOM CONTEXT MENU -->
+    <div id="aptContextMenu" class="context-menu hidden">
+        <div class="ctx-item" id="ctxEdit">
+            <svg width="14" height="14"><use href="#icon-edit"></use></svg>
+            <span>Detay / Düzenle</span>
+        </div>
+        <div class="ctx-item" id="ctxPatient">
+            <svg width="14" height="14"><use href="#icon-eye"></use></svg>
+            <span>Hasta Kartını Aç</span>
+        </div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-title">Durumu Değiştir</div>
+        <div class="ctx-item" id="ctxStatusWait">
+            <span class="status-dot dot-wait"></span>
+            <span>Bekliyor</span>
+        </div>
+        <div class="ctx-item" id="ctxStatusComp">
+            <span class="status-dot dot-comp"></span>
+            <span>Tamamlandı</span>
+        </div>
+        <div class="ctx-item" id="ctxStatusCanc">
+            <span class="status-dot dot-canc"></span>
+            <span>İptal</span>
+        </div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item ctx-danger" id="ctxDelete">
+            <svg width="14" height="14"><use href="#icon-trash"></use></svg>
+            <span>Randevuyu Sil</span>
+        </div>
+    </div>
+
+</body>
+
+</html>

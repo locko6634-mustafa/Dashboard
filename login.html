@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş - Lumina Beauty</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-body);
+            padding: 20px;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            text-align: center;
+            animation: slideUpFadeIn 0.6s ease-out;
+        }
+        .login-brand {
+            margin-bottom: 30px;
+        }
+        .login-brand .logo-text {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: var(--text-main);
+        }
+        .login-brand .logo-subtext {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .relative { position: relative; }
+        .absolute { position: absolute; }
+    </style>
+</head>
+<body class="dark-theme">
+    <div id="toast-container"></div>
+    <div class="login-wrapper">
+        <div class="glass login-card">
+            <div class="login-brand">
+                <div class="logo-text">Lumina</div>
+                <div class="logo-subtext">Beauty Dashboard</div>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div style="text-align: left; margin-bottom: 16px;">
+                    <label class="form-label">E-posta</label>
+                    <input type="email" id="loginEmail" class="modal-input w-full" placeholder="E-posta adresiniz" required>
+                </div>
+                <div style="text-align: left; margin-bottom: 24px;">
+                    <label class="form-label">Şifre</label>
+                    <input type="password" id="loginPassword" class="modal-input w-full" placeholder="Şifreniz" required>
+                </div>
+                
+                <button type="submit" id="btnLogin" class="modal-btn modal-btn-complete w-full relative">
+                    <span id="btnText">Giriş Yap</span>
+                    <div id="btnSpinner" class="spinner spinner-sm absolute hidden" style="left: 50%; top: 50%; transform: translate(-50%, -50%); border-color: rgba(255,255,255,0.3); border-top-color: white;"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showToast(msg, type = 'info', duration = 3000) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-message">${msg}</span>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        function applyTheme() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'dark') document.body.classList.add('dark-theme');
+            else document.body.classList.remove('dark-theme');
+        }
+
+        applyTheme();
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+            const btnLogin = document.getElementById('btnLogin');
+
+            if (!email || !password) return;
+
+            btnText.style.opacity = '0';
+            btnSpinner.classList.remove('hidden');
+            btnLogin.disabled = true;
+
+            try {
+                const endpoint = (typeof CONFIG !== 'undefined' && CONFIG.ENDPOINTS && CONFIG.ENDPOINTS.LOGIN) 
+                    ? CONFIG.ENDPOINTS.LOGIN 
+                    : 'kullanici-girisi';
+                    
+                const url = (typeof CONFIG !== 'undefined' ? CONFIG.API_BASE : '') + endpoint;
+
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!res.ok) {
+                    throw new Error('Geçersiz kimlik bilgileri veya sunucu hatası.');
+                }
+
+                const data = await res.json();
+                
+                if (data.success && data.token && data.tenant_id) {
+                    localStorage.setItem('user_token', data.token);
+                    localStorage.setItem('tenant_id', data.tenant_id);
+                    showToast('Giriş başarılı, yönlendiriliyor...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 800);
+                } else {
+                    throw new Error(data.message || 'Giriş başarısız');
+                }
+
+            } catch (error) {
+                showToast(error.message || 'Bağlantı hatası veya yetkisiz erişim.', 'error');
+            } finally {
+                btnText.style.opacity = '1';
+                btnSpinner.classList.add('hidden');
+                btnLogin.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

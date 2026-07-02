@@ -1,0 +1,10 @@
+# Bağımlılıklar
+node_modules/
+
+# Playwright Test Çıktıları ve Raporları
+playwright-report/
+test-results/
+.playwright-mcp/
+
+# Oturum Kayıtları (Kimlik Bilgileri)
+playwright/.auth/
