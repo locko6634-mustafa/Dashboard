@@ -1,20 +1,20 @@
-# Lumina Beauty Dashboard
+# Randevu Paneli
 
-Modern, hızlı ve işlevsel bir güzellik merkezi / salon yönetim paneli. Bu proje; randevu yönetimi, hasta takibi, seans kontrolleri ve finansal özet raporlarını tek bir ekrandan yönetebilmeniz için tasarlanmıştır.
+Modern, hızlı ve işlevsel bir genel randevu yönetim paneli. Bu proje; randevu yönetimi, müşteri takibi, seans kontrolleri ve finansal özet raporlarını tek bir ekrandan yönetebilmeniz için tasarlanmıştır.
 
 ## 🚀 Özellikler
 
 - **Dinamik Randevu Takvimi:** Günlük randevuları listeleyen, durumlarına göre renklendirilen ve sürükle-bırak veya yeniden boyutlandırma desteği sunan gelişmiş takvim görünümü.
-- **Gelişmiş Hasta Yönetimi:** Kayıtlı hastalar arasında hızlı arama yapabilme, yeni hasta ekleme ve mevcut hasta bilgilerini (finansal durum, seans bilgisi, kişisel bilgiler) düzenleme.
-- **Finansal & Operasyonel Özet (Overview):** Toplam hasta sayısı, toplam randevu adedi, ciro ve başarı oranını gösteren özet kartları ile hizmet dağılımını gösteren görsel grafikler.
+- **Gelişmiş Müşteri Yönetimi:** Kayıtlı müşteriler arasında hızlı arama yapabilme, yeni müşteri ekleme ve mevcut müşteri bilgilerini (finansal durum, seans bilgisi, kişisel bilgiler) düzenleme.
+- **Finansal & Operasyonel Özet (Overview):** Toplam müşteri sayısı, toplam randevu adedi, ciro ve başarı oranını gösteren özet kartları ile hizmet dağılımını gösteren görsel grafikler.
 - **n8n Webhook Entegrasyonu:** Tamamen n8n otomasyonu ile entegre çalışacak şekilde tasarlanmış webhook tabanlı API iletişimi.
-- **Not Yönetimi:** Her hasta randevusu için özel operasyonel ve geçmişe dönük notlar ekleme, silme ve düzenleme.
+- **Not Yönetimi:** Her müşteri randevusu için özel operasyonel ve geçmişe dönük notlar ekleme, silme ve düzenleme.
 - **Duyarlı Tasarım (Responsive):** Mobil, tablet ve masaüstü ekranlar için optimize edilmiş modern, premium arayüz.
 
 ## 🛠️ Teknoloji Yığını
 
 - **Arayüz (Frontend):** HTML5, Vanilla Javascript (Modern ES6+)
-- **Tasarım (CSS):** Özel HSL renk paletleri, modern tipografi (Inter font ailesi) ve akıcı mikro animasyonlar içeren saf CSS.
+- **Tasarım (CSS):** Nötr renk paleti, Geist tipografi ve akıcı mikro animasyonlar içeren saf CSS.
 - **Veri Entegrasyonu:** n8n Webhook API (asenkron fetch istekleri)
 
 ## 📦 Kurulum ve Yapılandırma

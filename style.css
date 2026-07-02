@@ -1,44 +1,48 @@
 :root {
-    /* Light Mode - Premium Nordic Cream Aesthetic */
-    --bg-deep: #FAF8F5;       /* Soft warm cream background */
+    --bg-deep: #FAFAFA;
     --bg-main: #FFFFFF;
-    --bg-secondary: #F3EFEA;  /* Soft warm taupe background */
-    --bg-card: rgba(255, 255, 255, 0.65); /* Frosted glass */
-    --border: rgba(197, 140, 140, 0.12); /* Subtle warm rose-gold border */
-    --border-hover: rgba(197, 140, 140, 0.25);
+    --bg-secondary: #F4F4F5;
+    --bg-card: rgba(255, 255, 255, 0.7);
+    --border: rgba(0, 0, 0, 0.06);
+    --border-hover: rgba(0, 0, 0, 0.12);
     
-    --text-main: #3A322D;     /* Deep warm charcoal */
-    --text-muted: #8E8279;    /* Muted warm grey */
+    --text-main: #18181B;
+    --text-muted: #71717A;
     
-    /* Elegant Accents */
-    --accent: #C58C8C;        /* Soft Rose Gold */
-    --accent-hover: #A77070;
-    --accent-soft: rgba(197, 140, 140, 0.08);
-    --accent-pink: #C58C8C;
-    --accent-pink-soft: rgba(197, 140, 140, 0.08);
+    --accent: #10B981;
+    --accent-hover: #059669;
+    --accent-soft: rgba(16, 185, 129, 0.08);
+    --accent-pink: var(--accent);
+    --accent-pink-soft: var(--accent-soft);
     
-    --sage: #9AB89A;          /* Adaçayı yeşili (Completed) */
-    --sage-hover: #85A385;
-    --sage-soft: rgba(154, 184, 154, 0.08);
+    --success: #22C55E;
+    --success-hover: #16A34A;
+    --success-soft: rgba(34, 197, 94, 0.08);
     
-    --gold: #E6C89C;          /* Champagne Gold (Waiting) */
-    --gold-hover: #D4B68A;
-    --gold-soft: rgba(230, 200, 156, 0.08);
+    --warning: #F59E0B;
+    --warning-hover: #D97706;
+    --warning-soft: rgba(245, 158, 11, 0.08);
     
-    --rose: #C89494;          /* Dusty Rose (Canceled) */
-    --rose-hover: #B67F7F;
-    --rose-soft: rgba(200, 148, 148, 0.08);
+    --danger: #EF4444;
+    --danger-hover: #DC2626;
+    --danger-soft: rgba(239, 68, 68, 0.08);
 
-    --emerald: var(--sage);
-    --emerald-soft: var(--sage-soft);
-    --amber: var(--gold);
-    --amber-soft: var(--gold-soft);
+    --sage: var(--success);
+    --sage-soft: var(--success-soft);
+    --gold: var(--warning);
+    --gold-soft: var(--warning-soft);
+    --rose: var(--danger);
+    --rose-soft: var(--danger-soft);
+    --emerald: var(--success);
+    --emerald-soft: var(--success-soft);
+    --amber: var(--warning);
+    --amber-soft: var(--warning-soft);
     
     --shadow: 0 4px 20px rgba(58, 50, 45, 0.03);
     --shadow-md: 0 10px 30px rgba(58, 50, 45, 0.06);
     --shadow-lg: 0 20px 45px rgba(58, 50, 45, 0.1);
-    --shadow-hover: 0 12px 30px rgba(197, 140, 140, 0.15);
-    --glow: 0 0 15px rgba(230, 200, 156, 0.25);
+    --shadow-hover: 0 12px 30px rgba(16, 185, 129, 0.12);
+    --glow: 0 0 15px rgba(16, 185, 129, 0.18);
     
     --anim-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
     --radius-sm: 8px;
@@ -52,41 +56,54 @@
 .dark-theme {
     /* Dark Mode - Sleek Metallic Obsidian Aesthetic */
     --bg-deep: #09090B;       /* Pure obsidian black */
-    --bg-main: #121214;       /* Deep metallic grey */
-    --bg-secondary: #1C1C1F;  /* Medium dark grey */
+    --bg-main: #18181B;
+    --bg-secondary: #27272A;
     --bg-card: rgba(18, 18, 20, 0.65); /* Frosted glass overlay */
     
     --border: rgba(255, 255, 255, 0.06); /* Ultra sharp subtle border */
-    --border-hover: rgba(217, 160, 160, 0.15);
+    --border-hover: rgba(255, 255, 255, 0.12);
     
     --text-main: #F4F4F6;     /* Pristine off-white */
     --text-muted: #8E8E93;    /* Cool metallic grey */
     
-    /* Accents in Dark mode - Sleek Rose Gold & Luxury Glows */
-    --accent: #D9A0A0;        /* Glowing Rose Gold */
-    --accent-hover: #C08A8A;
-    --accent-soft: rgba(217, 160, 160, 0.1);
-    --accent-pink: #D9A0A0;
-    --accent-pink-soft: rgba(217, 160, 160, 0.1);
+    --accent: #34D399;
+    --accent-hover: #10B981;
+    --accent-soft: rgba(52, 211, 153, 0.1);
+    --accent-pink: var(--accent);
+    --accent-pink-soft: var(--accent-soft);
     
-    --sage: #9AB89A;          /* Sage Green */
-    --sage-hover: #85A385;
-    --sage-soft: rgba(154, 184, 154, 0.1);
+    --success: #22C55E;
+    --success-hover: #16A34A;
+    --success-soft: rgba(34, 197, 94, 0.1);
     
-    --gold: #E6C89C;          /* Champagne Gold */
-    --gold-hover: #D4B68A;
-    --gold-soft: rgba(230, 200, 156, 0.1);
+    --warning: #F59E0B;
+    --warning-hover: #D97706;
+    --warning-soft: rgba(245, 158, 11, 0.1);
     
-    --rose: #C89494;          /* Dusty Rose */
-    --rose-hover: #B67F7F;
-    --rose-soft: rgba(200, 148, 148, 0.1);
+    --danger: #EF4444;
+    --danger-hover: #DC2626;
+    --danger-soft: rgba(239, 68, 68, 0.1);
+    --sage: var(--success);
+    --sage-soft: var(--success-soft);
+    --gold: var(--warning);
+    --gold-soft: var(--warning-soft);
+    --rose: var(--danger);
+    --rose-soft: var(--danger-soft);
     
     --shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 20px 50px rgba(0, 0, 0, 0.55);
     --shadow-lg: 0 30px 65px rgba(0, 0, 0, 0.7);
-    --shadow-hover: 0 12px 30px rgba(217, 160, 160, 0.2);
-    --glow: 0 0 20px rgba(230, 200, 156, 0.2);
+    --shadow-hover: 0 12px 30px rgba(52, 211, 153, 0.16);
+    --glow: 0 0 20px rgba(52, 211, 153, 0.16);
 }
+
+.accent-emerald { --accent: #10B981; --accent-hover: #059669; --accent-soft: rgba(16,185,129,0.08); }
+.accent-cobalt { --accent: #3B82F6; --accent-hover: #2563EB; --accent-soft: rgba(59,130,246,0.08); }
+.accent-amber { --accent: #F59E0B; --accent-hover: #D97706; --accent-soft: rgba(245,158,11,0.08); }
+.accent-rose { --accent: #F43F5E; --accent-hover: #E11D48; --accent-soft: rgba(244,63,94,0.08); }
+.accent-violet { --accent: #8B5CF6; --accent-hover: #7C3AED; --accent-soft: rgba(139,92,246,0.08); }
+.accent-slate { --accent: #64748B; --accent-hover: #475569; --accent-soft: rgba(100,116,139,0.08); }
+.dark-theme.accent-emerald { --accent: #34D399; --accent-hover: #10B981; --accent-soft: rgba(52,211,153,0.1); }
 
 
 *, *::before, *::after {
@@ -98,7 +115,7 @@
 body {
     background-color: var(--bg-deep);
     color: var(--text-main);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Geist', system-ui, -apple-system, sans-serif;
     height: 100vh;
     overflow: hidden;
     transition: background-color 0.3s var(--anim-ease), color 0.3s var(--anim-ease);
@@ -1959,7 +1976,7 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
 /* Ayarlar Sayfası */
 .settings-layout {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
 }
 
@@ -1973,6 +1990,93 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     margin-top: 14px;
     display: flex;
     justify-content: flex-end;
+}
+
+.accent-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.accent-preset-btn {
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.accent-preset-btn span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.accent-preset-btn.active {
+    color: var(--text-main);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+.service-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.service-setting-card {
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.service-setting-card strong {
+    display: block;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.service-setting-card span {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-family: 'Geist Mono', monospace;
+}
+
+.service-delete-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--danger-soft);
+    color: var(--danger);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.service-add-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 84px auto;
+    gap: 8px;
+    align-items: center;
 }
 
 /* Sayfa Yükleyici (Lüks Logo Animasyonu) */
@@ -2461,7 +2565,7 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     box-shadow: var(--shadow-lg);
     color: var(--text-main);
     font-size: 12px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Geist', sans-serif;
     pointer-events: none;
     animation: popupFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -2528,7 +2632,7 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.05);
     color: var(--text-main);
     font-size: 13px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Geist', sans-serif;
     transform-origin: top left;
     animation: ctxFadeIn 0.15s ease-out forwards;
     display: flex;

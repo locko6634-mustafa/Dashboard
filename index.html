@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://server.n8n-mustafa.me; object-src 'none';">
     <title>Randevu Paneli</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;900&family=Geist+Mono:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="config.js"></script>
     <link rel="stylesheet" href="style.css">
     <script src="app.js" defer></script>
@@ -53,8 +53,7 @@
     </svg>
     <div id="page-loader">
         <div class="loader-logo-pulse">
-            <span class="logo-text">Lumina</span>
-            <div class="logo-subtext">Beauty Dashboard</div>
+            <span id="loaderBrandText" class="logo-text">Randevu Paneli</span>
         </div>
         <span class="loading-text">Yükleniyor...</span>
     </div>
@@ -69,7 +68,7 @@
                     <span></span>
                     <span></span>
                 </button>
-                <span class="brand-name">Lumina Beauty</span>
+                <span id="brandNameText" class="brand-name">Randevu Paneli</span>
             </div>
             <nav class="sidebar-nav">
                 <button id="tabCalendar" class="nav-menu-item active">
@@ -111,7 +110,7 @@
                     <span></span>
                     <span></span>
                 </button>
-                <span class="mobile-brand">Lumina Beauty</span>
+                <span id="mobileBrandText" class="mobile-brand">Randevu Paneli</span>
             </div>
 
             <!-- Drawer Backdrops & Sidebars -->
@@ -188,7 +187,7 @@
                         <div class="info-card">
                             <div class="info-title">Hızlı Not Ekle</div>
                             <textarea id="sbNoteInput" class="modal-input w-full h-70 no-resize font-12 mb-8"
-                                placeholder="Randevu esnasında hasta için not alın..."></textarea>
+                                placeholder="Randevu esnasında müşteri için not alın..."></textarea>
                             <button id="btnSaveNote"
                                 class="modal-btn modal-btn-save w-full font-12">Notu Kaydet</button>
                         </div>
@@ -227,7 +226,7 @@
                                     <use href="#icon-search"></use>
                                 </svg>
                             </div>
-                            <input type="text" id="searchInput" class="focus-glow" autocomplete="off" placeholder="Hasta Arama... (Ad Soyad, Telefon)">
+                            <input type="text" id="searchInput" class="focus-glow" autocomplete="off" placeholder="Müşteri Arama... (Ad Soyad, Telefon)">
                             <div class="search-badge">Ctrl+K</div>
                         </div>
                         <div id="searchResults" class="hidden"></div>
@@ -304,6 +303,28 @@
                     <div class="settings-layout">
                         <div class="glass settings-card">
                             <div class="flex-between mb-16">
+                                <div class="info-title mb-0">Genel / Marka</div>
+                                <div class="stat-icon-wrapper text-main">🏢</div>
+                            </div>
+                            <div class="form-section">
+                                <label class="form-label">İşletme Adı</label>
+                                <input type="text" id="setBrandName" class="modal-input w-full mb-12" placeholder="Randevu Paneli">
+                                <label class="form-label">Para Birimi Sembolü</label>
+                                <input type="text" id="setUiCurrency" class="modal-input w-full mb-12" maxlength="5">
+                                <label class="form-label">Accent Renk</label>
+                                <div id="accentPresetGroup" class="accent-preset-grid">
+                                    <button type="button" class="accent-preset-btn" data-accent="emerald"><span style="background:#10B981"></span>Emerald</button>
+                                    <button type="button" class="accent-preset-btn" data-accent="cobalt"><span style="background:#3B82F6"></span>Cobalt</button>
+                                    <button type="button" class="accent-preset-btn" data-accent="amber"><span style="background:#F59E0B"></span>Amber</button>
+                                    <button type="button" class="accent-preset-btn" data-accent="rose"><span style="background:#F43F5E"></span>Rose</button>
+                                    <button type="button" class="accent-preset-btn" data-accent="violet"><span style="background:#8B5CF6"></span>Violet</button>
+                                    <button type="button" class="accent-preset-btn" data-accent="slate"><span style="background:#64748B"></span>Slate</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass settings-card">
+                            <div class="flex-between mb-16">
                                 <div class="info-title mb-0">Takvim Ayarları</div>
                                 <div class="stat-icon-wrapper text-pink">📅</div>
                             </div>
@@ -323,18 +344,22 @@
 
                         <div class="glass settings-card">
                             <div class="flex-between mb-16">
-                                <div class="info-title mb-0">Hizmet Ayarları</div>
+                                <div class="info-title mb-0">Hizmet Yönetimi</div>
                                 <div class="stat-icon-wrapper text-emerald">⚙️</div>
                             </div>
                             <div class="form-section">
-                                <label class="form-label">Hizmet Listesi (Virgülle Ayırın)</label>
-                                <textarea id="setSrvList" class="modal-input w-full h-70 no-resize mb-16" placeholder="Lazer, Cilt Bakımı..."></textarea>
+                                <div id="serviceCardList" class="service-card-grid"></div>
+                                <div class="service-add-row">
+                                    <input type="text" id="newServiceName" class="modal-input" placeholder="Hizmet adı">
+                                    <input type="number" id="newServiceDuration" class="modal-input modal-input-sm" min="5" step="5" value="30" aria-label="Süre">
+                                    <button type="button" id="btnAddServiceSetting" class="modal-btn modal-btn-save">Ekle</button>
+                                </div>
                             </div>
                         </div>
 
                         <div class="glass settings-card">
                             <div class="flex-between mb-16">
-                                <div class="info-title mb-0">Arayüz ve Finans</div>
+                                <div class="info-title mb-0">Arayüz Ayarları</div>
                                 <div class="stat-icon-wrapper text-main">🎨</div>
                             </div>
                             <div class="form-section">
@@ -343,8 +368,6 @@
                                     <option value="light">Gündüz (Light)</option>
                                     <option value="dark">Gece (Dark)</option>
                                 </select>
-                                <label class="form-label">Para Birimi Sembolü</label>
-                                <input type="text" id="setUiCurrency" class="modal-input w-full mb-12" maxlength="5">
                                 <label class="form-label">Durum Renkleri (Hex Kodları)</label>
                                 <div class="input-row mb-8">
                                     <div class="flex-1"><label class="form-label font-10">Bekliyor</label><input type="color" id="setColWaiting" class="modal-input w-full p-4 h-auto cursor-pointer"></div>
@@ -380,8 +403,8 @@
                 <button id="btnCancelAddModal" class="btn-close-x">&times;</button>
             </div>
             <div class="tab-container">
-                <button id="tabNew" class="tab-btn tab-btn-active">Sıfırdan Hasta</button>
-                <button id="tabExist" class="tab-btn tab-btn-inactive">Kayıtlı Hasta (Ara)</button>
+                <button id="tabNew" class="tab-btn tab-btn-active">Yeni Müşteri</button>
+                <button id="tabExist" class="tab-btn tab-btn-inactive">Kayıtlı Müşteri (Ara)</button>
             </div>
             <div class="form-section">
                 <div id="addNewFields">
@@ -391,9 +414,9 @@
                     <input type="text" id="addPhone" class="modal-input w-full mb-12">
                 </div>
                 <div id="addExistFields" class="hidden mb-12 relative">
-                    <label class="form-label">Kayıtlı Hasta Ara</label>
+                    <label class="form-label">Kayıtlı Müşteri Ara</label>
                     <input type="text" id="addSearchInput" autocomplete="off" class="modal-input w-full"
-                        placeholder="Hasta Arama... (Ad Soyad, Telefon)">
+                        placeholder="Müşteri Arama... (Ad Soyad, Telefon)">
                     <div id="addSearchResults" class="hidden search-results-popover"></div>
                     <div id="selectedPatientCard" class="hidden selected-patient-badge">
                         <div>
@@ -404,13 +427,7 @@
                     </div>
                 </div>
                 <label class="form-label">Hizmet</label>
-                <select id="addService" class="modal-input w-full mb-12 cursor-pointer">
-                    <option value="Lazer">Lazer</option>
-                    <option value="Cilt Bakımı">Cilt Bakımı</option>
-                    <option value="Bölgesel İncelme">Bölgesel İncelme</option>
-                    <option value="Protez">Protez</option>
-                    <option value="Diğer">Diğer</option>
-                </select>
+                <select id="addService" class="modal-input w-full mb-12 cursor-pointer"></select>
                 <label class="form-label">Tarih & Saat Ayarı</label>
                 <div class="input-row"><input type="date" id="addDate" class="modal-input"><input
                         type="time" id="addTime" class="modal-input modal-input-sm w-auto"></div>
@@ -436,13 +453,13 @@
             <p id="modalSub" class="text-muted font-11 mb-16"></p>
 
             <div id="inlineEditSection" class="hidden inline-edit-box">
-                <h3 class="label-pink-caps">Hasta Bilgileri</h3>
+                <h3 class="label-pink-caps">Müşteri Bilgileri</h3>
                 <label class="label-uppercase-muted">Ad Soyad</label>
                 <input type="text" id="inlineEditName" class="modal-input w-full mb-8" placeholder="Ad Soyad">
                 <label class="label-uppercase-muted">Telefon</label>
                 <input type="text" id="inlineEditPhone" class="modal-input w-full mb-8" placeholder="Telefon">
-                <label class="label-uppercase-muted">Kronik Rahatsızlık (Varsa)</label>
-                <textarea id="inlineEditChronic" class="modal-input w-full h-70 no-resize mb-8" placeholder="Kronik Rahatsızlık (Varsa)"></textarea>
+                <label class="label-uppercase-muted">Ek Bilgi / Not</label>
+                <textarea id="inlineEditChronic" class="modal-input w-full h-70 no-resize mb-8" placeholder="Ek Bilgi / Not"></textarea>
                 <label class="label-uppercase-muted">Paket Adı</label>
                 <input type="text" id="inlineEditPackage" class="modal-input w-full mb-8" placeholder="Paket Adı">
                 <div class="input-row mb-8">
@@ -498,14 +515,14 @@
                 <div class="spinner"></div><span class="loading-text">Kaydediliyor...</span>
             </div>
             <div class="flex-between mb-16">
-                <h2 class="modal-title-bold m-0">Hasta Bilgilerini Düzenle</h2>
+                <h2 class="modal-title-bold m-0">Müşteri Bilgilerini Düzenle</h2>
                 <button id="btnCancelEditPatient" class="btn-close-x">&times;</button>
             </div>
             <div class="form-section scroll-y-half">
                 <label class="form-label">Kişisel Bilgiler</label>
                 <input type="text" id="editName" class="modal-input w-full mb-8" placeholder="Ad Soyad">
                 <input type="text" id="editPhone" class="modal-input w-full mb-8" placeholder="Telefon">
-                <textarea id="editChronic" class="modal-input w-full h-70 no-resize mb-12" placeholder="Kronik Rahatsızlık (Varsa)"></textarea>
+                <textarea id="editChronic" class="modal-input w-full h-70 no-resize mb-12" placeholder="Ek Bilgi / Not"></textarea>
                 
                 <label class="form-label">Paket ve Seans</label>
                 <input type="text" id="editPackage" class="modal-input w-full mb-8" placeholder="Paket Adı">
@@ -546,7 +563,7 @@
         </div>
         <div class="ctx-item" id="ctxPatient">
             <svg width="14" height="14"><use href="#icon-eye"></use></svg>
-            <span>Hasta Kartını Aç</span>
+            <span>Müşteri Kartını Aç</span>
         </div>
         <div class="ctx-divider"></div>
         <div class="ctx-title">Durumu Değiştir</div>

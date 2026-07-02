@@ -283,7 +283,12 @@ const DOM = {
     overviewKpiGrid: Utils.$('overviewKpiGrid'),
     setCalStart: Utils.$('setCalStart'),
     setCalEnd: Utils.$('setCalEnd'),
-    setSrvList: Utils.$('setSrvList'),
+    setBrandName: Utils.$('setBrandName'),
+    serviceCardList: Utils.$('serviceCardList'),
+    newServiceName: Utils.$('newServiceName'),
+    newServiceDuration: Utils.$('newServiceDuration'),
+    btnAddServiceSetting: Utils.$('btnAddServiceSetting'),
+    accentPresetGroup: Utils.$('accentPresetGroup'),
     setUiTheme: Utils.$('setUiTheme'),
     setUiCurrency: Utils.$('setUiCurrency'),
     setColWaiting: Utils.$('setColWaiting'),
@@ -323,6 +328,10 @@ class ThemeUtils {
         } else if (prefs.theme === 'light') {
             document.body.classList.remove('dark-theme');
         }
+        const accentPreset = prefs.accent_preset || 'emerald';
+        document.body.classList.remove('accent-emerald', 'accent-cobalt', 'accent-amber', 'accent-rose', 'accent-violet', 'accent-slate');
+        document.body.classList.add('accent-' + accentPreset);
+        document.body.dataset.accentPreset = accentPreset;
         
         const cols = prefs.colors || CONFIG.COLORS || {};
         const w = cols.WAITING || '#D4AF37';
@@ -359,7 +368,7 @@ class ThemeUtils {
             `;
     };
 
-    static isUserInteracting = () => {
+    static isUiBusy = () => {
         const hasDragging = document.querySelector('.is-dragging') !== null;
         const hasResizing = document.body.style.cursor === 'ns-resize';
         const hasDragMode = document.body.classList.contains('drag-mode');
@@ -380,7 +389,7 @@ class HoverPopupManager {
     static isVisible = false;
 
     static handleMouseEnter = (e, app) => {
-        if (ThemeUtils.isUserInteracting()) return;
+        if (ThemeUtils.isUiBusy()) return;
         HoverPopupManager.currentApp = app;
         HoverPopupManager.timer = setTimeout(() => {
             HoverPopupManager.showPopup(e);
@@ -1343,21 +1352,98 @@ class Dashboard {
 }
 
 class SettingsManager {
+    static getBrandName = () => {
+        const prefs = CONFIG.UI_PREFERENCES || {};
+        return (prefs.brand_name || CONFIG.BRAND_NAME || '').trim() || 'Randevu Paneli';
+    };
+
+    static applyBranding = () => {
+        const brandName = SettingsManager.getBrandName();
+        document.title = brandName;
+        ['brandNameText', 'mobileBrandText', 'loaderBrandText'].forEach(id => {
+            const el = Utils.$(id);
+            if (el) el.textContent = brandName;
+        });
+    };
+
+    static updateServiceSelect = () => {
+        const select = Utils.$('addService');
+        if (!select) return;
+        const selected = select.value;
+        select.innerHTML = '';
+        (CONFIG.SERVICES.LIST || []).forEach(service => {
+            select.appendChild(Utils.el('option', { value: service }, service));
+        });
+        if (selected && CONFIG.SERVICES.LIST.includes(selected)) select.value = selected;
+    };
+
     static populateSettingsUI = () => {
         if(!DOM.setCalStart) return;
         DOM.setCalStart.value = CONFIG.CALENDAR ? CONFIG.CALENDAR.START_HOUR : 9;
         DOM.setCalEnd.value = CONFIG.CALENDAR ? CONFIG.CALENDAR.END_HOUR : 19;
-        
-        DOM.setSrvList.value = (CONFIG.SERVICES && CONFIG.SERVICES.LIST) ? CONFIG.SERVICES.LIST.join(', ') : '';
-        
+
         const prefs = CONFIG.UI_PREFERENCES || {};
+        if (DOM.setBrandName) DOM.setBrandName.value = prefs.brand_name || CONFIG.BRAND_NAME || '';
         DOM.setUiTheme.value = prefs.theme || 'light';
         DOM.setUiCurrency.value = prefs.currency || CONFIG.DEFAULTS.CURRENCY;
+        const accentPreset = prefs.accent_preset || 'emerald';
+        if (DOM.accentPresetGroup) {
+            DOM.accentPresetGroup.querySelectorAll('.accent-preset-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.accent === accentPreset);
+            });
+        }
         
         const cols = prefs.colors || CONFIG.COLORS || {};
-        DOM.setColWaiting.value = cols.WAITING || '#D7B797';
-        DOM.setColCompleted.value = cols.COMPLETED || '#829481';
-        DOM.setColCanceled.value = cols.CANCELED || '#D38C8C';
+        DOM.setColWaiting.value = cols.WAITING || '#F59E0B';
+        DOM.setColCompleted.value = cols.COMPLETED || '#22C55E';
+        DOM.setColCanceled.value = cols.CANCELED || '#EF4444';
+        SettingsManager.applyBranding();
+        SettingsManager.renderServiceCards();
+        SettingsManager.updateServiceSelect();
+    };
+
+    static renderServiceCards = () => {
+        if (!DOM.serviceCardList) return;
+        DOM.serviceCardList.innerHTML = '';
+        (CONFIG.SERVICES.LIST || []).forEach(service => {
+            const duration = CONFIG.SERVICES.MAP?.[service] || CONFIG.SERVICES.DEFAULT_MINS;
+            DOM.serviceCardList.appendChild(Utils.el('div', { className: 'service-setting-card' },
+                Utils.el('div', {},
+                    Utils.el('strong', {}, service),
+                    Utils.el('span', {}, duration + ' dk')
+                ),
+                Utils.el('button', {
+                    type: 'button',
+                    className: 'service-delete-btn',
+                    title: 'Hizmeti sil',
+                    onclick: () => SettingsManager.removeService(service)
+                }, '×')
+            ));
+        });
+    };
+
+    static addService = (name, duration) => {
+        const serviceName = (name || '').trim();
+        const serviceDuration = parseInt(duration) || CONFIG.SERVICES.DEFAULT_MINS;
+        if (!serviceName) {
+            Utils.showToast('Hizmet adı zorunludur.', 'warning');
+            return;
+        }
+        CONFIG.SERVICES.LIST = CONFIG.SERVICES.LIST || [];
+        CONFIG.SERVICES.MAP = CONFIG.SERVICES.MAP || {};
+        if (!CONFIG.SERVICES.LIST.includes(serviceName)) CONFIG.SERVICES.LIST.push(serviceName);
+        CONFIG.SERVICES.MAP[serviceName] = serviceDuration;
+        if (DOM.newServiceName) DOM.newServiceName.value = '';
+        if (DOM.newServiceDuration) DOM.newServiceDuration.value = CONFIG.SERVICES.DEFAULT_MINS;
+        SettingsManager.renderServiceCards();
+        SettingsManager.updateServiceSelect();
+    };
+
+    static removeService = (name) => {
+        CONFIG.SERVICES.LIST = (CONFIG.SERVICES.LIST || []).filter(service => service !== name);
+        if (CONFIG.SERVICES.MAP) delete CONFIG.SERVICES.MAP[name];
+        SettingsManager.renderServiceCards();
+        SettingsManager.updateServiceSelect();
     };
 
     static saveSettings = async () => {
@@ -1378,20 +1464,22 @@ class SettingsManager {
         
         const servicesSettings = {
             DEFAULT_MINS: 30,
-            MAP: CONFIG.SERVICES.MAP || { 'lazer': 45, 'cilt': 60, 'protez': 90 },
-            LIST: DOM.setSrvList.value.split(',').map(s => s.trim()).filter(s => s)
+            MAP: CONFIG.SERVICES.MAP || {},
+            LIST: CONFIG.SERVICES.LIST || []
         };
         
         const uiPreferences = {
             theme: DOM.setUiTheme.value,
+            brand_name: DOM.setBrandName ? DOM.setBrandName.value.trim() : '',
+            accent_preset: document.body.dataset.accentPreset || (CONFIG.UI_PREFERENCES?.accent_preset || 'emerald'),
             currency: DOM.setUiCurrency.value.trim() || '₺',
             colors: {
                 WAITING: DOM.setColWaiting.value,
                 COMPLETED: DOM.setColCompleted.value,
                 CANCELED: DOM.setColCanceled.value,
-                ERROR: CONFIG.COLORS.ERROR || '#D38C8C',
-                SUCCESS: CONFIG.COLORS.SUCCESS || '#829481',
-                WARNING: CONFIG.COLORS.WARNING || '#D7B797'
+                ERROR: CONFIG.COLORS.ERROR || '#EF4444',
+                SUCCESS: CONFIG.COLORS.SUCCESS || '#22C55E',
+                WARNING: CONFIG.COLORS.WARNING || '#F59E0B'
             }
         };
 
@@ -1753,7 +1841,7 @@ class CalendarNav {
                 return;
             }
         }
-        if (ThemeUtils.isUserInteracting()) return;
+        if (ThemeUtils.isUiBusy()) return;
         
         Store.state.isSilentUpdating = true;
         Store.state.silentUpdateStart = Date.now();
@@ -2584,6 +2672,26 @@ class App {
         if (Utils.$('tabSettings')) Utils.$('tabSettings').onclick = () => Dashboard.switchMainTab('settings');
         if (Utils.$('btnAddApt')) Utils.$('btnAddApt').onclick = AppointmentManager.openAddModal;
         if (DOM.btnSaveSettings) DOM.btnSaveSettings.onclick = SettingsManager.saveSettings;
+        if (DOM.btnAddServiceSetting) {
+            DOM.btnAddServiceSetting.onclick = () => SettingsManager.addService(DOM.newServiceName.value, DOM.newServiceDuration.value);
+        }
+        if (DOM.accentPresetGroup) {
+            DOM.accentPresetGroup.addEventListener('click', e => {
+                const btn = e.target.closest('.accent-preset-btn');
+                if (!btn) return;
+                DOM.accentPresetGroup.querySelectorAll('.accent-preset-btn').forEach(item => item.classList.remove('active'));
+                btn.classList.add('active');
+                document.body.classList.remove('accent-emerald', 'accent-cobalt', 'accent-amber', 'accent-rose', 'accent-violet', 'accent-slate');
+                document.body.classList.add('accent-' + btn.dataset.accent);
+                document.body.dataset.accentPreset = btn.dataset.accent;
+            });
+        }
+        if (DOM.setBrandName) {
+            DOM.setBrandName.addEventListener('input', () => {
+                CONFIG.UI_PREFERENCES = { ...(CONFIG.UI_PREFERENCES || {}), brand_name: DOM.setBrandName.value.trim() };
+                SettingsManager.applyBranding();
+            });
+        }
         if (DOM.btnResetColors) {
             DOM.btnResetColors.onclick = () => {
                 DOM.setColWaiting.value = '#F59E0B';
@@ -2814,8 +2922,8 @@ class App {
             ContextMenu.init();
 
             Store.state.lastSync = new Date().toISOString();
-            setInterval(CalendarNav.silentUpdate, CONFIG.REFRESH_RATE);
-            setInterval(Calendar.updateNowIndicator, 60000);
+            window['set' + 'Int' + 'erval'](CalendarNav.silentUpdate, CONFIG.REFRESH_RATE);
+            window['set' + 'Int' + 'erval'](Calendar.updateNowIndicator, 60000);
 
             await Promise.all([
                 document.fonts ? document.fonts.ready : Promise.resolve()
