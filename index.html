@@ -8,11 +8,12 @@
     <title>Randevu Paneli</title>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;900&family=Geist+Mono:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="config.js"></script>
-    <link rel="stylesheet" href="style.css">
-    <script src="app.js" defer></script>
+    <link rel="stylesheet" href="style.css?v=2">
+    <script src="app.js?v=2" defer></script>
 </head>
 
 <body class="dark-theme">
+    <div class="noise-overlay"></div>
     <div id="toast-container"></div>
     <svg class="svg-sprite">
         <symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -50,6 +51,69 @@
             <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
             <line x1="1" y1="1" x2="23" y2="23"></line>
         </symbol>
+        <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+        </symbol>
+        <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+        </symbol>
+        <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </symbol>
+        <symbol id="icon-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+            <line x1="9" y1="22" x2="9" y2="16"></line>
+            <line x1="15" y1="22" x2="15" y2="16"></line>
+            <line x1="9" y1="16" x2="15" y2="16"></line>
+            <path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01M12 6h.01M12 10h.01M8 14h.01M16 14h.01M12 14h.01"></path>
+        </symbol>
+        <symbol id="icon-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 11.1 21.3 10.3 20.4 10.3H17.7C17 10.3 16.3 10.9 16.3 11.6C16.3 12.1 16.5 12.6 16.9 13C17.1 13.2 17.2 13.5 17.2 13.8C17.2 14.5 16.6 15.1 15.9 15.1H14C12.9 15.1 12 14.2 12 13.1V8.5C12 7.1 13.1 6 14.5 6H15.8C16.3 6 16.7 5.6 16.7 5.1C16.7 4.1 14.9 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"></path>
+            <circle cx="7.5" cy="10.5" r="1.5"></circle>
+            <circle cx="11.5" cy="7.5" r="1.5"></circle>
+            <circle cx="16.5" cy="9.5" r="1.5"></circle>
+        </symbol>
+        <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </symbol>
+        <symbol id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </symbol>
+        <symbol id="icon-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </symbol>
+        <symbol id="icon-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </symbol>
+        <symbol id="icon-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </symbol>
+        <symbol id="icon-rotate-ccw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+        </symbol>
+        <symbol id="icon-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </symbol>
     </svg>
     <div id="page-loader">
         <div class="loader-logo-pulse">
@@ -72,22 +136,22 @@
             </div>
             <nav class="sidebar-nav">
                 <button id="tabCalendar" class="nav-menu-item active">
-                    <span class="menu-icon">📅</span>
+                    <span class="menu-icon"><svg width="16" height="16"><use href="#icon-calendar"></use></svg></span>
                     <span class="menu-label">Takvim</span>
                 </button>
                 <button id="tabOverview" class="nav-menu-item">
-                    <span class="menu-icon">📈</span>
+                    <span class="menu-icon"><svg width="16" height="16"><use href="#icon-chart"></use></svg></span>
                     <span class="menu-label">Genel Görünüm</span>
                 </button>
                 <button id="tabSettings" class="nav-menu-item">
-                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-icon"><svg width="16" height="16"><use href="#icon-settings"></use></svg></span>
                     <span class="menu-label">Ayarlar</span>
                 </button>
             </nav>
             <div class="sidebar-footer">
                 <div class="sidebar-actions">
                     <button id="btnThemeToggle" class="theme-toggle-btn" title="Temayı Değiştir">
-                        <span class="theme-icon">🌙</span>
+                        <span class="theme-icon"><svg width="14" height="14"><use href="#icon-moon"></use></svg></span>
                     </button>
                     <button id="btnLogout" class="theme-toggle-btn" title="Oturumu Kapat" style="background: var(--danger-dim); color: var(--rose);">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -304,7 +368,7 @@
                         <div class="glass settings-card">
                             <div class="flex-between mb-16">
                                 <div class="info-title mb-0">Genel / Marka</div>
-                                <div class="stat-icon-wrapper text-main">🏢</div>
+                                <div class="stat-icon-wrapper text-main"><svg width="18" height="18"><use href="#icon-building"></use></svg></div>
                             </div>
                             <div class="form-section">
                                 <label class="form-label">İşletme Adı</label>
@@ -326,7 +390,7 @@
                         <div class="glass settings-card">
                             <div class="flex-between mb-16">
                                 <div class="info-title mb-0">Takvim Ayarları</div>
-                                <div class="stat-icon-wrapper text-pink">📅</div>
+                                <div class="stat-icon-wrapper text-pink"><svg width="18" height="18"><use href="#icon-calendar"></use></svg></div>
                             </div>
                             <div class="form-section">
                                 <div class="input-row mb-12">
@@ -345,7 +409,7 @@
                         <div class="glass settings-card">
                             <div class="flex-between mb-16">
                                 <div class="info-title mb-0">Hizmet Yönetimi</div>
-                                <div class="stat-icon-wrapper text-emerald">⚙️</div>
+                                <div class="stat-icon-wrapper text-emerald"><svg width="18" height="18"><use href="#icon-settings"></use></svg></div>
                             </div>
                             <div class="form-section">
                                 <div id="serviceCardList" class="service-card-grid"></div>
@@ -360,7 +424,7 @@
                         <div class="glass settings-card">
                             <div class="flex-between mb-16">
                                 <div class="info-title mb-0">Arayüz Ayarları</div>
-                                <div class="stat-icon-wrapper text-main">🎨</div>
+                                <div class="stat-icon-wrapper text-main"><svg width="18" height="18"><use href="#icon-palette"></use></svg></div>
                             </div>
                             <div class="form-section">
                                 <label class="form-label">Tema Seçimi</label>
@@ -374,8 +438,8 @@
                                     <div class="flex-1"><label class="form-label font-10">Tamamlandı</label><input type="color" id="setColCompleted" class="modal-input w-full p-4 h-auto cursor-pointer"></div>
                                     <div class="flex-1"><label class="form-label font-10">İptal</label><input type="color" id="setColCanceled" class="modal-input w-full p-4 h-auto cursor-pointer"></div>
                                 </div>
-                                <button id="btnResetColors" class="modal-btn btn-secondary-soft w-full font-10 p-4 mt-0" style="padding: 6px; border: 1px dashed var(--border);">
-                                    ↩️ Renkleri Varsayılana Döndür
+                                <button id="btnResetColors" class="modal-btn btn-secondary-soft w-full font-10 p-4 mt-0" style="padding: 6px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                    <svg width="12" height="12"><use href="#icon-rotate-ccw"></use></svg> Renkleri Varsayılana Döndür
                                 </button>
                             </div>
                         </div>
@@ -432,7 +496,9 @@
                 <div class="input-row"><input type="date" id="addDate" class="modal-input"><input
                         type="time" id="addTime" class="modal-input modal-input-sm w-auto"></div>
             </div>
-            <button id="btnSubmitNewApt" class="modal-btn modal-btn-complete w-full">🚀 Kaydet ve Ekle</button>
+            <button id="btnSubmitNewApt" class="modal-btn modal-btn-complete w-full" style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <svg width="12" height="12"><use href="#icon-send"></use></svg> Kaydet ve Ekle
+            </button>
         </div>
     </div>
 
@@ -486,16 +552,28 @@
             </div>
             
             <div class="form-section">
-                <label class="form-label">Durum ve Zaman Ayarı</label>
                 <div class="input-row mb-12">
-                    <input type="date" id="newDate" class="modal-input">
-                    <input type="time" id="newTime" class="modal-input modal-input-sm w-auto">
+                    <div class="flex-1">
+                        <label class="form-label">Tarih</label>
+                        <input type="date" id="newDate" class="modal-input w-full">
+                    </div>
+                    <div style="width: 100px;">
+                        <label class="form-label">Saat</label>
+                        <input type="time" id="newTime" class="modal-input w-full">
+                    </div>
+                    <div style="width: 100px;">
+                        <label class="form-label">Süre (Dk)</label>
+                        <input type="number" id="newDuration" class="modal-input w-full" min="5" step="5" placeholder="Dk">
+                    </div>
                 </div>
-                <select id="newStatus" class="modal-input w-full cursor-pointer">
-                    <option value="Bekliyor">⏳ Bekliyor</option>
-                    <option value="Tamamlandı">✅ Tamamlandı</option>
-                    <option value="İptal">❌ İptal</option>
-                </select>
+                <div class="mb-12">
+                    <label class="form-label">Durum</label>
+                    <select id="newStatus" class="modal-input w-full cursor-pointer">
+                        <option value="Bekliyor">⏳ Bekliyor</option>
+                        <option value="Tamamlandı">✅ Tamamlandı</option>
+                        <option value="İptal">❌ İptal</option>
+                    </select>
+                </div>
             </div>
             <div class="input-row mt-auto">
                 <button id="saveBtn" class="modal-btn modal-btn-save flex-1 p-12">💾 Değişiklikleri Kaydet</button>

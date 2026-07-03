@@ -51,6 +51,14 @@
     --radius-pill: 9999px;
     
     --glass-blur: blur(20px);
+    
+    /* Context Menu Variables - Light Theme */
+    --ctx-bg: rgba(255, 255, 255, 0.8);
+    --ctx-border: rgba(0, 0, 0, 0.08);
+    --ctx-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    --ctx-hover: rgba(0, 0, 0, 0.04);
+    --ctx-divider: rgba(0, 0, 0, 0.06);
+    --ctx-title: rgba(24, 24, 27, 0.4);
 }
 
 .dark-theme {
@@ -95,6 +103,14 @@
     --shadow-lg: 0 30px 65px rgba(0, 0, 0, 0.7);
     --shadow-hover: 0 12px 30px rgba(52, 211, 153, 0.16);
     --glow: 0 0 20px rgba(52, 211, 153, 0.16);
+    
+    /* Context Menu Variables - Dark Theme */
+    --ctx-bg: rgba(26, 28, 35, 0.85);
+    --ctx-border: rgba(255, 255, 255, 0.08);
+    --ctx-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    --ctx-hover: rgba(255, 255, 255, 0.08);
+    --ctx-divider: rgba(255, 255, 255, 0.08);
+    --ctx-title: rgba(255, 255, 255, 0.4);
 }
 
 .accent-emerald { --accent: #10B981; --accent-hover: #059669; --accent-soft: rgba(16,185,129,0.08); }
@@ -105,6 +121,17 @@
 .accent-slate { --accent: #64748B; --accent-hover: #475569; --accent-soft: rgba(100,116,139,0.08); }
 .dark-theme.accent-emerald { --accent: #34D399; --accent-hover: #10B981; --accent-soft: rgba(52,211,153,0.1); }
 
+.noise-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.015;
+    pointer-events: none;
+    z-index: 9999;
+}
 
 *, *::before, *::after {
     box-sizing: border-box;
@@ -253,6 +280,10 @@ body {
     color: var(--text-main);
 }
 
+.nav-menu-item:active {
+    transform: scale(0.97);
+}
+
 .nav-menu-item.active {
     background: var(--accent-soft);
     color: var(--accent-hover);
@@ -372,22 +403,28 @@ body {
     background: var(--bg-card);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--border);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow);
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        var(--shadow);
     transition: box-shadow 0.3s var(--anim-ease), transform 0.3s var(--anim-ease), border-color 0.3s ease, background 0.3s ease;
 }
 
 .dark-theme .glass {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: linear-gradient(135deg, rgba(24, 24, 27, 0.7) 0%, rgba(18, 18, 20, 0.6) 100%) !important;
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 8px 32px 0 rgba(0, 0, 0, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .light-theme .glass {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 100%);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 100%) !important;
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 8px 32px 0 rgba(31, 38, 135, 0.07) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
 }
 
 .glass:not(.right-sidebar):not(.main-header):not(.calendar-grid):hover {
@@ -408,8 +445,8 @@ body {
 
 .header-brand h1 {
     font-size: 16px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-weight: 800;
+    letter-spacing: -0.03em;
     color: var(--text-main);
 }
 
@@ -434,14 +471,14 @@ body {
 
 .header-stat-badge {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--bg-secondary);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    background: var(--bg-card);
     border: 1px solid var(--border);
     padding: 6px 12px;
     border-radius: var(--radius-md);
-    font-size: 11px;
-    font-weight: 500;
+    min-width: 90px;
     transition: all 0.2s var(--anim-ease);
 }
 
@@ -453,34 +490,37 @@ body {
 
 .header-stat-badge .h-stat-label {
     color: var(--text-muted);
-    font-weight: 500;
-    font-size: 10px;
+    font-weight: 600;
+    font-size: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
 }
 
 .header-stat-badge .h-stat-val {
     color: var(--text-main);
-    font-weight: 700;
-    font-size: 13px;
+    font-weight: 800;
+    font-size: 15px;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
 }
 
-.header-stat-badge:nth-child(1) {
-    border-left: 3.5px solid var(--accent);
+.header-stat-badge:nth-child(1) .h-stat-val {
+    color: var(--accent);
 }
 
-.header-stat-badge:nth-child(2) {
-    border-left: 3.5px solid var(--sage);
+.header-stat-badge:nth-child(2) .h-stat-val {
+    color: var(--success);
 }
 
-.header-stat-badge:nth-child(3) {
-    border-left: 3.5px solid var(--gold);
+.header-stat-badge:nth-child(3) .h-stat-val {
+    color: var(--warning);
 }
 
 /* Arama Alanı */
 .search-wrap {
     position: relative;
     flex: 1;
+    min-width: 180px;
     max-width: 280px;
 }
 
@@ -636,6 +676,10 @@ body {
     box-shadow: var(--shadow);
 }
 
+.nav-btn:active {
+    transform: scale(0.97);
+}
+
 .nav-btn-today {
     padding: 5px 14px;
 }
@@ -665,6 +709,10 @@ body {
     background: var(--bg-main);
     color: var(--text-main);
     box-shadow: var(--shadow);
+}
+
+.view-toggle-btn:active {
+    transform: scale(0.97);
 }
 
 .record-badge {
@@ -700,7 +748,7 @@ body {
 }
 
 .btn-add-primary:active {
-    transform: translateY(0);
+    transform: scale(0.97) translateY(1px);
 }
 
 /* KPI Kartları */
@@ -742,6 +790,7 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
+    font-variant-numeric: tabular-nums;
 }
 
 .stat-badge {
@@ -1373,10 +1422,10 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
 
 .modal-title-bold {
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 800;
     margin-bottom: 14px;
     color: var(--text-main);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
 }
 
 .modal-scroll-container {
@@ -1425,10 +1474,10 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
 
 .form-label {
     display: block;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 700;
+    font-size: 11px;
+    text-transform: none;
+    letter-spacing: -0.01em;
+    font-weight: 600;
     color: var(--text-muted);
     margin-bottom: 6px;
 }
@@ -1459,7 +1508,7 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
 
 .modal-input-sm {
     flex: none;
-    width: 80px;
+    width: 105px;
 }
 
 .modal-btn {
@@ -1766,6 +1815,7 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     justify-content: space-between;
     font-size: 12px;
     margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
 }
 
 .finance-row:last-child {
@@ -2011,6 +2061,7 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     font-size: 11px;
     font-weight: 700;
     cursor: pointer;
+    transition: all 0.2s var(--anim-ease);
 }
 
 .accent-preset-btn span {
@@ -2024,6 +2075,10 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     color: var(--text-main);
     border-color: var(--accent);
     background: var(--accent-soft);
+}
+
+.accent-preset-btn:active {
+    transform: scale(0.97);
 }
 
 .service-card-grid {
@@ -2533,10 +2588,10 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     left: 0;
     right: 0;
     height: 2px;
-    background-color: #ff4d4f;
+    background-color: var(--accent);
     z-index: 25;
     pointer-events: none;
-    box-shadow: 0 0 8px rgba(255, 77, 79, 0.5);
+    box-shadow: 0 0 10px var(--accent-soft);
 }
 
 .now-indicator::before {
@@ -2547,8 +2602,18 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #ff4d4f;
-    box-shadow: 0 0 6px rgba(255, 77, 79, 0.8);
+    background-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: indicator-pulse 2s infinite;
+}
+
+@keyframes indicator-pulse {
+    0% {
+        box-shadow: 0 0 0 0px rgba(52, 211, 153, 0.7);
+    }
+    100% {
+        box-shadow: 0 0 0 8px rgba(52, 211, 153, 0);
+    }
 }
 
 /* Hover Popup */
@@ -2623,13 +2688,13 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     position: absolute;
     z-index: 10000;
     width: 220px;
-    background: rgba(26, 28, 35, 0.85);
+    background: var(--ctx-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--ctx-border);
     border-radius: 12px;
     padding: 8px 0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.05);
+    box-shadow: var(--ctx-shadow);
     color: var(--text-main);
     font-size: 13px;
     font-family: 'Geist', sans-serif;
@@ -2659,7 +2724,7 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
 }
 
 .ctx-item:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--ctx-hover);
     color: var(--text-main);
 }
 
@@ -2685,7 +2750,7 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
 
 .ctx-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--ctx-divider);
     margin: 6px 0;
 }
 
@@ -2694,7 +2759,7 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--ctx-title);
     font-weight: 600;
 }
 
@@ -2984,3 +3049,101 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
 .cascade-delay-1 { animation-delay: 0.1s; }
 .cascade-delay-2 { animation-delay: 0.2s; }
 .cascade-delay-3 { animation-delay: 0.3s; }
+
+/* Koyu Temada Detay Paneli ve Sidebar Okunaklılık İyileştirmeleri */
+.dark-theme .right-sidebar, 
+.dark-theme .modal-panel {
+    background: rgba(18, 18, 22, 0.97) !important;
+    backdrop-filter: blur(30px) !important;
+    -webkit-backdrop-filter: blur(30px) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+}
+
+.dark-theme .form-label {
+    color: #A1A1AA !important;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.dark-theme .modal-input {
+    background: #18181B !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #F4F4F6 !important;
+}
+
+.dark-theme .modal-input:focus {
+    border-color: var(--accent) !important;
+    background: #202024 !important;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15) !important;
+}
+
+.dark-theme .sidebar-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .sidebar-close {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #A1A1AA !important;
+}
+
+.dark-theme .sidebar-close:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #F4F4F6 !important;
+}
+
+/* Sidebar Tab Butonlarının Koyu Tema Uyumu */
+.dark-theme .sidebar-tab-btn {
+    color: #A1A1AA;
+}
+
+.dark-theme .sidebar-tab-btn:hover {
+    color: #F4F4F6;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Geçmiş Randevu Kartlarının Koyu Tema Görünümü */
+.dark-theme .card-history-item {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark-theme .card-history-item:hover {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Koyu Temada Tarih ve Saat Seçici İkonlarının Okunaklılığı */
+.dark-theme input[type="date"]::-webkit-calendar-picker-indicator,
+.dark-theme input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.9) brightness(1.2) !important;
+    cursor: pointer;
+}
+
+/* Premium ve Minimal Kaydırma Çubukları (Scrollbars) */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15) !important;
+    border-radius: var(--radius-pill) !important;
+    transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25) !important;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.22) !important;
+}

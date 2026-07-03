@@ -122,6 +122,12 @@ class UndoManager {
 // 2. YARDIMCI FONKSİYONLAR (DOM & UI Helpers)
 // ==========================================
 class Utils {
+    static formatName = (str) => {
+        if (!str) return '';
+        return str.trim().split(/\s+/)
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                  .join(' ');
+    };
     static getSafeStatusClass = d => !d ? 'status-bekliyor' : d === CONFIG.STATUS.COMPLETED ? 'status-tamamlandi' : d === CONFIG.STATUS.CANCELED ? 'status-iptal' : 'status-bekliyor';
     
     static calcBitisSaati = (saat, sure) => {
@@ -270,6 +276,7 @@ const DOM = {
     modalSub: Utils.$('modalSub'),
     newDate: Utils.$('newDate'),
     newTime: Utils.$('newTime'),
+    newDuration: Utils.$('newDuration'),
     addAptModal: Utils.$('addAptModal'),
     aptModal: Utils.$('aptModal'),
     editPatientModal: Utils.$('editPatientModal'),
@@ -419,7 +426,7 @@ class HoverPopupManager {
         const statusColor = app.durum === CONFIG.STATUS.WAITING ? CONFIG.COLORS.WAITING : app.durum === CONFIG.STATUS.COMPLETED ? CONFIG.COLORS.COMPLETED : CONFIG.COLORS.CANCELED;
         
         const header = Utils.el('div', { className: 'hp-header' },
-            Utils.el('div', { className: 'hp-name' }, app.ad_soyad || CONFIG.DEFAULTS.NAME),
+            Utils.el('div', { className: 'hp-name' }, Utils.formatName(app.ad_soyad) || CONFIG.DEFAULTS.NAME),
             Utils.el('div', { className: 'hp-phone' }, app.telefon || '-')
         );
 
@@ -550,7 +557,7 @@ class Calendar {
         if (app.toplam_seans > 0 && duration > 30) {
             seansText = ' (' + (app.gelinen_seans || 0) + '/' + app.toplam_seans + ')';
         }
-        const cardName = (app.ad_soyad || CONFIG.DEFAULTS.NAME) + seansText;
+        const cardName = (Utils.formatName(app.ad_soyad) || CONFIG.DEFAULTS.NAME) + seansText;
 
         // Seans İlerleme Çubuğu (Mini Progress Bar)
         let cardProgress = null;
@@ -1033,7 +1040,7 @@ class Dashboard {
             const item = Utils.el('div', { className: 'agenda-item ' + statusClass, onclick: () => AppointmentManager.openAptModal(app.randevu_id) },
                 Utils.el('div', { className: 'agenda-time' }, Utils.getTimeRangeText(app.saat, duration)),
                 Utils.el('div', { className: 'agenda-details' },
-                    Utils.el('div', { className: 'agenda-name' }, app.ad_soyad || CONFIG.DEFAULTS.NAME),
+                    Utils.el('div', { className: 'agenda-name' }, Utils.formatName(app.ad_soyad) || CONFIG.DEFAULTS.NAME),
                     Utils.el('div', { className: 'agenda-service' },
                         (app.hizmet || CONFIG.DEFAULTS.SERVICE) + ' • ',
                         Utils.el('span', { style: 'color:' + statusColor }, app.durum)
@@ -1158,7 +1165,7 @@ class Dashboard {
         
         const dotsAndLabels = points.map((p, i) => {
             const countText = p.count > 0 ? p.count : '';
-            return '<circle class="chart-dot" cx="' + p.x + '" cy="' + p.y + '" data-count="' + p.count + '" data-label="' + p.label + '"></circle>' +
+            return '<circle class="chart-dot" cx="' + p.x + '" cy="' + p.y + '" data-count="' + p.count + '" data-label="' + p.label + '" data-date="' + currentWeek[i].iso + '"></circle>' +
                 '<text class="chart-text" x="' + p.x + '" y="' + (height - 5) + '">' + CONFIG.CALENDAR.DAYS[i] + '</text>' +
                 '<text class="chart-text font-bold" x="' + p.x + '" y="' + (p.y - 8) + '" style="font-size: 9px; fill: var(--accent-hover);">' + countText + '</text>';
         }).join('');
@@ -1200,10 +1207,10 @@ class Dashboard {
 
         const kpiFrag = document.createDocumentFragment();
         const kpis = [
-            { label: CONFIG.LABELS.OV_TOTAL_PATIENT, rawVal: d.total_clients || 0, prefix: '', suffix: '', icon: '👥', delta: d.delta_clients },
-            { label: CONFIG.LABELS.OV_TOTAL_APT, rawVal: d.total_appointments || 0, prefix: '', suffix: '', icon: '📅', delta: d.delta_appointments },
-            { label: CONFIG.LABELS.OV_TOTAL_REV, rawVal: d.total_revenue || 0, prefix: '', suffix: ' ' + CONFIG.DEFAULTS.CURRENCY, icon: '💰', delta: d.delta_revenue },
-            { label: CONFIG.LABELS.OV_SUCCESS_RATE, rawVal: d.success_rate || 0, prefix: '%', suffix: '', icon: '⭐', badge: 'success', delta: d.delta_success_rate }
+            { label: CONFIG.LABELS.OV_TOTAL_PATIENT, rawVal: d.total_clients || 0, prefix: '', suffix: '', icon: '<svg width="20" height="20"><use href="#icon-users"></use></svg>', delta: d.delta_clients },
+            { label: CONFIG.LABELS.OV_TOTAL_APT, rawVal: d.total_appointments || 0, prefix: '', suffix: '', icon: '<svg width="20" height="20"><use href="#icon-calendar"></use></svg>', delta: d.delta_appointments },
+            { label: CONFIG.LABELS.OV_TOTAL_REV, rawVal: d.total_revenue || 0, prefix: '', suffix: ' ' + CONFIG.DEFAULTS.CURRENCY, icon: '<svg width="20" height="20"><use href="#icon-dollar"></use></svg>', delta: d.delta_revenue },
+            { label: CONFIG.LABELS.OV_SUCCESS_RATE, rawVal: d.success_rate || 0, prefix: '%', suffix: '', icon: '<svg width="20" height="20"><use href="#icon-star"></use></svg>', badge: 'success', delta: d.delta_success_rate }
         ];
         
         kpis.forEach((kpi, i) => {
@@ -1226,9 +1233,12 @@ class Dashboard {
                 valContainer
             );
 
+            const iconWrapper = Utils.el('div', { className: 'stat-icon-wrapper' });
+            iconWrapper.innerHTML = kpi.icon;
+
             const card = Utils.el('div', { className: 'glass stat-card' + (kpi.badge ? ' card-success-border' : ''), style: 'animation-delay: ' + (i * 0.1) + 's' },
                 cardContent,
-                Utils.el('div', { className: 'stat-icon-wrapper' }, kpi.icon)
+                iconWrapper
             );
             kpiFrag.appendChild(card);
             
@@ -1283,7 +1293,7 @@ class Dashboard {
                 patFrag.appendChild(
                     Utils.el('div', { className: 'ov-recent-item' },
                         Utils.el('div', { className: 'flex-col-gap-8', style: 'gap:2px;' },
-                            Utils.el('span', { className: 'font-13 font-bold text-main' }, p.ad_soyad || CONFIG.DEFAULTS.NAME),
+                            Utils.el('span', { className: 'font-13 font-bold text-main' }, Utils.formatName(p.ad_soyad) || CONFIG.DEFAULTS.NAME),
                             Utils.el('span', { className: 'font-10 text-muted' }, p.telefon || '')
                         ),
                         Utils.el('span', { className: 'font-11 text-pink font-bold' }, dateStr)
@@ -1666,7 +1676,7 @@ class PatientUI {
 
         PatientUI.switchSidebarTab('overview');
 
-        DOM.sbName.textContent = hasta.ad_soyad || CONFIG.DEFAULTS.NAME;
+        DOM.sbName.textContent = Utils.formatName(hasta.ad_soyad) || CONFIG.DEFAULTS.NAME;
         DOM.sbPhone.textContent = hasta.telefon || CONFIG.DEFAULTS.PHONE;
 
         if (hasta.kronik_rahatsizlik) {
@@ -2369,11 +2379,12 @@ class AppointmentManager {
         const app = Store.state.appointments[id]; if(!app) return; 
         const todayStr = DateUtils.getTodayLocalISO();
         Store.state.activeAptId = id;
-        DOM.modalTitleText.textContent = app.ad_soyad; 
+        DOM.modalTitleText.textContent = Utils.formatName(app.ad_soyad); 
         DOM.modalSub.textContent = (app.hizmet || '') + ' | ' + app.telefon; 
         DOM.newDate.min = todayStr;
         DOM.newDate.value = app.tarih; 
         DOM.newTime.value = app.saat;
+        DOM.newDuration.value = app.sure || Utils.getServiceDuration(app.hizmet) || 30;
         Utils.$('newStatus').value = app.durum || CONFIG.STATUS.WAITING;
         Utils.$('inlineEditSection').classList.add('hidden');
         PatientManager.fillPatientForm('inlineEdit', app);
@@ -2407,17 +2418,20 @@ class AppointmentManager {
     static updateAppointment = async () => {
         const dVal = Utils.$('newDate').value;
         const tVal = Utils.$('newTime').value;
+        const durationVal = parseInt(DOM.newDuration.value) || 30;
         const statusVal = Utils.$('newStatus').value;
         const todayStr = DateUtils.getTodayLocalISO();
         const app = Store.state.appointments[Store.state.activeAptId], card = Utils.$('card-' + Store.state.activeAptId);
         if (dVal < todayStr) return Utils.showToast(CONFIG.UI.MSG_PAST_DATE_NOT_ALLOWED, "warning");
         Utils.$('modalLoading').classList.remove('hidden');
-        if (await AppointmentManager.silentSync(Store.state.activeAptId, statusVal, dVal, tVal, card, app.sure || Utils.getServiceDuration(app.hizmet))) {
-            app.tarih = dVal; app.saat = tVal; app.durum = statusVal;
-            const duration = app.sure || Utils.getServiceDuration(app.hizmet);
-            card.className = 'apt-card ' + Utils.getSafeStatusClass(statusVal) + (duration <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : '');
+        if (await AppointmentManager.silentSync(Store.state.activeAptId, statusVal, dVal, tVal, card, durationVal)) {
+            app.tarih = dVal; app.saat = tVal; app.durum = statusVal; app.sure = durationVal;
+            const heightPx = Math.max((durationVal / CONFIG.CALENDAR.SLOT_MINS) * CONFIG.CALENDAR.SLOT_PX - 2, CONFIG.CALENDAR.MIN_PX);
+            card.style.height = heightPx + 'px';
+            card.dataset.duration = durationVal;
+            card.className = 'apt-card ' + Utils.getSafeStatusClass(statusVal) + (durationVal <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : '');
             Calendar.updateCardActions(card, Store.state.activeAptId, statusVal);
-            const tSpan = card.querySelector('.apt-time'); if(tSpan) tSpan.textContent = Utils.getTimeRangeText(tVal, duration);
+            const tSpan = card.querySelector('.apt-time'); if(tSpan) tSpan.textContent = Utils.getTimeRangeText(tVal, durationVal);
             const targetZone = document.querySelector('.drop-zone[data-date="' + dVal + '"][data-time="' + tVal + '"]');
             targetZone ? targetZone.appendChild(card) : card.style.display = 'none';
             Dashboard.updateDashboardStats();
@@ -2429,7 +2443,7 @@ class AppointmentManager {
     static silentSync = async (id, status, dVal, tVal, card, sure) => {
         if (!card) return false;
         card.style.opacity = '0.5';
-        const success = await ApiService.call(CONFIG.ENDPOINTS.ACTION, { payload: { id, durum: status, tarih: dVal, saat: tVal, bitis_saati: Utils.calcBitisSaati(tVal, sure) }, customErrorMsg: null });
+        const success = await ApiService.call(CONFIG.ENDPOINTS.ACTION, { payload: { id, durum: status, tarih: dVal, saat: tVal, sure, bitis_saati: Utils.calcBitisSaati(tVal, sure) }, customErrorMsg: null });
         if (success) {
             card.style.opacity = '1'; return true;
         } else {
@@ -2663,7 +2677,7 @@ class App {
                 const isDark = e.target.value === 'dark';
                 document.body.classList.toggle('dark-theme', isDark);
                 const btn = Utils.$('btnThemeToggle');
-                if (btn) btn.innerHTML = isDark ? '<span class="theme-icon">☀️</span>' : '<span class="theme-icon">🌙</span>';
+                if (btn) btn.innerHTML = isDark ? '<span class="theme-icon"><svg width="14" height="14"><use href="#icon-sun"></use></svg></span>' : '<span class="theme-icon"><svg width="14" height="14"><use href="#icon-moon"></use></svg></span>';
             });
         }
         if (Utils.$('btnSaveNote')) Utils.$('btnSaveNote').onclick = NotesManager.savePatientNote;
@@ -2737,7 +2751,7 @@ class App {
             const syncThemeIcon = () => {
                 const isDark = document.body.classList.contains('dark-theme');
                 const btn = Utils.$('btnThemeToggle');
-                if (btn) btn.innerHTML = isDark ? '<span class="theme-icon">☀️</span>' : '<span class="theme-icon">🌙</span>';
+                if (btn) btn.innerHTML = isDark ? '<span class="theme-icon"><svg width="14" height="14"><use href="#icon-sun"></use></svg></span>' : '<span class="theme-icon"><svg width="14" height="14"><use href="#icon-moon"></use></svg></span>';
             };
             syncThemeIcon();
 
@@ -2770,6 +2784,17 @@ class App {
             trendChart.addEventListener('mouseout', e => {
                 if (e.target.closest('.chart-dot')) {
                     ChartTooltip.hide();
+                }
+            });
+            trendChart.addEventListener('click', async e => {
+                const dot = e.target.closest('.chart-dot');
+                if (dot) {
+                    const targetDate = dot.dataset.date;
+                    if (targetDate) {
+                        ChartTooltip.hide();
+                        await CalendarNav.loadCalendarRange(targetDate);
+                        await Dashboard.switchMainTab('calendar');
+                    }
                 }
             });
         }
@@ -2848,7 +2873,7 @@ class App {
                         className: 'search-item',
                         onclick: () => { PatientUI.openSidebar(i); Utils.$('searchResults').classList.add('hidden'); }
                     },
-                    Utils.el('div', { className: 'search-item-name' }, i.ad_soyad || CONFIG.DEFAULTS.NAME),
+                    Utils.el('div', { className: 'search-item-name' }, Utils.formatName(i.ad_soyad) || CONFIG.DEFAULTS.NAME),
                     Utils.el('div', { className: 'search-item-phone' },
                         Utils.el('svg', { style: 'width:12px;height:12px;margin-right:4px;' }, Utils.el('use', { href: '#icon-phone' })),
                         i.telefon || CONFIG.DEFAULTS.PHONE
@@ -2865,7 +2890,7 @@ class App {
                         className: 'search-item',
                         onclick: () => AppointmentManager.selectExistingPatient(i.id || i.hasta_id, i.ad_soyad || '', i.telefon || '')
                     },
-                    Utils.el('div', { className: 'search-item-name' }, i.ad_soyad || ''),
+                    Utils.el('div', { className: 'search-item-name' }, Utils.formatName(i.ad_soyad) || ''),
                     Utils.el('div', { className: 'search-item-phone' }, i.telefon || '')
                 )
             );
