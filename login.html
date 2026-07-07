@@ -128,7 +128,7 @@
                     localStorage.setItem('tenant_id', data.tenant_id);
                     showToast('Giriş başarılı, yönlendiriliyor...', 'success');
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = 'dashboard.html';
                     }, 800);
                 } else {
                     throw new Error(data.message || 'Giriş başarısız');

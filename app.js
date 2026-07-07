@@ -1087,7 +1087,7 @@ class Dashboard {
         
         let pCircle = '';
         if (pStroke > 0) {
-            pCircle = '<circle class="doughnut-segment" cx="75" cy="75" r="50" stroke="var(--sage)" stroke-dasharray="' + pStroke + ' ' + circ + '" stroke-dashoffset="' + pOffset + '"></circle>';
+            pCircle = '<circle class="doughnut-segment" cx="75" cy="75" r="50" stroke="var(--accent)" stroke-dasharray="' + pStroke + ' ' + circ + '" stroke-dashoffset="' + pOffset + '"></circle>';
         }
         let dCircle = '';
         if (dStroke > 0) {
@@ -1105,7 +1105,7 @@ class Dashboard {
             '</div>' +
             '<div class="chart-legend">' +
                 '<div class="legend-item">' +
-                    '<div class="legend-color" style="background:var(--sage);"></div>' +
+                    '<div class="legend-color" style="background:var(--accent);"></div>' +
                     '<div class="flex-1">' +
                         '<div class="font-bold">' + CONFIG.LABELS.PAID_AMOUNT + '</div>' +
                         '<div class="text-muted">' + paid + ' ' + CONFIG.DEFAULTS.CURRENCY + '</div>' +
@@ -2451,22 +2451,7 @@ class AppointmentManager {
         }
     };
 
-    static quickComplete = async (id) => {
-        const app = Store.state.appointments[id];
-        if (!app) return;
-        const card = Utils.$('card-' + id);
-        if (!card) return;
-        
-        const duration = app.sure || Utils.getServiceDuration(app.hizmet);
-        const success = await AppointmentManager.silentSync(id, CONFIG.STATUS.COMPLETED, app.tarih, app.saat, card, duration);
-        if (success) {
-            app.durum = CONFIG.STATUS.COMPLETED;
-            card.className = 'apt-card ' + Utils.getSafeStatusClass(CONFIG.STATUS.COMPLETED) + (duration <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : '');
-            Calendar.updateCardActions(card, id, CONFIG.STATUS.COMPLETED);
-            Dashboard.updateDashboardStats();
-            Utils.showToast('Randevu başarıyla tamamlandı.', 'success');
-        }
-    };
+
 
     static customConfirm = (message) => {
         return new Promise((resolve) => {
