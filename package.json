@@ -1,6 +1,10 @@
 {
   "name": "randevu-paneli",
   "version": "1.0.0",
-  "description": "Genel randevu yönetim paneli",
-  "scripts": {}
+  "private": true,
+  "type": "module",
+  "description": "Genel randevu ve salon yönetim işletim sistemi",
+  "scripts": {
+    "validate": "node -e \"const fs=require('fs'), cp=require('child_process'); ['js/shared','js/home','js/login','js/dashboard'].forEach(d => fs.readdirSync(d).filter(f => f.endsWith('.js')).forEach(f => cp.execSync('node -c ' + d + '/' + f))); console.log('All modular JS files syntax OK');\""
+  }
 }

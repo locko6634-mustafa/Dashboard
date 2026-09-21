@@ -4,12 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://server.n8n-mustafa.me; object-src 'none';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://server.n8n-mustafa.me https://randevu.n8n-mustafa.me; img-src 'self' data: https: blob:; object-src 'none';">
     <title>Randevu Paneli</title>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;900&family=Geist+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <script src="config.js"></script>
-    <link rel="stylesheet" href="style.css?v=2">
-    <script src="app.js?v=2" defer></script>
+    <link rel="stylesheet" href="css/shared/fonts.css">
+    <link rel="stylesheet" href="css/shared/base.css">
+    <link rel="stylesheet" href="css/shared/toast.css">
+    <link rel="stylesheet" href="css/dashboard/dashboard.css">
+    <script type="module" src="js/dashboard/app.js"></script>
 </head>
 
 <body class="dark-theme">

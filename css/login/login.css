@@ -1,0 +1,241 @@
+/* ==========================================
+   LOGIN PAGE STYLES
+   ========================================== */
+* {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+        .login-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            min-height: 100dvh;
+        }
+        @media (min-width: 992px) {
+            .login-container {
+                grid-template-columns: 1.15fr 1fr;
+            }
+        }
+        
+        /* Sol Görsel Panel */
+        .login-sidebar {
+            display: none;
+            position: relative;
+            padding: 60px;
+            overflow: hidden;
+        }
+        @media (min-width: 992px) {
+            .login-sidebar {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+        }
+        .login-sidebar-bg {
+            position: absolute;
+            inset: 0;
+            background-image: url('https://picsum.photos/seed/dashboard-login/1200/1200');
+            background-size: cover;
+            background-position: center;
+            transform: scale(1.02);
+            transition: transform 10s ease-out;
+            z-index: 1;
+        }
+        .login-sidebar:hover .login-sidebar-bg {
+            transform: scale(1.05);
+        }
+        .login-sidebar-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(9, 9, 11, 0.7) 0%, rgba(9, 9, 11, 0.98) 100%);
+            z-index: 2;
+        }
+        .login-sidebar-content {
+            position: relative;
+            z-index: 3;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .login-sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+        .brand-mark {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #09090b;
+            font-weight: 900;
+            font-size: 18px;
+        }
+        .brand-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+        .login-sidebar-middle {
+            margin: auto 0;
+            max-width: 480px;
+        }
+        .login-sidebar-kicker {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .login-sidebar-headline {
+            font-size: 38px;
+            line-height: 1.15;
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            text-wrap: balance;
+        }
+        .login-sidebar-desc {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        .features-bullets {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .feature-bullet-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+        .feature-bullet-icon {
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
+        /* Anasayfa Dönüş Butonu (Sol Panel) */
+        .back-home-btn-left {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+            opacity: 0.7;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s, opacity 0.2s, transform 0.2s;
+            margin-top: 40px;
+            align-self: flex-start;
+        }
+        .back-home-btn-left:hover {
+            color: var(--accent);
+            opacity: 1;
+            transform: translateX(-4px);
+        }
+        .back-home-btn-left svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Sağ Form Panel */
+        .login-main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+            position: relative;
+            background: var(--bg-deep);
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 32px;
+            animation: slideUpFadeIn 0.6s var(--anim-ease);
+        }
+        
+        /* Mobil/Sağ Panel Anasayfa Dönüş Butonu */
+        .back-home-link-top {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-main);
+            opacity: 0.7;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s, opacity 0.2s, transform 0.2s;
+        }
+        .back-home-link-top:hover {
+            color: var(--accent);
+            opacity: 1;
+            transform: translateX(-2px);
+        }
+        .back-home-link-top svg {
+            width: 14px;
+            height: 14px;
+        }
+        @media (min-width: 992px) {
+            .back-home-link-top {
+                display: none;
+            }
+        }
+        
+        .login-brand {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        .login-brand .logo-text {
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: var(--text-main);
+        }
+        .login-brand .logo-subtext {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+        
+        @keyframes slideUpFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .relative { position: relative; }
+        .absolute { position: absolute; }

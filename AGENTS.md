@@ -14,9 +14,9 @@ Bu projede frontend veya tasarım çalışması yapmadan önce aşağıdaki glob
 
 ## 2. Proje Genel Yapısı
 Randevu Paneli (Appointment Dashboard); randevu takvimi, müşteri yönetimi, seans takipleri ve finansal özet raporlarını sunan tek sayfalık modern bir web uygulamasıdır.
-* **Frontend:** HTML5, Vanilla JavaScript ve Geist tipografisine dayalı saf CSS (style.css).
+* **Frontend:** HTML5, modüler Vanilla JavaScript (ES Modules: `js/shared/`, `js/home/`, `js/login/`, `js/dashboard/`) ve Geist tipografisine dayalı modüler saf CSS (`css/shared/`, `css/home/`, `css/login/`, `css/dashboard/`).
 * **Backend:** n8n Webhook API uç noktaları üzerinden yönetilir ve Supabase Postgres veritabanını kullanır.
-* **API İletişimi:** Tüm HTTP fetch istekleri [config.js](file:///c:/Users/Mustafa/Desktop/dashboard/config.js) içindeki `CONFIG.API_BASE` (`https://server.n8n-mustafa.me/webhook/`) temel adresi ve tanımlı uç noktalar (endpoints) kullanılarak asenkron olarak gerçekleştirilir.
+* **API İletişimi:** Tüm HTTP fetch istekleri `js/shared/api-client.js` ve `js/shared/config.js` içindeki `CONFIG.API_BASE` temel adresi ve tanımlı uç noktalar (endpoints) kullanılarak asenkron olarak gerçekleştirilir.
 
 ---
 

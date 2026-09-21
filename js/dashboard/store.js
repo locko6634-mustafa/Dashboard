@@ -1,0 +1,47 @@
+// ==========================================
+// STORE & STATE MANAGEMENT (Dashboard)
+// ==========================================
+
+import { DateUtils } from '../shared/utils.js';
+
+const initialApps = (typeof window !== 'undefined' && window.appData) ? window.appData : {};
+Object.keys(initialApps).forEach(key => {
+    const app = initialApps[key];
+    if (app.deleted_at) {
+        delete initialApps[key];
+        return;
+    }
+    if (app.saat && app.saat.length > 5) app.saat = app.saat.substring(0, 5);
+});
+
+export class Store {
+    static state = {
+        appointments: initialApps,
+        isAuthenticated: true,
+        activePatientId: null,
+        activeAptId: null,
+        searchCache: {},
+        isNewPatientMode: true,
+        selectedClientId: null,
+        selectedClientPhone: null,
+        isSilentUpdating: false,
+        silentUpdateStart: 0,
+        activeMainTab: 'calendar',
+        overviewData: null,
+        currentViewDate: (typeof window !== 'undefined' && window.location) 
+            ? (new URLSearchParams(window.location.search).get('date') || DateUtils.getTodayLocalISO()) 
+            : DateUtils.getTodayLocalISO(),
+        lastSync: null,
+        renderedWeekKey: null,
+        isLoading: false,
+        patientNotes: [],
+        visibleNotesCount: 3,
+        calendarViewMode: 'week',
+        isAgendaCollapsed: false,
+        sidebarTab: 'overview',
+        pendingDeletes: [],
+        activeUndo: null
+    };
+}
+
+export default Store;

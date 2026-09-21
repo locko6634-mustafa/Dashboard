@@ -9,12 +9,11 @@ $remoteDir = "/home/locko-admin/randevu-paneli"
 
 # 1. Dosyalari SCP ile aktar
 Write-Host "Dosyalar sunucuya aktariliyor..." -ForegroundColor Yellow
-scp -i $key config.js "${server}:${remoteDir}/config.js"
-scp -i $key app.js "${server}:${remoteDir}/app.js"
+scp -i $key -r css "${server}:${remoteDir}/"
+scp -i $key -r js "${server}:${remoteDir}/"
 scp -i $key dashboard.html "${server}:${remoteDir}/dashboard.html"
 scp -i $key login.html "${server}:${remoteDir}/login.html"
 scp -i $key index.html "${server}:${remoteDir}/index.html"
-scp -i $key style.css "${server}:${remoteDir}/style.css"
 scp -i $key backend/docker-compose.yml "${server}:${remoteDir}/backend/docker-compose.yml"
 
 # 2. Sunucuda konteyneri yeniden baslat
