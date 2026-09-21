@@ -27,22 +27,22 @@ services:
       - "traefik.http.routers.randevu-web.tls=true"
       - "traefik.http.routers.randevu-web.tls.certresolver=mytlschallenge"
       - "traefik.http.routers.randevu-web.priority=110"
-      - "traefik.http.routers.randevu-web.service=randevu-svc"
+      - "traefik.http.routers.randevu-web.service=randevu-api"
       # API Router: server.n8n-mustafa.me/randevu-api
       - "traefik.http.routers.randevu-api.rule=Host(`server.n8n-mustafa.me`) && PathPrefix(`/randevu-api`)"
       - "traefik.http.routers.randevu-api.entrypoints=websecure"
       - "traefik.http.routers.randevu-api.tls=true"
       - "traefik.http.routers.randevu-api.tls.certresolver=mytlschallenge"
       - "traefik.http.routers.randevu-api.priority=110"
-      - "traefik.http.routers.randevu-api.service=randevu-svc"
+      - "traefik.http.routers.randevu-api.service=randevu-api"
       # Service definition
-      - "traefik.http.services.randevu-svc.loadbalancer.server.port=3000"
+      - "traefik.http.services.randevu-api.loadbalancer.server.port=3000"
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/health || exit 1"]
-      interval: 15s
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:3000/health || exit 1"]
+      interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 5s
 
 networks:
   edge_proxy:
