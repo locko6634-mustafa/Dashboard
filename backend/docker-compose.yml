@@ -1,11 +1,13 @@
 services:
   randevu-api:
     build:
-      context: ..
-      dockerfile: backend/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     image: randevu-api:latest
     container_name: randevu-api
     restart: always
+    volumes:
+      - ..:/app/public:ro
     networks:
       - edge_proxy
       - vitrinos_internal

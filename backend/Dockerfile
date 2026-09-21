@@ -4,8 +4,8 @@ WORKDIR /app
 
 RUN apk add --no-cache openssl python3 make g++
 
-COPY package.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 
 COPY prisma ./prisma
 RUN npx prisma generate
@@ -23,18 +23,13 @@ RUN apk add --no-cache openssl
 ENV NODE_ENV=production
 ENV PORT=3000
 
-COPY package.json ./
-RUN npm install --omit=dev --omit=peer
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --omit=peer
 
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/dist ./dist
-
-# Copy public frontend assets
-COPY ../*.html ./public/
-COPY ../*.js ./public/
-COPY ../*.css ./public/
 
 EXPOSE 3000
 
