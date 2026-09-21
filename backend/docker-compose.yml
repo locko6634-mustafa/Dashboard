@@ -1,0 +1,49 @@
+services:
+  randevu-api:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    image: randevu-api:latest
+    container_name: randevu-api
+    restart: always
+    networks:
+      - edge_proxy
+      - vitrinos_internal
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://vitrinos_app:ef52fa7716e78fddd9ff78a9f2a72a2c38e2a267bd8dcb68e809173a738de12b@vitrinos-postgres-1:5432/randevu_paneli?schema=public
+      - JWT_SECRET=randevu-paneli-super-secure-jwt-secret-key-2026-production
+      - STATIC_FILES_PATH=/app/public
+      - CORS_ORIGIN=*
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=edge_proxy"
+      # Web / Frontend Router: server.n8n-mustafa.me/randevu
+      - "traefik.http.routers.randevu-web.rule=Host(`server.n8n-mustafa.me`) && PathPrefix(`/randevu`)"
+      - "traefik.http.routers.randevu-web.entrypoints=websecure"
+      - "traefik.http.routers.randevu-web.tls=true"
+      - "traefik.http.routers.randevu-web.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.randevu-web.priority=110"
+      - "traefik.http.routers.randevu-web.service=randevu-svc"
+      # API Router: server.n8n-mustafa.me/randevu-api
+      - "traefik.http.routers.randevu-api.rule=Host(`server.n8n-mustafa.me`) && PathPrefix(`/randevu-api`)"
+      - "traefik.http.routers.randevu-api.entrypoints=websecure"
+      - "traefik.http.routers.randevu-api.tls=true"
+      - "traefik.http.routers.randevu-api.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.randevu-api.priority=110"
+      - "traefik.http.routers.randevu-api.service=randevu-svc"
+      # Service definition
+      - "traefik.http.services.randevu-svc.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  edge_proxy:
+    external: true
+  vitrinos_internal:
+    external: true

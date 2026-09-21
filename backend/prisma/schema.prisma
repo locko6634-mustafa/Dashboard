@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id            String         @id @default(uuid()) @db.Uuid
+  salon_adi     String         @db.VarChar(255)
+  email         String         @unique @db.VarChar(255)
+  password_hash String         @db.VarChar(255)
+  created_at    DateTime?      @default(now()) @db.Timestamptz(6)
+
+  clients       Client[]
+  appointments  Appointment[]
+  hasta_notlari HastaNotu[]
+  app_settings  AppSetting[]
+
+  @@map("tenants")
+}
+
+model Client {
+  id                 String         @id @default(uuid()) @db.Uuid
+  ad_soyad           String         @db.VarChar(255)
+  telefon            String         @db.VarChar(50)
+  kronik_rahatsizlik String?        @db.Text
+  paket_adi          String?        @db.VarChar(255)
+  toplam_seans       Int?           @default(0)
+  gelinen_seans      Int?           @default(0)
+  toplam_tutar       Decimal?       @default(0) @db.Decimal(12, 2)
+  alinan_odeme       Decimal?       @default(0) @db.Decimal(12, 2)
+  created_at         DateTime?      @default(now()) @db.Timestamptz(6)
+  tenant_id          String         @db.Uuid
+
+  tenant             Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  appointments       Appointment[]
+  hasta_notlari      HastaNotu[]
+
+  @@index([tenant_id])
+  @@index([tenant_id, telefon])
+  @@map("clients")
+}
+
+model Appointment {
+  id              String         @id @default(uuid()) @db.Uuid
+  hasta_id        String?        @db.Uuid
+  tarih           String         @db.VarChar(20)
+  baslangic_saati String         @db.VarChar(20)
+  bitis_saati     String?        @db.VarChar(20)
+  durum           String?        @default("Bekliyor") @db.VarChar(50)
+  hizmet          String?        @db.VarChar(100)
+  sure            Int?           @default(30)
+  created_at      DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?      @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at      DateTime?      @db.Timestamptz(6)
+  tenant_id       String         @db.Uuid
+
+  tenant          Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  client          Client?        @relation(fields: [hasta_id], references: [id], onDelete: SetNull)
+
+  @@index([tenant_id, tarih])
+  @@index([tenant_id, deleted_at])
+  @@map("appointments")
+}
+
+model HastaNotu {
+  id         String         @id @default(uuid()) @db.Uuid
+  hasta_id   String?        @db.Uuid
+  not_metni  String         @db.Text
+  tarih      DateTime?      @default(now()) @db.Timestamptz(6)
+  tenant_id  String         @db.Uuid
+
+  tenant     Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  client     Client?        @relation(fields: [hasta_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, hasta_id])
+  @@map("hasta_notlari")
+}
+
+model AppSetting {
+  setting_key   String         @db.VarChar(100)
+  tenant_id     String         @db.Uuid
+  setting_value Json
+  updated_at    DateTime?      @default(now()) @updatedAt @db.Timestamptz(6)
+
+  tenant        Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@id([setting_key, tenant_id])
+  @@map("app_settings")
+}
+
+model ConversationState {
+  conversation_id String         @id @db.VarChar(255)
+  phone_number    String         @db.VarChar(50)
+  current_intent  String?        @db.VarChar(100)
+  current_stage   String?        @db.VarChar(100)
+  context_data    Json?          @default("{}")
+  retry_count     Int?           @default(0)
+  updated_at      DateTime?      @default(now()) @updatedAt @db.Timestamptz(6)
+
+  @@index([phone_number])
+  @@map("conversation_states")
+}

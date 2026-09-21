@@ -4,30 +4,234 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giriş - Randevu Paneli</title>
+    <script>
+        // Giriş yapılmışsa doğrudan dashboard'a yönlendir, giriş sayfasını gösterme
+        const token = localStorage.getItem('user_token');
+        const tenant = localStorage.getItem('tenant_id');
+        if (token && tenant) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;900&family=Geist+Mono:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="config.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=999">
     <style>
-        .login-wrapper {
-            min-height: 100vh;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+        .login-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            min-height: 100dvh;
+        }
+        @media (min-width: 992px) {
+            .login-container {
+                grid-template-columns: 1.15fr 1fr;
+            }
+        }
+        
+        /* Sol Görsel Panel */
+        .login-sidebar {
+            display: none;
+            position: relative;
+            padding: 60px;
+            overflow: hidden;
+        }
+        @media (min-width: 992px) {
+            .login-sidebar {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+        }
+        .login-sidebar-bg {
+            position: absolute;
+            inset: 0;
+            background-image: url('https://picsum.photos/seed/dashboard-login/1200/1200');
+            background-size: cover;
+            background-position: center;
+            transform: scale(1.02);
+            transition: transform 10s ease-out;
+            z-index: 1;
+        }
+        .login-sidebar:hover .login-sidebar-bg {
+            transform: scale(1.05);
+        }
+        .login-sidebar-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(9, 9, 11, 0.7) 0%, rgba(9, 9, 11, 0.98) 100%);
+            z-index: 2;
+        }
+        .login-sidebar-content {
+            position: relative;
+            z-index: 3;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .login-sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+        .brand-mark {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: var(--radius-sm);
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--bg-body);
-            padding: 20px;
+            color: #09090b;
+            font-weight: 900;
+            font-size: 18px;
+        }
+        .brand-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+        .login-sidebar-middle {
+            margin: auto 0;
+            max-width: 480px;
+        }
+        .login-sidebar-kicker {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .login-sidebar-headline {
+            font-size: 38px;
+            line-height: 1.15;
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            text-wrap: balance;
+        }
+        .login-sidebar-desc {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        .features-bullets {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .feature-bullet-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+        .feature-bullet-icon {
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
+        /* Anasayfa Dönüş Butonu (Sol Panel) */
+        .back-home-btn-left {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+            opacity: 0.7;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s, opacity 0.2s, transform 0.2s;
+            margin-top: 40px;
+            align-self: flex-start;
+        }
+        .back-home-btn-left:hover {
+            color: var(--accent);
+            opacity: 1;
+            transform: translateX(-4px);
+        }
+        .back-home-btn-left svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Sağ Form Panel */
+        .login-main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+            position: relative;
+            background: var(--bg-deep);
         }
         .login-card {
             width: 100%;
             max-width: 400px;
-            padding: 40px;
-            text-align: center;
-            animation: slideUpFadeIn 0.6s ease-out;
+            padding: 40px 32px;
+            animation: slideUpFadeIn 0.6s var(--anim-ease);
         }
+        
+        /* Mobil/Sağ Panel Anasayfa Dönüş Butonu */
+        .back-home-link-top {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-main);
+            opacity: 0.7;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s, opacity 0.2s, transform 0.2s;
+        }
+        .back-home-link-top:hover {
+            color: var(--accent);
+            opacity: 1;
+            transform: translateX(-2px);
+        }
+        .back-home-link-top svg {
+            width: 14px;
+            height: 14px;
+        }
+        @media (min-width: 992px) {
+            .back-home-link-top {
+                display: none;
+            }
+        }
+        
         .login-brand {
-            margin-bottom: 30px;
+            margin-bottom: 32px;
+            text-align: center;
         }
         .login-brand .logo-text {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 900;
             letter-spacing: -1px;
             color: var(--text-main);
@@ -35,7 +239,18 @@
         .login-brand .logo-subtext {
             font-size: 13px;
             color: var(--text-muted);
-            margin-top: 4px;
+            margin-top: 6px;
+        }
+        
+        @keyframes slideUpFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         .relative { position: relative; }
         .absolute { position: absolute; }
@@ -43,28 +258,76 @@
 </head>
 <body class="dark-theme">
     <div id="toast-container"></div>
-    <div class="login-wrapper">
-        <div class="glass login-card">
-            <div class="login-brand">
-                <div class="logo-text">Randevu Paneli</div>
-            </div>
-            
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div style="text-align: left; margin-bottom: 16px;">
-                    <label class="form-label">E-posta</label>
-                    <input type="email" id="loginEmail" class="modal-input w-full" placeholder="E-posta adresiniz" required>
-                </div>
-                <div style="text-align: left; margin-bottom: 24px;">
-                    <label class="form-label">Şifre</label>
-                    <input type="password" id="loginPassword" class="modal-input w-full" placeholder="Şifreniz" required>
+    
+    <div class="login-container">
+        <!-- Sol Görsel Alan -->
+        <aside class="login-sidebar">
+            <div class="login-sidebar-bg"></div>
+            <div class="login-sidebar-overlay"></div>
+            <div class="login-sidebar-content">
+                <a href="index.html" class="login-sidebar-brand">
+                    <span class="brand-mark">R</span>
+                    <span class="brand-text">Randevu Paneli</span>
+                </a>
+                
+                <div class="login-sidebar-middle">
+                    <span class="login-sidebar-kicker">Salon Yönetim OS</span>
+                    <h1 class="login-sidebar-headline">Randevularınız, seanslar ve ödemeler tek akışta.</h1>
+                    <p class="login-sidebar-desc">İşletmenizin tüm yönetim süreçlerini otomatikleştirin, çakışmaları önleyin ve finansal raporlamanızı anlık olarak takip edin.</p>
+                    
+                    <div class="features-bullets">
+                        <div class="feature-bullet-item">
+                            <span class="feature-bullet-icon">✦</span>
+                            <span>Akıllı Takvim & Sürükle Bırak Randevu</span>
+                        </div>
+                        <div class="feature-bullet-item">
+                            <span class="feature-bullet-icon">✦</span>
+                            <span>Müşteri Seans Kartları & Geçmiş Notları</span>
+                        </div>
+                        <div class="feature-bullet-item">
+                            <span class="feature-bullet-icon">✦</span>
+                            <span>Kalan Bakiye & Finansal Raporlama</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <button type="submit" id="btnLogin" class="modal-btn modal-btn-complete w-full relative">
-                    <span id="btnText">Giriş Yap</span>
-                    <div id="btnSpinner" class="spinner spinner-sm absolute hidden" style="left: 50%; top: 50%; transform: translate(-50%, -50%); border-color: rgba(255,255,255,0.3); border-top-color: white;"></div>
-                </button>
-            </form>
-        </div>
+                <a href="index.html" class="back-home-btn-left">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    <span>Anasayfaya Dön</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Sağ Giriş Formu Alanı -->
+        <main class="login-main">
+            <a href="index.html" class="back-home-link-top">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Anasayfaya Dön
+            </a>
+            
+            <div class="glass login-card">
+                <div class="login-brand">
+                    <div class="logo-text">Giriş Yap</div>
+                    <p class="logo-subtext">Hesabınıza erişmek için bilgilerinizi girin</p>
+                </div>
+                
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div style="text-align: left; margin-bottom: 16px;">
+                        <label class="form-label">E-posta</label>
+                        <input type="email" id="loginEmail" class="modal-input w-full" placeholder="E-posta adresiniz" required>
+                    </div>
+                    <div style="text-align: left; margin-bottom: 24px;">
+                        <label class="form-label">Şifre</label>
+                        <input type="password" id="loginPassword" class="modal-input w-full" placeholder="Şifreniz" required>
+                    </div>
+                    
+                    <button type="submit" id="btnLogin" class="modal-btn modal-btn-complete w-full relative">
+                        <span id="btnText">Giriş Yap</span>
+                        <div id="btnSpinner" class="spinner spinner-sm absolute hidden" style="left: 50%; top: 50%; transform: translate(-50%, -50%); border-color: rgba(255,255,255,0.3); border-top-color: white;"></div>
+                    </button>
+                </form>
+            </div>
+        </main>
     </div>
 
     <script>

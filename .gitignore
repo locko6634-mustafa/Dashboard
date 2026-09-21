@@ -1,5 +1,7 @@
 # Bağımlılıklar (Dependencies)
 node_modules/
+dist/
+backend/dist/
 jspm_packages/
 web_modules/
 
