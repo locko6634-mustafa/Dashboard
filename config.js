@@ -1,5 +1,7 @@
 const CONFIG = {
-    API_BASE: (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:3000/webhook/' : 'https://server.n8n-mustafa.me/randevu-api/webhook/',
+    API_BASE: (typeof window !== 'undefined' && window.location.origin && window.location.origin.startsWith('http')) 
+        ? (window.location.origin + '/webhook/') 
+        : 'https://randevu.n8n-mustafa.me/webhook/',
     REFRESH_RATE: 60000,
     CALENDAR: {
         START_HOUR: 9, END_HOUR: 19, SLOT_MINS: 15, SLOT_PX: 15, MIN_PX: 13, DRAG_THRES: 3, DAYS: ['Pzt', 'Sal',

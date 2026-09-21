@@ -21,21 +21,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=edge_proxy"
-      # Web / Frontend Router: server.n8n-mustafa.me/randevu
-      - "traefik.http.routers.randevu-web.rule=Host(`server.n8n-mustafa.me`) && PathPrefix(`/randevu`)"
-      - "traefik.http.routers.randevu-web.entrypoints=websecure"
-      - "traefik.http.routers.randevu-web.tls=true"
-      - "traefik.http.routers.randevu-web.tls.certresolver=mytlschallenge"
-      - "traefik.http.routers.randevu-web.priority=110"
-      - "traefik.http.routers.randevu-web.service=randevu-api"
-      # API Router: server.n8n-mustafa.me/randevu-api
-      - "traefik.http.routers.randevu-api.rule=Host(`server.n8n-mustafa.me`) && PathPrefix(`/randevu-api`)"
-      - "traefik.http.routers.randevu-api.entrypoints=websecure"
-      - "traefik.http.routers.randevu-api.tls=true"
-      - "traefik.http.routers.randevu-api.tls.certresolver=mytlschallenge"
-      - "traefik.http.routers.randevu-api.priority=110"
-      - "traefik.http.routers.randevu-api.service=randevu-api"
-      # Service definition
+      - "traefik.http.routers.randevu.rule=Host(`randevu.n8n-mustafa.me`)"
+      - "traefik.http.routers.randevu.entrypoints=websecure"
+      - "traefik.http.routers.randevu.tls=true"
+      - "traefik.http.routers.randevu.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.randevu.service=randevu-api"
       - "traefik.http.services.randevu-api.loadbalancer.server.port=3000"
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:3000/health || exit 1"]
