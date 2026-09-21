@@ -46,6 +46,8 @@ class App {
                 if (leftSidebar && leftSidebar.classList.contains('mobile-active')) {
                     leftSidebar.classList.remove('mobile-active');
                     if (DOM.overlay) DOM.overlay.classList.remove('active');
+                    const menuBtn = Utils.$('btnMobileMenu');
+                    if (menuBtn) menuBtn.classList.remove('active');
                 }
             }
         });
@@ -77,6 +79,8 @@ class App {
                 const leftSidebar = Utils.$('left-sidebar');
                 if (leftSidebar) leftSidebar.classList.remove('mobile-active');
                 if (DOM.overlay) DOM.overlay.classList.remove('active');
+                const menuBtn = Utils.$('btnMobileMenu');
+                if (menuBtn) menuBtn.classList.remove('active');
             };
         }
         if (DOM.setUiTheme) {
@@ -88,9 +92,18 @@ class App {
             });
         }
         if (Utils.$('btnSaveNote')) Utils.$('btnSaveNote').onclick = NotesManager.savePatientNote;
-        if (Utils.$('tabCalendar')) Utils.$('tabCalendar').onclick = () => Dashboard.switchMainTab('calendar');
-        if (Utils.$('tabOverview')) Utils.$('tabOverview').onclick = () => Dashboard.switchMainTab('overview');
-        if (Utils.$('tabSettings')) Utils.$('tabSettings').onclick = () => Dashboard.switchMainTab('settings');
+        if (Utils.$('tabCalendar')) Utils.$('tabCalendar').onclick = () => {
+            Dashboard.switchMainTab('calendar');
+            if (window.innerWidth <= 768) closeMobileNav();
+        };
+        if (Utils.$('tabOverview')) Utils.$('tabOverview').onclick = () => {
+            Dashboard.switchMainTab('overview');
+            if (window.innerWidth <= 768) closeMobileNav();
+        };
+        if (Utils.$('tabSettings')) Utils.$('tabSettings').onclick = () => {
+            Dashboard.switchMainTab('settings');
+            if (window.innerWidth <= 768) closeMobileNav();
+        };
         if (Utils.$('btnAddApt')) Utils.$('btnAddApt').onclick = AppointmentManager.openAddModal;
         if (DOM.btnSaveSettings) DOM.btnSaveSettings.onclick = SettingsManager.saveSettings;
         if (DOM.btnAddServiceSetting) {
@@ -136,20 +149,36 @@ class App {
         if (Utils.$('btnSubmitEditPatient')) Utils.$('btnSubmitEditPatient').onclick = PatientUI.submitEditPatient;
         if (Utils.$('btnCancelEditPatient')) Utils.$('btnCancelEditPatient').onclick = PatientUI.closeEditPatientModal;
         
-        // Mobile Sidebar Controls
+        // Mobile Sidebar Controls (Aç/Kapat Toggle Desteği)
+        const closeMobileNav = () => {
+            const sidebar = Utils.$('left-sidebar');
+            if (sidebar) sidebar.classList.remove('mobile-active');
+            if (DOM.overlay) DOM.overlay.classList.remove('active');
+            const menuBtn = Utils.$('btnMobileMenu');
+            if (menuBtn) menuBtn.classList.remove('active');
+        };
+
         if (Utils.$('btnMobileMenu')) {
-            Utils.$('btnMobileMenu').onclick = () => {
+            Utils.$('btnMobileMenu').onclick = (e) => {
+                e.stopPropagation();
                 const sidebar = Utils.$('left-sidebar');
-                if (sidebar) sidebar.classList.add('mobile-active');
-                if (DOM.overlay) DOM.overlay.classList.add('active');
+                if (!sidebar) return;
+                const isOpening = !sidebar.classList.contains('mobile-active');
+                sidebar.classList.toggle('mobile-active', isOpening);
+                if (DOM.overlay) DOM.overlay.classList.toggle('active', isOpening);
+                Utils.$('btnMobileMenu').classList.toggle('active', isOpening);
             };
         }
 
         // Sol Sidebar genişletme/daraltma
         if (Utils.$('btnSidebarCollapse')) {
             Utils.$('btnSidebarCollapse').onclick = () => {
-                const sidebar = Utils.$('left-sidebar');
-                if (sidebar) sidebar.classList.toggle('expanded');
+                if (window.innerWidth <= 768) {
+                    closeMobileNav();
+                } else {
+                    const sidebar = Utils.$('left-sidebar');
+                    if (sidebar) sidebar.classList.toggle('expanded');
+                }
             };
         }
 
@@ -219,6 +248,14 @@ class App {
         if (Utils.$('btnViewDay')) Utils.$('btnViewDay').onclick = () => toggleViewMode('day');
         if (Utils.$('btnViewWeek')) Utils.$('btnViewWeek').onclick = () => toggleViewMode('week');
         if (Utils.$('btnViewMonth')) Utils.$('btnViewMonth').onclick = () => toggleViewMode('month');
+
+        if (window.innerWidth <= 768) {
+            Store.state.calendarViewMode = 'day';
+            const btnDay = Utils.$('btnViewDay');
+            const btnWeek = Utils.$('btnViewWeek');
+            if (btnDay) btnDay.classList.add('active');
+            if (btnWeek) btnWeek.classList.remove('active');
+        }
         if (Utils.$('btnToggleAgenda')) {
             Utils.$('btnToggleAgenda').onclick = () => {
                 Store.state.isAgendaCollapsed = !Store.state.isAgendaCollapsed;

@@ -36,7 +36,7 @@ export class Store {
         isLoading: false,
         patientNotes: [],
         visibleNotesCount: 3,
-        calendarViewMode: 'week',
+        calendarViewMode: (typeof window !== 'undefined' && window.innerWidth <= 768) ? 'day' : 'week',
         isAgendaCollapsed: false,
         sidebarTab: 'overview',
         pendingDeletes: [],
