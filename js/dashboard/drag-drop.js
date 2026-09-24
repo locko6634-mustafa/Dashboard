@@ -112,10 +112,11 @@ class DragDrop {
         const tSpan = DragDrop.activeResizeCard.querySelector('.apt-time');
         if (tSpan) tSpan.textContent = Utils.getTimeRangeText(app.saat, newDuration);
         
+        DragDrop.activeResizeCard.classList.remove('short-apt', 'medium-apt');
         if (newDuration <= CONFIG.SERVICES.DEFAULT_MINS) {
             DragDrop.activeResizeCard.classList.add('short-apt');
-        } else {
-            DragDrop.activeResizeCard.classList.remove('short-apt');
+        } else if (newDuration === 45) {
+            DragDrop.activeResizeCard.classList.add('medium-apt');
         }
         
         app.sure = newDuration;
@@ -139,7 +140,8 @@ class DragDrop {
                             card.style.opacity = '1';
                             app.sure = oldSure;
                             card.dataset.duration = oldSure;
-                            card.className = 'apt-card ' + Utils.getSafeStatusClass(oldDurum) + (oldSure <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : '');
+                            const durationClass = oldSure <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : (oldSure === 45 ? ' medium-apt' : '');
+                            card.className = 'apt-card ' + Utils.getSafeStatusClass(oldDurum) + durationClass;
                             const tSpan = card.querySelector('.apt-time');
                             if (tSpan) tSpan.textContent = Utils.getTimeRangeText(oldTime, oldSure);
                             const slotsCount = oldSure / CONFIG.CALENDAR.SLOT_MINS;
@@ -162,10 +164,11 @@ class DragDrop {
             DragDrop.activeResizeCard.style.height = 'calc(' + (slotsCount * 100) + '% - 2px)';
             DragDrop.activeResizeCard.dataset.duration = oldSure;
             if (tSpan) tSpan.textContent = Utils.getTimeRangeText(app.saat, oldSure);
+            DragDrop.activeResizeCard.classList.remove('short-apt', 'medium-apt');
             if (oldSure <= CONFIG.SERVICES.DEFAULT_MINS) {
                 DragDrop.activeResizeCard.classList.add('short-apt');
-            } else {
-                DragDrop.activeResizeCard.classList.remove('short-apt');
+            } else if (oldSure === 45) {
+                DragDrop.activeResizeCard.classList.add('medium-apt');
             }
             Calendar.adjustOverlapPositions();
         }
@@ -254,7 +257,8 @@ class DragDrop {
                                     app.saat = oldTime;
                                     app.sure = oldSure;
                                     app.durum = oldDurum;
-                                    card.className = 'apt-card ' + Utils.getSafeStatusClass(oldDurum) + (oldSure <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : '');
+                                    const durationClass = oldSure <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : (oldSure === 45 ? ' medium-apt' : '');
+                                    card.className = 'apt-card ' + Utils.getSafeStatusClass(oldDurum) + durationClass;
                                     const tSpan = card.querySelector('.apt-time');
                                     if (tSpan) tSpan.textContent = Utils.getTimeRangeText(oldTime, oldSure);
                                     const targetZone = document.querySelector('.drop-zone[data-date="' + oldDate + '"][data-time="' + oldTime + '"]');

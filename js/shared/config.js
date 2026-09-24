@@ -2,10 +2,10 @@ const isLocal = typeof window !== 'undefined' && ['localhost', '127.0.0.1', ''].
 
 export const CONFIG = {
     API_BASE: isLocal 
-        ? 'https://server.n8n-mustafa.me/webhook/'
+        ? 'https://randevu.n8n-mustafa.me/webhook/'
         : ((typeof window !== 'undefined' && window.location.origin && window.location.origin.startsWith('http')) 
             ? (window.location.origin + '/webhook/') 
-            : 'https://server.n8n-mustafa.me/webhook/'),
+            : 'https://randevu.n8n-mustafa.me/webhook/'),
     REFRESH_RATE: 60000,
     CALENDAR: {
         START_HOUR: 9, END_HOUR: 19, SLOT_MINS: 15, SLOT_PX: 15, MIN_PX: 13, DRAG_THRES: 3, DAYS: ['Pzt', 'Sal',

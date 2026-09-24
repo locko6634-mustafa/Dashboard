@@ -71,7 +71,7 @@ class Calendar {
         const duration = app.sure || Utils.getServiceDuration(app.hizmet);
         const slotsCount = duration / CONFIG.CALENDAR.SLOT_MINS;
         const heightStr = `calc(${slotsCount * 100}% - 2px)`;
-        const shortClass = duration <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : '';
+        const durationClass = duration <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : (duration === 45 ? ' medium-apt' : '');
         const statusClass = Utils.getSafeStatusClass(app.durum);
 
         let seansText = '';
@@ -91,7 +91,7 @@ class Calendar {
 
         const card = Utils.el('div', { 
             id: 'card-' + (app.randevu_id || app.id), 
-            className: 'apt-card ' + statusClass + shortClass,
+            className: 'apt-card ' + statusClass + durationClass,
             style: 'height:' + heightStr + ';',
             'data-duration': duration,
             ondragstart: () => false,
@@ -531,7 +531,8 @@ class CalendarNav {
                                 }
                                 const duration = newApp.sure || Utils.getServiceDuration(newApp.hizmet);
                                 const heightPx = Math.max((duration / CONFIG.CALENDAR.SLOT_MINS) * CONFIG.CALENDAR.SLOT_PX - 2, CONFIG.CALENDAR.MIN_PX);
-                                cardEl.className = 'apt-card ' + Utils.getSafeStatusClass(newApp.durum) + (duration <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : '') + (isDrag ? ' is-dragging' : '');
+                                const durationClass = duration <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : (duration === 45 ? ' medium-apt' : '');
+                                cardEl.className = 'apt-card ' + Utils.getSafeStatusClass(newApp.durum) + durationClass + (isDrag ? ' is-dragging' : '');
                                 cardEl.style.height = heightPx + 'px';
                                 cardEl.dataset.duration = duration;
                                 

@@ -853,7 +853,7 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     right: 2px;
     z-index: 10;
     font-size: 11px;
-    padding: 8px 10px;
+    padding: 6px 9px;
     border-radius: var(--radius-md);
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
     backdrop-filter: blur(10px);
@@ -865,7 +865,8 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     transition: transform 0.3s var(--anim-ease), box-shadow 0.3s var(--anim-ease), border-color 0.3s ease, filter 0.3s ease;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 2px;
     overflow: hidden;
     line-height: 1.3;
     user-select: none;
@@ -937,6 +938,49 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
 
 .apt-card.short-apt .resize-handle {
     display: none !important;
+}
+
+/* 45 Dakikalık (Orta Boy) Randevu Kartı - İsim ve Saatlerin Taşmasını/Ezilmesini Önler */
+.apt-card.medium-apt,
+.apt-card[data-duration="45"],
+.apt-card.duration-45 {
+    padding: 3px 8px;
+    justify-content: center;
+    gap: 2px;
+}
+
+.apt-card.medium-apt .apt-name,
+.apt-card[data-duration="45"] .apt-name,
+.apt-card.duration-45 .apt-name {
+    font-size: 10.5px;
+    line-height: 1.15;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.apt-card.medium-apt .apt-meta,
+.apt-card[data-duration="45"] .apt-meta,
+.apt-card.duration-45 .apt-meta {
+    margin-top: 0;
+    font-size: 9.5px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.apt-card.medium-apt .apt-time,
+.apt-card[data-duration="45"] .apt-time,
+.apt-card.duration-45 .apt-time {
+    font-size: 9.5px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.apt-card.medium-apt .apt-service,
+.apt-card[data-duration="45"] .apt-service,
+.apt-card.duration-45 .apt-service {
+    font-size: 7.5px;
+    padding: 1px 4px;
+    line-height: 1;
 }
 
 /* Mini Seans İlerleme Çubuğu (Apt Card Progress Bar) */
@@ -1014,15 +1058,19 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    line-height: 1.2;
+    flex-shrink: 0;
 }
 
 .apt-meta {
-    margin-top: 4px;
+    margin-top: 2px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: var(--text-muted);
     font-size: 10px;
+    line-height: 1.2;
+    flex-shrink: 0;
 }
 
 .apt-time {

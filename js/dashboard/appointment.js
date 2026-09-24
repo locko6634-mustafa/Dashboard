@@ -244,7 +244,8 @@ class AppointmentManager {
             const heightPx = Math.max((durationVal / CONFIG.CALENDAR.SLOT_MINS) * CONFIG.CALENDAR.SLOT_PX - 2, CONFIG.CALENDAR.MIN_PX);
             card.style.height = heightPx + 'px';
             card.dataset.duration = durationVal;
-            card.className = 'apt-card ' + Utils.getSafeStatusClass(statusVal) + (durationVal <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : '');
+            const durationClass = durationVal <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : (durationVal === 45 ? ' medium-apt' : '');
+            card.className = 'apt-card ' + Utils.getSafeStatusClass(statusVal) + durationClass;
             Calendar.updateCardActions(card, Store.state.activeAptId, statusVal);
             const tSpan = card.querySelector('.apt-time'); if(tSpan) tSpan.textContent = Utils.getTimeRangeText(tVal, durationVal);
             const targetZone = document.querySelector('.drop-zone[data-date="' + dVal + '"][data-time="' + tVal + '"]');
@@ -401,7 +402,8 @@ class ContextMenu {
         const success = await AppointmentManager.silentSync(id, newStatus, app.tarih, app.saat, card, duration);
         if (success) {
             app.durum = newStatus;
-            card.className = 'apt-card ' + Utils.getSafeStatusClass(newStatus) + (duration <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : '');
+            const durationClass = duration <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : (duration === 45 ? ' medium-apt' : '');
+            card.className = 'apt-card ' + Utils.getSafeStatusClass(newStatus) + durationClass;
             Calendar.updateCardActions(card, id, newStatus);
             Dashboard.updateDashboardStats();
             Utils.showToast('Durum güncellendi.', 'success');
