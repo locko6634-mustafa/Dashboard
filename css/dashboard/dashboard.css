@@ -1962,26 +1962,6 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     gap: 4px;
 }
 
-.sb-wa-btn {
-    background: rgba(37, 211, 102, 0.12);
-    border: 1px solid rgba(37, 211, 102, 0.25);
-    color: #25D366;
-    border-radius: var(--radius-xs);
-    padding: 3px 6px;
-    font-size: 9.5px;
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.15s ease;
-}
-
-.sb-wa-btn:hover {
-    background: #25D366;
-    color: #ffffff;
-}
-
 /* İstatistikler (Overview) Görünümü */
 .overview-content-layout {
     display: grid;
@@ -3792,18 +3772,6 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
 .crm-action-btn:hover {
     background: var(--bg-hover);
     transform: translateY(-1px);
-}
-
-.crm-action-btn.btn-wa {
-    background: rgba(37, 211, 102, 0.12);
-    color: #25d366;
-    border-color: rgba(37, 211, 102, 0.3);
-}
-
-.crm-action-btn.btn-wa:hover {
-    background: #25d366;
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(37, 211, 102, 0.35);
 }
 
 .crm-action-btn.btn-view-profile:hover {

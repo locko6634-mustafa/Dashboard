@@ -309,31 +309,6 @@ class PatientUI {
             if (a.durum === CONFIG.STATUS.COMPLETED) statusClass = 'sb-status-completed';
             else if (a.durum === CONFIG.STATUS.CANCELED) statusClass = 'sb-status-canceled';
 
-            // WhatsApp butonu
-            let waBtn = null;
-            const phone = a.telefon || (DOM.sbPhone ? DOM.sbPhone.textContent : '');
-            if (phone && phone !== '-' && phone !== CONFIG.DEFAULTS.PHONE) {
-                const digits = phone.replace(/[^0-9]/g, '');
-                const cleanPhone = digits.startsWith('90') ? digits : (digits.startsWith('0') ? '90' + digits.substring(1) : '90' + digits);
-                if (cleanPhone.length >= 10) {
-                    const clientName = Utils.formatName(a.ad_soyad || (DOM.sbName ? DOM.sbName.textContent : '')) || '';
-                    const message = `Merhaba Sn. ${clientName}, ${fDate} tarihindeki ${a.hizmet || 'randevu'} randevunuz hakkında bilgi almak isteriz.`;
-                    const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-
-                    waBtn = Utils.el('a', {
-                        href: waUrl,
-                        target: '_blank',
-                        rel: 'noopener noreferrer',
-                        className: 'sb-wa-btn',
-                        title: 'Müşteriye WhatsApp mesajı gönder',
-                        onclick: (e) => e.stopPropagation()
-                    },
-                        Utils.el('svg', { width: '12', height: '12' }, Utils.el('use', { href: '#icon-whatsapp' })),
-                        Utils.el('span', {}, 'WhatsApp')
-                    );
-                }
-            }
-
             const headerLeft = Utils.el('div', { className: 'sb-apt-date-wrap' },
                 isUpcoming ? Utils.el('span', { className: 'sb-apt-upcoming-tag' }, 'Yaklaşan') : null,
                 Utils.el('span', { className: 'sb-apt-date' }, fDate)
@@ -349,10 +324,7 @@ class PatientUI {
                 Utils.el('span', {}, timeRange)
             );
 
-            const cardBody = Utils.el('div', { className: 'sb-apt-card-body' },
-                metaLeft,
-                waBtn ? Utils.el('div', { className: 'sb-apt-actions' }, waBtn) : null
-            );
+            const cardBody = Utils.el('div', { className: 'sb-apt-card-body' }, metaLeft);
 
             const card = Utils.el('div', {
                 className: `sb-apt-card ${isUpcoming ? 'is-upcoming' : 'is-past'}`,
@@ -669,26 +641,6 @@ class PatientCRM {
             const currentS = c.gelinen_seans || 0;
             const sessionPerc = totalS > 0 ? Math.min(100, Math.round((currentS / totalS) * 100)) : 0;
 
-            // WhatsApp linki
-            const cleanPhone = (c.telefon || '').replace(/[^0-9]/g, '');
-            let waBtnHtml = '';
-            if (cleanPhone && cleanPhone.length >= 10) {
-                let intlPhone = cleanPhone;
-                if (intlPhone.startsWith('0')) intlPhone = '90' + intlPhone.substring(1);
-                else if (!intlPhone.startsWith('90')) intlPhone = '90' + intlPhone;
-                
-                const waMsg = encodeURIComponent(`Merhaba ${Utils.formatName(c.ad_soyad)}, Randevu Panelinizden ulaşıyoruz.`);
-                const waUrl = `https://wa.me/${intlPhone}?text=${waMsg}`;
-                waBtnHtml = `
-                    <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="crm-action-btn btn-wa" title="WhatsApp ile Mesaj Gönder" onclick="event.stopPropagation();">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.592 2.654-.696c1.004.577 1.777.787 2.806.787 3.18 0 5.767-2.587 5.767-5.766.001-3.18-2.585-5.77-5.767-5.77zm3.368 8.163c-.145.408-.847.787-1.18.847-.323.058-.696.082-1.121-.058-.268-.088-.616-.208-1.047-.395-1.833-.795-3.033-2.656-3.125-2.778-.092-.121-.749-.997-.749-1.902 0-.904.475-1.349.645-1.533.17-.184.372-.23.496-.23.124 0 .248.001.356.006.114.006.267-.043.418.32.157.375.534 1.303.58 1.398.046.095.077.206.015.328-.061.122-.092.198-.184.305-.092.107-.194.239-.277.322-.092.092-.188.192-.081.376.107.184.477.788 1.023 1.274.704.628 1.297.822 1.482.914.185.092.293.077.401-.047.108-.124.462-.538.586-.723.124-.184.248-.153.418-.092.17.061 1.08.509 1.265.602.185.092.309.138.355.215.046.077.046.446-.099.854z"/>
-                        </svg>
-                        <span>WhatsApp</span>
-                    </a>
-                `;
-            }
-
             tr.innerHTML = `
                 <td>
                     <div class="crm-client-cell">
@@ -727,7 +679,6 @@ class PatientCRM {
                 </td>
                 <td style="text-align: right;">
                     <div class="crm-actions-group">
-                        ${waBtnHtml}
                         <button type="button" class="crm-action-btn btn-view-profile" title="Detayları ve Notları Gör">
                             <svg width="14" height="14"><use href="#icon-edit"></use></svg>
                             <span>Detay</span>

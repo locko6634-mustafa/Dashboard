@@ -146,7 +146,7 @@ export class ChatbotService {
       client = await prisma.client.create({
         data: {
           tenant_id: tenantId,
-          ad_soyad: data.ad_soyad || 'WhatsApp Danışanı',
+          ad_soyad: data.ad_soyad || 'Chatbot Danışanı',
           telefon: data.telefon,
         },
       });
