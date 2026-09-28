@@ -34,6 +34,7 @@ router.post('/appointments/batch', authMiddleware, AppointmentController.batchUp
 
 // Clients
 router.get('/clients/search', authMiddleware, ClientController.searchClients);
+router.post('/clients', authMiddleware, ClientController.createClient);
 router.get('/clients/:id', authMiddleware, ClientController.getClientById);
 router.put('/clients/:id', authMiddleware, ClientController.updateClient);
 router.patch('/clients/:id', authMiddleware, ClientController.updateClient);

@@ -18,6 +18,7 @@ import { HoverPopupManager, AppointmentManager, ContextMenu } from './appointmen
 import { PatientManager, NotesManager, PatientUI, SearchEngine, PatientCRM } from './patient.js';
 import { Dashboard, ChartTooltip } from './overview.js';
 import { SettingsManager } from './settings.js';
+import { ReportsManager } from './reports.js';
 
 class App {
     static initEventListeners() {
@@ -36,6 +37,7 @@ class App {
                 if (DOM.addAptModal && !DOM.addAptModal.classList.contains('hidden')) AppointmentManager.closeAddModal();
                 if (DOM.aptModal && !DOM.aptModal.classList.contains('hidden')) AppointmentManager.closeModal();
                 if (DOM.editPatientModal && !DOM.editPatientModal.classList.contains('hidden')) PatientUI.closeEditPatientModal();
+                if (DOM.addPatientModal && !DOM.addPatientModal.classList.contains('hidden')) PatientCRM.closeAddPatientModal();
                 if (Utils.$('confirmModal') && !Utils.$('confirmModal').classList.contains('hidden')) {
                     const noBtn = Utils.$('confirmNoBtn');
                     if (noBtn) noBtn.click();
@@ -56,6 +58,7 @@ class App {
             if (e.target.id === 'addAptModal') AppointmentManager.closeAddModal();
             else if (e.target.id === 'aptModal') AppointmentManager.closeModal();
             else if (e.target.id === 'editPatientModal') PatientUI.closeEditPatientModal();
+            else if (e.target.id === 'addPatientModal') PatientCRM.closeAddPatientModal();
             else if (e.target.id === 'confirmModal') {
                 const noBtn = Utils.$('confirmNoBtn');
                 if (noBtn) noBtn.click();
@@ -130,6 +133,16 @@ class App {
         if (Utils.$('tabSettings')) Utils.$('tabSettings').onclick = () => {
             Dashboard.switchMainTab('settings');
             if (window.innerWidth <= 768) closeMobileNav();
+        };
+        if (Utils.$('tabReports')) Utils.$('tabReports').onclick = () => {
+            Dashboard.switchMainTab('reports');
+            if (window.innerWidth <= 768) closeMobileNav();
+        };
+        // Yazdır butonu
+        if (Utils.$('btnPrint')) Utils.$('btnPrint').onclick = () => {
+            const titles = { calendar: 'Takvim', patients: 'Müşteri Listesi', overview: 'Genel Görünüm', reports: 'Randevu Raporu', settings: 'Ayarlar' };
+            document.body.dataset.printTitle = (DOM.setBrandName?.value || 'Randevu Paneli') + ' — ' + (titles[Store.state.activeMainTab] || 'Randevu Paneli');
+            window.print();
         };
         if (Utils.$('btnAddApt')) Utils.$('btnAddApt').onclick = AppointmentManager.openAddModal;
         if (DOM.btnSaveSettings) DOM.btnSaveSettings.onclick = SettingsManager.saveSettings;
@@ -384,7 +397,7 @@ class App {
         try {
             const settingsData = await ApiService.call(CONFIG.ENDPOINTS.GET_SETTINGS, { method: 'GET', returnData: true });
             if (settingsData && Array.isArray(settingsData)) {
-                // n8n/Supabase'den gelen satır tabanlı ayarları güvenle entegre et (Deep Merge)
+                // Veritabanından gelen satır tabanlı ayarları güvenle entegre et (Deep Merge)
                 settingsData.forEach(item => {
                     const key = item.setting_key;
                     const val = item.setting_value;

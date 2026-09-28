@@ -743,6 +743,64 @@ class PatientCRM {
         Utils.showToast(`${list.length} müşteri CSV olarak dışa aktarıldı.`, 'success');
     };
 
+    static openAddPatientModal = () => {
+        const modal = DOM.addPatientModal;
+        if (!modal) return;
+        // Formu sıfırla
+        ['addPtName','addPtPhone','addPtChronic','addPtPackage','addPtTotalSession','addPtCurrentSession','addPtTotalAmount','addPtPaidAmount'].forEach(id => {
+            const el = Utils.$(id);
+            if (el) el.value = '';
+        });
+        modal.classList.remove('hidden');
+    };
+
+    static closeAddPatientModal = () => {
+        const modal = DOM.addPatientModal;
+        if (modal) modal.classList.add('hidden');
+    };
+
+    static submitNewPatient = async () => {
+        const name = Utils.$('addPtName')?.value?.trim();
+        const phone = Utils.$('addPtPhone')?.value?.trim();
+        if (!name) { showToast(CONFIG.UI.MSG_NAME_REQUIRED, 'error'); return; }
+        if (!phone || phone.length < 10) { showToast(CONFIG.UI.MSG_PHONE_INVALID, 'error'); return; }
+
+        const payload = {
+            ad_soyad: name,
+            telefon: phone,
+            kronik_rahatsizlik: Utils.$('addPtChronic')?.value?.trim() || null,
+            paket_adi: Utils.$('addPtPackage')?.value?.trim() || null,
+            toplam_seans: parseInt(Utils.$('addPtTotalSession')?.value) || 0,
+            gelinen_seans: parseInt(Utils.$('addPtCurrentSession')?.value) || 0,
+            toplam_tutar: parseFloat(Utils.$('addPtTotalAmount')?.value) || 0,
+            alinan_odeme: parseFloat(Utils.$('addPtPaidAmount')?.value) || 0
+        };
+
+        // Negatif değer kontrolü
+        if (payload.toplam_seans < 0 || payload.gelinen_seans < 0 || payload.toplam_tutar < 0 || payload.alinan_odeme < 0) {
+            showToast(CONFIG.UI.MSG_NEGATIVE_VALUE, 'error');
+            return;
+        }
+
+        const loader = Utils.$('addPatientLoading');
+        if (loader) loader.classList.remove('hidden');
+
+        try {
+            const res = await ApiService.call(CONFIG.ENDPOINTS.ADD_PATIENT, { method: 'POST', payload });
+            if (res && !res.error) {
+                showToast('✅ Müşteri başarıyla eklendi!', 'success');
+                PatientCRM.closeAddPatientModal();
+                await PatientCRM.loadPatients(true);
+            } else {
+                showToast(res?.message || CONFIG.UI.MSG_API_ERROR, 'error');
+            }
+        } catch (err) {
+            showToast(CONFIG.UI.MSG_API_ERROR, 'error');
+        } finally {
+            if (loader) loader.classList.add('hidden');
+        }
+    };
+
     static initEventListeners = () => {
         // Filtre chip'leri
         const chips = document.querySelectorAll('.crm-filter-chip');
@@ -786,6 +844,16 @@ class PatientCRM {
         if (exportBtn) {
             exportBtn.addEventListener('click', PatientCRM.exportToCSV);
         }
+
+        // CRM Müşteri Ekleme butonları
+        const addPatientBtn = Utils.$('btnAddPatientCRM');
+        if (addPatientBtn) addPatientBtn.addEventListener('click', PatientCRM.openAddPatientModal);
+
+        const cancelAddPatient = Utils.$('btnCancelAddPatient');
+        if (cancelAddPatient) cancelAddPatient.addEventListener('click', PatientCRM.closeAddPatientModal);
+
+        const submitAddPatient = Utils.$('btnSubmitAddPatient');
+        if (submitAddPatient) submitAddPatient.addEventListener('click', PatientCRM.submitNewPatient);
     };
 }
 

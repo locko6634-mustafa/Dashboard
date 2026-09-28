@@ -38,7 +38,8 @@ export const CONFIG = {
         GET_SETTINGS: 'ayarlar-getir',
         LOGIN: 'kullanici-girisi',
         GET_PATIENTS: 'musteriler',
-        CLIENT_APTS: 'musteri-randevulari'
+        CLIENT_APTS: 'musteri-randevulari',
+        ADD_PATIENT: 'musteri-ekle'
     },
     UI: {
         LOADER: 'Yükleniyor...',
@@ -59,11 +60,11 @@ export const CONFIG = {
         BTN_SAVE_NOTE: 'Notu Kaydet',
         BTN_SAVED: '✅ Kaydedildi!',
         BTN_LOAD_MORE: 'Daha Fazla Yükle',
-        MSG_API_ERROR: 'İşlem başarısız! Webhook çalışmıyor veya ağ bağlantısı yok.',
+        MSG_API_ERROR: 'İşlem başarısız! Sunucu yanıt vermiyor veya ağ bağlantısı yok.',
         MSG_DELETE_ERROR: 'Silme işlemi başarısız oldu.',
         MSG_NOTE_EMPTY: 'Lütfen bir not yazın.',
         MSG_PATIENT_NOT_FOUND: 'Müşteri bilgisi bulunamadı.',
-        MSG_NOTE_ERROR: 'Hata! n8n tarafında "add-note" isimli webhook oluşturulmadı veya ulaşılamıyor.',
+        MSG_NOTE_ERROR: 'Hata! Not ekleme servisine ulaşılamıyor veya sunucu yanıt vermiyor.',
         MSG_NOTE_DEL_ERROR: 'Not silinemedi. Lütfen tekrar deneyin.',
         MSG_AGENDA_EMPTY: 'Bugün için randevu bulunmuyor.',
         MSG_NOTES_EMPTY: 'Henüz not eklenmemiş.',

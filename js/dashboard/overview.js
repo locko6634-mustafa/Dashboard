@@ -74,11 +74,13 @@ class Dashboard {
         if (DOM.tabPatients) DOM.tabPatients.classList.toggle('active', tabName === 'patients');
         if (DOM.tabOverview) DOM.tabOverview.classList.toggle('active', tabName === 'overview');
         if (DOM.tabSettings) DOM.tabSettings.classList.toggle('active', tabName === 'settings');
+        if (DOM.tabReports) DOM.tabReports.classList.toggle('active', tabName === 'reports');
         
         if (DOM.viewCalendar) DOM.viewCalendar.classList.add('hidden');
         if (DOM.viewPatients) DOM.viewPatients.classList.add('hidden');
         if (DOM.viewOverview) DOM.viewOverview.classList.add('hidden');
         if (DOM.viewSettings) DOM.viewSettings.classList.add('hidden');
+        if (DOM.viewReports) DOM.viewReports.classList.add('hidden');
 
         if (tabName === 'calendar') {
             if (DOM.viewCalendar) DOM.viewCalendar.classList.remove('hidden');
@@ -90,6 +92,10 @@ class Dashboard {
             if (!Store.state.overviewData) await Dashboard.loadOverviewData();
         } else if (tabName === 'settings') {
             if (DOM.viewSettings) DOM.viewSettings.classList.remove('hidden');
+        } else if (tabName === 'reports') {
+            if (DOM.viewReports) DOM.viewReports.classList.remove('hidden');
+            const { ReportsManager } = await import('./reports.js');
+            await ReportsManager.initReports();
         }
     };
 

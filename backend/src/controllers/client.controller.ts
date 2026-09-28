@@ -15,6 +15,17 @@ export class ClientController {
     }
   }
 
+  static async createClient(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+    try {
+      const tenantId = req.tenantId!;
+      const data = req.body?.payload ? req.body.payload : req.body;
+      const result = await ClientService.createClient(tenantId, data);
+      res.status(201).json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async updateClient(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = req.tenantId!;

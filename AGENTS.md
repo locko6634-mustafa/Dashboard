@@ -1,6 +1,6 @@
 # Randevu Paneli Geliştirme ve Backend Kuralları
 
-Bu dosya, Randevu Paneli projesinde çalışmaya başlamadan önce okunması gereken, projenin mimarisini, veritabanı şemasını ve n8n otomasyon iş akışlarını açıklayan ana kılavuzdur.
+Bu dosya, Randevu Paneli projesinde çalışmaya başlamadan önce okunması gereken, projenin güncel mimarisini, veritabanı şemasını ve bağımsız backend API yapısını açıklayan ana kılavuzdur.
 
 ---
 
@@ -13,72 +13,78 @@ Bu projede frontend veya tasarım çalışması yapmadan önce aşağıdaki glob
 ---
 
 ## 2. Proje Genel Yapısı
-Randevu Paneli (Appointment Dashboard); randevu takvimi, müşteri yönetimi, seans takipleri ve finansal özet raporlarını sunan tek sayfalık modern bir web uygulamasıdır.
+Randevu Paneli (Appointment Dashboard); randevu takvimi, müşteri yönetimi, seans takipleri, raporlama ve finansal özet analizlerini sunan tek sayfalık modern bir web uygulamasıdır.
 * **Frontend:** HTML5, modüler Vanilla JavaScript (ES Modules: `js/shared/`, `js/home/`, `js/login/`, `js/dashboard/`) ve Geist tipografisine dayalı modüler saf CSS (`css/shared/`, `css/home/`, `css/login/`, `css/dashboard/`).
-* **Backend:** n8n Webhook API uç noktaları üzerinden yönetilir ve Supabase Postgres veritabanını kullanır.
-* **API İletişimi:** Tüm HTTP fetch istekleri `js/shared/api-client.js` ve `js/shared/config.js` içindeki `CONFIG.API_BASE` temel adresi ve tanımlı uç noktalar (endpoints) kullanılarak asenkron olarak gerçekleştirilir.
+* **Backend:** Bağımsız Node.js (TypeScript) + Express REST API servisi (`backend/` dizini), Prisma ORM ve PostgreSQL veritabanı. Docker konteyneri (`randevu-api`) ve Traefik ters ters vekil (reverse proxy) üzerinden çalışır.
+* **API İletişimi:** Tüm HTTP fetch istekleri `js/shared/api-client.js` ve `js/shared/config.js` içindeki `CONFIG.API_BASE` adresi üzerinden asenkron olarak gerçekleştirilir.
 
 ---
 
-## 3. Supabase Veritabanı Mimarisi
+## 3. PostgreSQL & Prisma Veritabanı Mimarisi
 Veritabanı ilişkisel yapıda olup her işlem `tenant_id` (salon/kullanıcı bazlı) izolasyonu ile yürütülür.
 
-### A. Temel Tablolar
+### A. Temel Modeller (Prisma / PostgreSQL)
 1. **`tenants`:** Sistemdeki salon/kullanıcı hesapları.
    * `id` (UUID, PK, Default: `gen_random_uuid()`)
-   * `salon_adi` (varchar), `email` (varchar, unique), `password_hash` (varchar), `created_at` (timestamptz)
+   * `salon_adi` (varchar), `email` (varchar, unique), `password_hash` (varchar, Argon2), `created_at` (timestamptz)
 2. **`clients`:** Müşteri/hasta bilgileri.
-   * `id` (UUID, PK, Default: `uuid_generate_v4()`)
+   * `id` (UUID, PK, Default: `gen_random_uuid()`)
    * `ad_soyad` (text), `telefon` (text)
    * `kronik_rahatsizlik` (text, nullable), `paket_adi` (text, nullable)
    * `toplam_seans` (integer, default 0), `gelinen_seans` (integer, default 0)
    * `toplam_tutar` (numeric, default 0), `alinan_odeme` (numeric, default 0)
    * `tenant_id` (UUID, FK -> `tenants.id`), `created_at` (timestamptz)
 3. **`appointments`:** Randevu kayıtları.
-   * `id` (UUID, PK, Default: `uuid_generate_v4()`)
+   * `id` (UUID, PK, Default: `gen_random_uuid()`)
    * `hasta_id` (UUID, FK -> `clients.id`), `tenant_id` (UUID, FK -> `tenants.id`)
    * `tarih` (date), `baslangic_saati` (time), `sure` (integer, default 30), `bitis_saati` (time)
    * `durum` (text, default 'Bekliyor'), `hizmet` (text)
    * `created_at` (timestamptz), `updated_at` (timestamptz), `deleted_at` (timestamptz, soft-delete için)
-4. **`hasta_notlari`:** Müşterilere ait geçmiş ve hızlı notlar.
+4. **`hasta_notlari`:** Müşterilere ait geçmiş ve hızlı operasyonel notlar.
    * `id` (UUID, PK), `hasta_id` (UUID, FK -> `clients.id`), `tenant_id` (UUID, FK -> `tenants.id`)
    * `not_metni` (text), `tarih` (timestamptz)
-5. **`app_settings`:** Dashboard ayarları.
-   * `setting_key` (text, PK), `tenant_id` (UUID, PK, FK -> `tenants.id`), `setting_value` (jsonb)
-
-### B. SQL View Yapıları (Görünümler)
-1. **`appointment_details`:** Silinmemiş aktif randevuları (`deleted_at IS NULL`) hastaların kişisel, seans ve ödeme bilgileriyle JOIN ederek sunar.
-2. **`dashboard_stats_overview`:** Toplam müşteri, ciro, alınan ödeme, kalan borç, toplam randevu, randevu başarı oranı (Tamamlanan / (Tamamlanan + İptal)), son 5 müşteri ve son 7/14 gün bazındaki yüzdelik değişimleri (delta) tek bir JSON objesi halinde döner.
+5. **`app_settings`:** Dashboard ayarları (genel marka, çalışma saatleri, hizmetler, durum renkleri).
+   * `setting_key` (text), `tenant_id` (UUID, FK -> `tenants.id`), `setting_value` (jsonb)
 
 ---
 
-## 4. n8n İş Akışları (Workflows) ve Webhook API Uç Noktaları
-Sistem n8n üzerinde çalışan 3 ana iş akışı üzerinden Supabase ile haberleşir:
+## 4. Bağımsız Backend API Servisi & Endpoint Mimarisi
+Backend servisi Express ve TypeScript tabanlı olup iki ana routing katmanı sunar:
 
-### 1. DASHBOARD İş Akışı (ID: `RWGmnIB3m0wLPnjT`)
-* **GET `/webhook/genel-istatistik`:** `dashboard_stats_overview` görünümünden genel özet kartları ve istatistik verilerini getirir.
-* **POST `/webhook/randevulari-getir`:** İstekte gelen tarih ve görünüm moduna (`week` veya `month`) göre asenkron tarih aralığını hesaplar. `appointment_details` görünümünden randevuları çeker ve mükerrer verileri temizleyerek Whitelist kolonlar ile döndürür.
-* **GET `/webhook/ayarlar-getir`:** `app_settings` tablosundan tenant'a ait ayarları döner.
-* **POST `/webhook/ayarlar-guncelle`:** Gelen ayar dizisini tekil objelere dönüştürerek `app_settings` tablosunda günceller.
+### 1. Modern RESTful API Uç Noktaları (`/api/v1/` ve `/api/`)
+* **Kimlik Doğrulama:**
+  * `POST /api/v1/auth/login`: E-posta ve Argon2 şifre doğrulaması yaparak JWT ve `tenant_id` döner.
+* **Genel İstatistik & KPI:**
+  * `GET /api/v1/stats/overview`: Toplam müşteri, ciro, alınan ödeme, kalan borç, başarı oranı ve trend verilerini döner.
+* **Randevu İşlemleri:**
+  * `GET /api/v1/appointments`: Randevu listeleme (tarih ve filtre parametreleriyle).
+  * `POST /api/v1/appointments`: Yeni randevu oluşturma (opsiyonel otomatik müşteri kaydıyla).
+  * `PATCH / PUT /api/v1/appointments/:id`: Randevu güncelleme (saat, tarih, durum, süre).
+  * `DELETE /api/v1/appointments/:id`: Randevu silme (soft-delete).
+  * `POST /api/v1/appointments/batch`: Toplu randevu tamamlama/güncelleme.
+* **Müşteri İşlemleri:**
+  * `GET /api/v1/clients/search`: İsim veya telefona göre canlı müşteri arama / CRM listeleme.
+  * `POST /api/v1/clients`: CRM'den doğrudan yeni müşteri oluşturma.
+  * `GET /api/v1/clients/:id`: Müşteri detayını ve randevu/not geçmişini getirme.
+  * `PUT / PATCH /api/v1/clients/:id`: Müşteri bilgilerini, seans ve finansal verilerini güncelleme.
+* **Müşteri Notları:**
+  * `GET /api/v1/notes`: Müşteriye ait notları listeleme.
+  * `POST /api/v1/notes`: Yeni not ekleme.
+  * `DELETE /api/v1/notes/:id`: Not silme.
+* **Ayar Yönetimi:**
+  * `GET /api/v1/settings`: Tenant ayarlarını getirme.
+  * `POST /api/v1/settings`: Tenant ayarlarını kaydetme/güncelleme.
 
-### 2. DASHBOARD_RANDEVU_KAYDET İş Akışı (ID: `0uBEu0iMyqBdHdw7`)
-* **GET `/webhook/arama`:** `clients` tablosunda `ad_soyad` kolonuna göre canlı müşteri araması yapar.
-* **POST `/webhook/ekle-dashboard`:** Yeni randevu ekler. `is_new` true ise `clients` tablosunda yeni müşteri kaydı oluşturup ID'sini randevuya bağlar. `is_new` false ise doğrudan `appointments` tablosuna randevuyu kaydeder.
-* **POST `/webhook/randevu-sil`:** Belirtilen randevunun `deleted_at` alanını `$now` ile güncelleyerek soft-delete yapar.
-* **POST `/webhook/guncelleme`:** Bir randevunun durumunu, tarihini, başlagıç/bitiş saatini ve süresini günceller.
-* **POST `/webhook/guncelleme-toplu`:** Çoklu randevu ID listesini alıp durumlarını topluca 'Tamamlandı' olarak günceller.
-* **POST `/webhook/kullanici-girisi`:** `tenants` tablosunda e-posta ve şifre doğrulaması yaparak `tenant_id` ve oturum tokenı döner.
+### 2. Geriye Dönük Uyumluluk Katmanı (`/webhook/`)
+Eski frontend çağrılarını karşılamak için backend `/webhook/` altında eşdeğer rota takma adları (alias) barındırır (`kullanici-girisi`, `genel-istatistik`, `randevulari-getir`, `arama`, `musteriler`, `ekle-dashboard`, `guncelleme`, `randevu-sil`, `notlari-getir`, `not-ekle`, `not-sil`, `hasta-guncelle`, `ayarlar-getir`, `ayarlar-guncelle`, `musteri-ekle`).
 
-### 3. DASHBOARD_EKSTRA_İŞLEMLER İş Akışı (ID: `w2muGYCXKWCUyPta`)
-* **POST `/webhook/not-ekle`:** Müşteriye hızlı randevu notu ekler.
-* **GET `/webhook/notlari-getir`:** Müşteriye ait not listesini çeker.
-* **POST `/webhook/not-sil`:** İlgili not ID'sine ait kaydı siler.
-* **POST `/webhook/hasta-guncelle`:** Müşteri kartındaki kişisel bilgileri, seans durumlarını ve finansal detayları günceller.
-* **Zamanlanmış Görev (Cron - `Gecmis_Randevuları_Guncelle`):** Her 15 dakikada bir otomatik çalışarak, tarihi/saati geçmiş ve durumu 'Bekliyor' olan randevuları tarar; bitiş saati şimdiki zamandan küçük olanları otomatik olarak 'Tamamlandı' durumuna çeker.
+### 3. Arka Plan Zamanlanmış Görevler (Cron Service)
+* `backend/src/services/cron.service.ts`: Periyodik olarak çalışarak tarihi ve saati geçmiş, durumu hâlâ 'Bekliyor' olan randevuları otomatik olarak 'Tamamlandı' durumuna çeker.
 
 ---
 
 ## 5. Güvenlik ve Kimlik Doğrulama Protokolü
-* Tüm webhook istekleri, istemciden (app.js) gönderilen HTTP başlıklarını (headers) kontrol eden güvenlik filtrelerinden (`API_Guvenlik_Filtresi_*`) geçer.
-* İsteklerde **`x-tenant-id`** ve **`authorization`** (veya `x-api-key`) başlıklarının gönderilmesi zorunludur.
-* Bu filtreler sayesinde hiçbir tenant, başka bir salonun verilerine erişemez veya değişiklik yapamaz.
+* Tüm korumalı isteklere istemci tarafından **`authorization`** (Bearer JWT token) ve **`x-tenant-id`** başlıkları gönderilir.
+* `authMiddleware` (`backend/src/middlewares/auth.middleware.ts`) token'ı doğrular ve isteğin yalnızca ilgili `tenant_id` kapsamındaki verilere erişmesine izin verir.
+* Şifreler Argon2 algoritması ile güvenli şekilde hash'lenir.
+* CORS ve Helmet başlıkları üretim ortamı standartlarına göre yapılandırılmıştır.

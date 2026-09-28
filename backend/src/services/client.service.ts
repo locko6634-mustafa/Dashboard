@@ -24,6 +24,32 @@ export class ClientService {
     }));
   }
 
+  static async createClient(tenantId: string, data: any) {
+    const created = await prisma.client.create({
+      data: {
+        tenant_id: tenantId,
+        ad_soyad: data.ad_soyad || 'İsimsiz Müşteri',
+        telefon: data.telefon || '',
+        kronik_rahatsizlik: data.kronik_rahatsizlik || null,
+        paket_adi: data.paket_adi || null,
+        toplam_seans: parseInt(data.toplam_seans, 10) || 0,
+        gelinen_seans: parseInt(data.gelinen_seans, 10) || 0,
+        toplam_tutar: data.toplam_tutar ? Number(data.toplam_tutar) : 0,
+        alinan_odeme: data.alinan_odeme ? Number(data.alinan_odeme) : 0,
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Müşteri başarıyla eklendi',
+      data: {
+        ...created,
+        toplam_tutar: created.toplam_tutar ? Number(created.toplam_tutar) : 0,
+        alinan_odeme: created.alinan_odeme ? Number(created.alinan_odeme) : 0,
+      },
+    };
+  }
+
   static async updateClient(tenantId: string, id: string, data: any) {
     const existing = await prisma.client.findFirst({
       where: { id, tenant_id: tenantId },

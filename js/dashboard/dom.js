@@ -66,7 +66,22 @@ export const DOM = {
     get ovFinanceChart() { return Utils.$('ovFinanceChart'); },
     get ovTrendChart() { return Utils.$('ovTrendChart'); },
     get ovServiceDist() { return Utils.$('ovServiceDist'); },
-    get ovRecentPatients() { return Utils.$('ovRecentPatients'); }
+    get ovRecentPatients() { return Utils.$('ovRecentPatients'); },
+    // CRM Müşteri Ekleme
+    get addPatientModal() { return Utils.$('addPatientModal'); },
+    get btnAddPatientCRM() { return Utils.$('btnAddPatientCRM'); },
+    // Raporlar Sekmesi
+    get viewReports() { return Utils.$('viewReports'); },
+    get tabReports() { return Utils.$('tabReports'); },
+    get reportTableBody() { return Utils.$('reportTableBody'); },
+    get reportDateStart() { return Utils.$('reportDateStart'); },
+    get reportDateEnd() { return Utils.$('reportDateEnd'); },
+    get reportStatusFilter() { return Utils.$('reportStatusFilter'); },
+    get reportServiceFilter() { return Utils.$('reportServiceFilter'); },
+    get reportKpiGrid() { return Utils.$('reportKpiGrid'); },
+    get reportCountBadge() { return Utils.$('reportCountBadge'); },
+    get btnApplyReportFilter() { return Utils.$('btnApplyReportFilter'); },
+    get btnExportReport() { return Utils.$('btnExportReport'); }
 };
 
 export default DOM;

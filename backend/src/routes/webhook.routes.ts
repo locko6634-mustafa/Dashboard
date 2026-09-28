@@ -41,8 +41,10 @@ router.get('/notlari-getir', authMiddleware, NotesController.getNotes);
 router.post('/not-ekle', authMiddleware, NotesController.addNote);
 router.post('/not-sil', authMiddleware, NotesController.deleteNote);
 
-// 10. Update client
+// 10. Update & Add client
 router.post('/hasta-guncelle', authMiddleware, ClientController.updateClient);
+router.post('/musteri-ekle', authMiddleware, ClientController.createClient);
+router.post('/clients', authMiddleware, ClientController.createClient);
 
 // 11. Settings
 router.get('/ayarlar-getir', authMiddleware, SettingsController.getSettings);

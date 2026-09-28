@@ -3807,3 +3807,265 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
         min-width: 100%;
     }
 }
+
+/* ==========================================
+   YENİ MÜŞTERI EKLEME BUTONU
+   ========================================== */
+.btn-primary-soft {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    border: 1px solid var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.btn-primary-soft:hover {
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+/* addPatientModal — Çekmece Stili (editPatientModal ile aynı davranış) */
+#addPatientModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(44, 38, 33, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    justify-content: flex-end;
+    transition: opacity 0.25s;
+}
+#addPatientModal.hidden {
+    opacity: 0;
+    pointer-events: none;
+    display: flex !important;
+}
+#addPatientModal .modal-panel {
+    transform: translateX(0);
+    transition: transform 0.3s var(--anim-ease);
+}
+#addPatientModal.hidden .modal-panel {
+    transform: translateX(100%);
+}
+
+/* ==========================================
+   RAPORLAR SEKMESİ
+   ========================================== */
+.reports-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.reports-filters {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.report-date-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.report-filter-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.report-date-input {
+    width: 150px;
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+}
+.report-date-sep {
+    color: var(--text-muted);
+    font-size: 14px;
+    padding-bottom: 4px;
+}
+.report-select {
+    min-width: 140px;
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+}
+.reports-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Rapor KPI Grid — stats-grid ile aynı yapı */
+#reportKpiGrid {
+    margin-bottom: 16px;
+}
+
+/* Rapor Tablosu — crm-table extend */
+.reports-table th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.reports-table td {
+    font-size: 12.5px;
+    vertical-align: middle;
+}
+.report-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.report-status-badge.status-waiting {
+    background: color-mix(in srgb, #F59E0B 15%, transparent);
+    color: #F59E0B;
+}
+.report-status-badge.status-completed {
+    background: color-mix(in srgb, #22C55E 15%, transparent);
+    color: #22C55E;
+}
+.report-status-badge.status-canceled {
+    background: color-mix(in srgb, #EF4444 15%, transparent);
+    color: #EF4444;
+}
+
+/* Responsive — Raporlar */
+@media (max-width: 768px) {
+    .reports-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .reports-filters {
+        flex-direction: column;
+    }
+    .report-date-input, .report-select {
+        width: 100%;
+        min-width: 100%;
+    }
+    .reports-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* ==========================================
+   YAZDIRMA DESTEĞİ
+   ========================================== */
+@media print {
+    /* Sidebar, header alanları, modal/overlay, toast, popup gizle */
+    .left-sidebar,
+    .main-header,
+    .toast-container,
+    .sidebar-overlay,
+    #patientSidebar,
+    .context-menu,
+    .apt-hover-popup,
+    #aptHoverPopup,
+    #aptContextMenu,
+    #addAptModal,
+    #aptModal,
+    #editPatientModal,
+    #addPatientModal,
+    #confirmModal,
+    .mobile-top-bar,
+    #btnPrint,
+    .agenda-wrapper,
+    .calendar-filter-bar,
+    .patients-toolbar .btn-primary-soft,
+    .patients-toolbar .btn-secondary-soft,
+    .reports-toolbar .btn-primary-soft,
+    .reports-toolbar .btn-secondary-soft,
+    .page-loader { display: none !important; }
+
+    /* Ana gövde tam genişlikte */
+    body, html {
+        background: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .app-layout {
+        padding: 0 !important;
+        gap: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    .main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+    .container {
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+    .view-section {
+        padding: 8px !important;
+        overflow: visible !important;
+    }
+
+    /* Takvim kartları korunsun */
+    .apt-card {
+        border: 1px solid #999 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        box-shadow: none !important;
+    }
+    .calendar-wrapper {
+        overflow: visible !important;
+        height: auto !important;
+    }
+    .calendar-grid {
+        overflow: visible !important;
+    }
+
+    /* CRM Tablosu */
+    .crm-table, .reports-table {
+        width: 100% !important;
+    }
+    .crm-table-row:nth-child(even) {
+        background: #f5f5f5 !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    /* Overview kartları */
+    .overview-content-layout {
+        display: block !important;
+    }
+    .overview-card, .stat-card {
+        break-inside: avoid;
+        margin-bottom: 12px;
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    .stats-grid {
+        break-inside: avoid;
+    }
+
+    /* Sayfa başlığı */
+    body::before {
+        content: attr(data-print-title);
+        font-size: 18px;
+        font-weight: 700;
+        display: block;
+        padding: 12px 8px;
+        border-bottom: 2px solid #333;
+        margin-bottom: 12px;
+    }
+}

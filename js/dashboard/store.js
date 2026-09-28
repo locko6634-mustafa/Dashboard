@@ -46,6 +46,9 @@ export class Store {
         patientsFilter: { status: 'all', query: '' },
         isLoadingPatients: false,
         patientAppointments: [],
+        reportData: [],
+        reportFiltered: [],
+        reportDateRange: { start: null, end: null },
     };
 }
 

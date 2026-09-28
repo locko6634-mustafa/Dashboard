@@ -148,6 +148,17 @@
                     <span class="menu-icon"><svg width="16" height="16"><use href="#icon-chart"></use></svg></span>
                     <span class="menu-label">Genel Görünüm</span>
                 </button>
+                <button id="tabReports" class="nav-menu-item">
+                    <span class="menu-icon">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"></path>
+                            <rect x="9" y="3" width="6" height="4" rx="1"></rect>
+                            <line x1="9" y1="12" x2="15" y2="12"></line>
+                            <line x1="9" y1="16" x2="13" y2="16"></line>
+                        </svg>
+                    </span>
+                    <span class="menu-label">Raporlar</span>
+                </button>
                 <button id="tabSettings" class="nav-menu-item">
                     <span class="menu-icon"><svg width="16" height="16"><use href="#icon-settings"></use></svg></span>
                     <span class="menu-label">Ayarlar</span>
@@ -351,6 +362,13 @@
                             <button id="btnViewWeek" class="view-toggle-btn active">Hafta</button>
                             <button id="btnViewMonth" class="view-toggle-btn">Ay</button>
                         </div>
+                        <button id="btnPrint" class="nav-btn" title="Sayfayı Yazdır">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"></path>
+                                <rect x="6" y="14" width="12" height="8"></rect>
+                            </svg>
+                        </button>
                         <button id="btnToggleAgenda" class="nav-btn" title="Ajandayı Göster/Gizle">Ajanda</button>
                     </div>
                 </header>
@@ -470,6 +488,12 @@
                             </div>
                         </div>
                         <div class="crm-toolbar-right">
+                            <button type="button" id="btnAddPatientCRM" class="btn-primary-soft" title="Yeni Müşteri Ekle">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                <span>Yeni Müşteri</span>
+                            </button>
                             <button type="button" id="btnExportPatients" class="btn-secondary-soft" title="Müşteri Listesini CSV olarak indir">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -521,6 +545,59 @@
                             <div class="info-title">Son Kayıtlar</div>
                             <div id="ovRecentPatients" class="ov-recent-list"></div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Section: Reports View -->
+                <div id="viewReports" class="view-section hidden">
+                    <div class="reports-toolbar glass">
+                        <div class="reports-filters">
+                            <div class="report-date-group">
+                                <label class="report-filter-label">Başlangıç</label>
+                                <input type="date" id="reportDateStart" class="modal-input report-date-input">
+                            </div>
+                            <span class="report-date-sep">—</span>
+                            <div class="report-date-group">
+                                <label class="report-filter-label">Bitiş</label>
+                                <input type="date" id="reportDateEnd" class="modal-input report-date-input">
+                            </div>
+                            <select id="reportStatusFilter" class="modal-input report-select">
+                                <option value="all">Tüm Durumlar</option>
+                                <option value="Bekliyor">Bekliyor</option>
+                                <option value="Tamamlandı">Tamamlandı</option>
+                                <option value="İptal">İptal</option>
+                            </select>
+                            <select id="reportServiceFilter" class="modal-input report-select">
+                                <option value="all">Tüm Hizmetler</option>
+                            </select>
+                            <button type="button" id="btnApplyReportFilter" class="btn-primary-soft">Filtrele</button>
+                        </div>
+                        <div class="reports-actions">
+                            <button type="button" id="btnExportReport" class="btn-secondary-soft" title="Raporu CSV olarak indir">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                </svg>
+                                <span>CSV İndir</span>
+                            </button>
+                            <span id="reportCountBadge" class="patients-count-badge">0 Randevu</span>
+                        </div>
+                    </div>
+                    <div class="stats-grid" id="reportKpiGrid"></div>
+                    <div class="patients-table-wrapper glass">
+                        <table class="crm-table reports-table">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Saat</th>
+                                    <th>Müşteri</th>
+                                    <th>Hizmet</th>
+                                    <th>Süre</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody">
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -789,6 +866,39 @@
                 <button id="confirmNoBtn" class="modal-btn flex-1 btn-secondary-soft">Vazgeç</button>
                 <button id="confirmYesBtn" class="modal-btn modal-btn-cancel flex-1">Evet, Sil</button>
             </div>
+        </div>
+    </div>
+
+    <!-- YENİ MÜŞTERİ EKLEME MODALI -->
+    <div id="addPatientModal" class="hidden">
+        <div class="modal-panel">
+            <div id="addPatientLoading" class="hidden modal-overlay-loader">
+                <div class="spinner"></div><span class="loading-text">Kaydediliyor...</span>
+            </div>
+            <div class="flex-between mb-16">
+                <h2 class="modal-title-bold m-0">Yeni Müşteri Ekle</h2>
+                <button id="btnCancelAddPatient" class="btn-close-x">&times;</button>
+            </div>
+            <div class="form-section scroll-y-half">
+                <label class="form-label">Kişisel Bilgiler</label>
+                <input type="text" id="addPtName" class="modal-input w-full mb-8" placeholder="Ad Soyad" required>
+                <input type="text" id="addPtPhone" class="modal-input w-full mb-8" placeholder="Telefon (05XX XXX XXXX)">
+                <textarea id="addPtChronic" class="modal-input w-full h-70 no-resize mb-12" placeholder="Kronik rahatsızlık veya ek bilgi (opsiyonel)"></textarea>
+
+                <label class="form-label">Paket ve Seans</label>
+                <input type="text" id="addPtPackage" class="modal-input w-full mb-8" placeholder="Paket Adı (opsiyonel)">
+                <div class="input-row mb-12">
+                    <input type="number" id="addPtTotalSession" class="modal-input flex-1" placeholder="Toplam Seans" min="0">
+                    <input type="number" id="addPtCurrentSession" class="modal-input flex-1" placeholder="Gelinen Seans" min="0">
+                </div>
+
+                <label class="form-label">Finansal Bilgiler</label>
+                <div class="input-row mb-12">
+                    <input type="number" id="addPtTotalAmount" class="modal-input flex-1" placeholder="Toplam Tutar (₺)" min="0">
+                    <input type="number" id="addPtPaidAmount" class="modal-input flex-1" placeholder="Alınan Ödeme (₺)" min="0">
+                </div>
+            </div>
+            <button id="btnSubmitAddPatient" class="modal-btn modal-btn-complete w-full mb-8">🚀 Müşteriyi Kaydet</button>
         </div>
     </div>
 
