@@ -1581,15 +1581,16 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    padding: 12px 4px;
-    font-size: 11px;
+    padding: 11px 2px;
+    font-size: 10.5px;
     font-weight: 700;
     color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s;
     text-align: center;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
 }
 
 .sidebar-tab-btn:hover {
@@ -1740,6 +1741,245 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
 .delete-note-btn:hover {
     color: var(--rose);
     background: var(--bg-secondary);
+}
+
+/* Müşteri Çekmecesi - Tüm Randevu Geçmişi Stilleri */
+.sb-link-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: var(--radius-xs);
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sb-link-btn:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+.sb-apt-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.sb-apt-filters {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--bg-main);
+    padding: 3px;
+    border-radius: var(--radius-full, 9999px);
+    border: 1px solid var(--border);
+}
+
+.sb-filter-chip {
+    background: none;
+    border: none;
+    padding: 4px 9px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-radius: var(--radius-full, 9999px);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.sb-filter-chip:hover {
+    color: var(--text-main);
+}
+
+.sb-filter-chip.active {
+    background: var(--accent);
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.sb-quick-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 9px;
+    border-radius: var(--radius-sm);
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sb-quick-add-btn:hover {
+    background: var(--accent);
+    color: #ffffff;
+}
+
+.sb-apt-summary-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 2px 6px 2px;
+    border-bottom: 1px dashed var(--border);
+}
+
+.sb-apt-pill-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full, 9999px);
+    background: var(--emerald-dim, rgba(34, 197, 94, 0.1));
+    color: var(--emerald, #22c55e);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.sb-apt-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px;
+}
+
+.sb-apt-card {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sb-apt-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.sb-apt-card.is-upcoming {
+    border-left: 3px solid var(--cobalt, #3b82f6);
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, var(--bg-main) 40%);
+}
+
+.sb-apt-card.is-past {
+    opacity: 0.92;
+}
+
+.sb-apt-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.sb-apt-date-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sb-apt-upcoming-tag {
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--cobalt-dim, rgba(59, 130, 246, 0.15));
+    color: var(--cobalt, #3b82f6);
+}
+
+.sb-apt-date {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.sb-apt-status {
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: var(--radius-xs);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sb-status-waiting {
+    background: var(--amber-dim, rgba(245, 158, 11, 0.12));
+    color: var(--amber, #f59e0b);
+}
+
+.sb-status-completed {
+    background: var(--emerald-dim, rgba(34, 197, 94, 0.12));
+    color: var(--emerald, #22c55e);
+}
+
+.sb-status-canceled {
+    background: var(--rose-dim, rgba(239, 68, 68, 0.12));
+    color: var(--rose, #ef4444);
+}
+
+.sb-apt-card-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.sb-apt-service {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.sb-apt-meta {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sb-apt-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sb-wa-btn {
+    background: rgba(37, 211, 102, 0.12);
+    border: 1px solid rgba(37, 211, 102, 0.25);
+    color: #25D366;
+    border-radius: var(--radius-xs);
+    padding: 3px 6px;
+    font-size: 9.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+}
+
+.sb-wa-btn:hover {
+    background: #25D366;
+    color: #ffffff;
 }
 
 /* İstatistikler (Overview) Görünümü */

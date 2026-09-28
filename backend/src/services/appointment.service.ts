@@ -262,4 +262,47 @@ export class AppointmentService {
 
     return { success: true, message: 'Randevu başarıyla silindi' };
   }
+
+  static async getClientAppointments(tenantId: string, clientId: string) {
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        tenant_id: tenantId,
+        hasta_id: clientId,
+        deleted_at: null,
+      },
+      include: {
+        client: true,
+      },
+      orderBy: [
+        { tarih: 'desc' },
+        { baslangic_saati: 'desc' },
+      ],
+    });
+
+    return appointments.map((a) => {
+      const c = a.client;
+      const saat = a.baslangic_saati ? a.baslangic_saati.substring(0, 5) : '';
+      return {
+        id: a.id,
+        randevu_id: a.id,
+        hasta_id: a.hasta_id,
+        ad_soyad: c?.ad_soyad || 'İsimsiz',
+        telefon: c?.telefon || '',
+        kronik_rahatsizlik: c?.kronik_rahatsizlik || '',
+        paket_adi: c?.paket_adi || 'Paket Seçilmedi',
+        toplam_seans: c?.toplam_seans ?? 0,
+        gelinen_seans: c?.gelinen_seans ?? 0,
+        toplam_tutar: c?.toplam_tutar ? Number(c.toplam_tutar) : 0,
+        alinan_odeme: c?.alinan_odeme ? Number(c.alinan_odeme) : 0,
+        tarih: a.tarih,
+        saat,
+        sure: a.sure,
+        bitis_saati: a.bitis_saati ? a.bitis_saati.substring(0, 5) : '',
+        durum: a.durum,
+        hizmet: a.hizmet,
+        created_at: a.created_at,
+        updated_at: a.updated_at,
+      };
+    });
+  }
 }

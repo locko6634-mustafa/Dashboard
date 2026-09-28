@@ -44,8 +44,13 @@ export class Store {
         calendarFilter: { status: 'all', query: '' },
         patientsList: [],
         patientsFilter: { status: 'all', query: '' },
-        isLoadingPatients: false
+        isLoadingPatients: false,
+        patientAppointments: [],
     };
+}
+
+if (typeof window !== 'undefined') {
+    window.Store = Store;
 }
 
 export default Store;

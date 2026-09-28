@@ -185,15 +185,188 @@ class PatientUI {
     static switchSidebarTab = (tabName) => {
         Store.state.sidebarTab = tabName;
         
-        ['sbTabOverview', 'sbTabFinance', 'sbTabNotes'].forEach(id => {
+        ['sbTabOverview', 'sbTabAppointments', 'sbTabFinance', 'sbTabNotes'].forEach(id => {
             const el = Utils.$(id);
             if (el) el.classList.toggle('active', id === 'sbTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
         });
 
-        ['sbPanelOverview', 'sbPanelFinance', 'sbPanelNotes'].forEach(id => {
+        ['sbPanelOverview', 'sbPanelAppointments', 'sbPanelFinance', 'sbPanelNotes'].forEach(id => {
             const el = Utils.$(id);
             if (el) el.classList.toggle('active', id === 'sbPanel' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
         });
+
+        if (tabName === 'appointments') {
+            PatientUI.renderPatientAppointments();
+        }
+    };
+
+    static updateOverviewAptLink = () => {
+        const btn = Utils.$('btnViewAllAppointments');
+        if (!btn) return;
+        const count = (Store.state.patientAppointments || []).length;
+        btn.textContent = count > 0 ? `Tümünü Gör (${count}) →` : 'Randevular →';
+    };
+
+    static loadPatientAppointments = async (pId) => {
+        if (!pId) return;
+        
+        // 1. Yerel Store'daki randevulardan anında doldur
+        const localApps = Object.values(Store.state.appointments).filter(a => (a.hasta_id === pId || a.id === pId));
+        Store.state.patientAppointments = [...localApps];
+        PatientUI.renderPatientAppointments();
+        PatientUI.updateOverviewAptLink();
+
+        // 2. API'den tüm randevuları asenkron getir
+        try {
+            const endpoint = (CONFIG.ENDPOINTS.CLIENT_APTS || 'musteri-randevulari') + '?id=' + pId;
+            const data = await ApiService.call(endpoint, {
+                method: 'GET',
+                returnData: true,
+                customErrorMsg: null
+            });
+
+            if (Array.isArray(data)) {
+                const mergedMap = new Map();
+                data.forEach(a => {
+                    const id = a.id || a.randevu_id;
+                    if (id) mergedMap.set(id, a);
+                });
+                localApps.forEach(a => {
+                    const id = a.id || a.randevu_id;
+                    if (id && !mergedMap.has(id)) {
+                        mergedMap.set(id, a);
+                    }
+                });
+                Store.state.patientAppointments = Array.from(mergedMap.values());
+                PatientUI.renderPatientAppointments();
+                PatientUI.updateOverviewAptLink();
+            }
+        } catch (e) {
+            console.warn('Müşteri tüm randevuları API üzerinden çekilemedi, yerel veriler kullanılıyor:', e);
+        }
+    };
+
+    static renderPatientAppointments = () => {
+        const listEl = Utils.$('sbAppointmentsList');
+        if (!listEl) return;
+
+        const allApps = Store.state.patientAppointments || [];
+        const filter = Store.state.patientAppointmentsFilter || 'all';
+        const todayStr = DateUtils.getTodayLocalISO();
+
+        // 1. Özet Sayaç ve Başarı Oranı
+        const totalCount = allApps.length;
+        const completedCount = allApps.filter(a => a.durum === CONFIG.STATUS.COMPLETED).length;
+        const canceledCount = allApps.filter(a => a.durum === CONFIG.STATUS.CANCELED).length;
+        const successDenom = completedCount + canceledCount;
+        const successRate = successDenom > 0 ? Math.round((completedCount / successDenom) * 100) : 0;
+
+        const summaryEl = Utils.$('sbAptSummaryText');
+        if (summaryEl) summaryEl.textContent = `${totalCount} Randevu Kaydı`;
+
+        const badgeEl = Utils.$('sbAptSuccessBadge');
+        if (badgeEl) {
+            badgeEl.textContent = `%${successRate} Başarı`;
+            badgeEl.className = successRate >= 70 ? 'sb-apt-pill-badge' : 'sb-apt-pill-badge text-amber';
+        }
+
+        // 2. Filtreleme
+        let filtered = allApps.filter(a => {
+            if (filter === 'upcoming') {
+                return a.tarih && a.tarih >= todayStr && a.durum !== CONFIG.STATUS.CANCELED;
+            }
+            if (filter === 'completed') {
+                return a.durum === CONFIG.STATUS.COMPLETED;
+            }
+            if (filter === 'canceled') {
+                return a.durum === CONFIG.STATUS.CANCELED;
+            }
+            return true;
+        });
+
+        // 3. Sıralama: En yeniden eskiye (Tarih ve Saat)
+        filtered.sort((a, b) => {
+            const dateCmp = (b.tarih || '').localeCompare(a.tarih || '');
+            if (dateCmp !== 0) return dateCmp;
+            return (b.saat || '').localeCompare(a.saat || '');
+        });
+
+        // 4. Render
+        if (filtered.length === 0) {
+            const svg = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>';
+            listEl.replaceChildren(Utils.createEmptyState('Randevu Bulunamadı', 'Bu filtreye uygun randevu kaydı bulunmamaktadır.', svg));
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        filtered.forEach(a => {
+            const isUpcoming = a.tarih && a.tarih >= todayStr && a.durum === CONFIG.STATUS.WAITING;
+            const fDate = new Date(a.tarih).toLocaleDateString(CONFIG.LOCALE, { day: 'numeric', month: 'long', year: 'numeric', weekday: 'short' });
+            const duration = a.sure || Utils.getServiceDuration(a.hizmet) || 30;
+            const timeRange = Utils.getTimeRangeText(a.saat, duration);
+
+            let statusClass = 'sb-status-waiting';
+            if (a.durum === CONFIG.STATUS.COMPLETED) statusClass = 'sb-status-completed';
+            else if (a.durum === CONFIG.STATUS.CANCELED) statusClass = 'sb-status-canceled';
+
+            // WhatsApp butonu
+            let waBtn = null;
+            const phone = a.telefon || (DOM.sbPhone ? DOM.sbPhone.textContent : '');
+            if (phone && phone !== '-' && phone !== CONFIG.DEFAULTS.PHONE) {
+                const digits = phone.replace(/[^0-9]/g, '');
+                const cleanPhone = digits.startsWith('90') ? digits : (digits.startsWith('0') ? '90' + digits.substring(1) : '90' + digits);
+                if (cleanPhone.length >= 10) {
+                    const clientName = Utils.formatName(a.ad_soyad || (DOM.sbName ? DOM.sbName.textContent : '')) || '';
+                    const message = `Merhaba Sn. ${clientName}, ${fDate} tarihindeki ${a.hizmet || 'randevu'} randevunuz hakkında bilgi almak isteriz.`;
+                    const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+                    waBtn = Utils.el('a', {
+                        href: waUrl,
+                        target: '_blank',
+                        rel: 'noopener noreferrer',
+                        className: 'sb-wa-btn',
+                        title: 'Müşteriye WhatsApp mesajı gönder',
+                        onclick: (e) => e.stopPropagation()
+                    },
+                        Utils.el('svg', { width: '12', height: '12' }, Utils.el('use', { href: '#icon-whatsapp' })),
+                        Utils.el('span', {}, 'WhatsApp')
+                    );
+                }
+            }
+
+            const headerLeft = Utils.el('div', { className: 'sb-apt-date-wrap' },
+                isUpcoming ? Utils.el('span', { className: 'sb-apt-upcoming-tag' }, 'Yaklaşan') : null,
+                Utils.el('span', { className: 'sb-apt-date' }, fDate)
+            );
+
+            const statusBadge = Utils.el('span', { className: `sb-apt-status ${statusClass}` }, a.durum || CONFIG.STATUS.WAITING);
+
+            const cardHeader = Utils.el('div', { className: 'sb-apt-card-header' }, headerLeft, statusBadge);
+
+            const metaLeft = Utils.el('div', { className: 'sb-apt-meta' },
+                Utils.el('span', { className: 'font-bold text-main' }, a.hizmet || CONFIG.DEFAULTS.SERVICE),
+                Utils.el('span', {}, '•'),
+                Utils.el('span', {}, timeRange)
+            );
+
+            const cardBody = Utils.el('div', { className: 'sb-apt-card-body' },
+                metaLeft,
+                waBtn ? Utils.el('div', { className: 'sb-apt-actions' }, waBtn) : null
+            );
+
+            const card = Utils.el('div', {
+                className: `sb-apt-card ${isUpcoming ? 'is-upcoming' : 'is-past'}`,
+                title: 'Randevu detayını açmak için tıklayın',
+                onclick: () => {
+                    const aptId = a.id || a.randevu_id;
+                    if (aptId) AppointmentManager.openAptModal(aptId);
+                }
+            }, cardHeader, cardBody);
+
+            fragment.appendChild(card);
+        });
+
+        listEl.replaceChildren(fragment);
     };
 
     static openSidebar = hasta => {
@@ -232,7 +405,7 @@ class PatientUI {
         if(pId) {
             const todayStr = DateUtils.getTodayLocalISO();
             const pApps = Object.values(Store.state.appointments).filter(a =>
-                a.hasta_id === pId &&
+                (a.hasta_id === pId || a.id === pId) &&
                 a.tarih &&
                 a.tarih < todayStr
             );
@@ -254,6 +427,12 @@ class PatientUI {
                 const svg = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
                 DOM.sbHistory.appendChild(Utils.createEmptyState('İşlem Geçmişi Yok', CONFIG.UI.SEARCH_RESULTS_EMPTY, svg));
             }
+
+            // Filtreyi sıfırla ve tüm randevuları çek
+            Store.state.patientAppointmentsFilter = 'all';
+            const filterChips = document.querySelectorAll('#sbAptFilterChips .sb-filter-chip');
+            filterChips.forEach(c => c.classList.toggle('active', c.dataset.filter === 'all'));
+            PatientUI.loadPatientAppointments(pId);
         }
         if(DOM.sbNoteInput) DOM.sbNoteInput.value = '';
 

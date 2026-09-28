@@ -157,6 +157,12 @@ class AppointmentManager {
         Utils.$('addPhone').value = '';
     };
 
+    static openAddModalWithPatient = (id, name, phone) => {
+        AppointmentManager.openAddModal();
+        AppointmentManager.switchAddTab(false);
+        AppointmentManager.selectExistingPatient(id, name, phone);
+    };
+
     static closeAddModal = () => {
         DOM.addAptModal.classList.add('hidden');
         Utils.$('addName').value = ''; 

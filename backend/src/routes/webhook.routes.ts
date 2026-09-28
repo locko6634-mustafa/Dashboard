@@ -18,6 +18,7 @@ router.get('/genel-istatistik', authMiddleware, StatsController.getOverview);
 // 3. Appointments list
 router.post('/randevulari-getir', authMiddleware, AppointmentController.getAppointments);
 router.get('/randevulari-getir', authMiddleware, AppointmentController.getAppointments);
+router.get('/musteri-randevulari', authMiddleware, AppointmentController.getClientAppointments);
 
 // 4. Live Search & Clients List
 router.get('/arama', authMiddleware, ClientController.searchClients);

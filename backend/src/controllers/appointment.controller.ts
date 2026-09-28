@@ -82,4 +82,21 @@ export class AppointmentController {
       next(err);
     }
   }
+
+  static async getClientAppointments(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+    try {
+      const tenantId = req.tenantId!;
+      const clientId = (req.query.id as string) || (req.query.hasta_id as string) || req.params.id;
+
+      if (!clientId) {
+        res.status(400).json({ success: false, error: 'Müşteri ID zorunludur' });
+        return;
+      }
+
+      const appointments = await AppointmentService.getClientAppointments(tenantId, clientId);
+      res.json(appointments);
+    } catch (err) {
+      next(err);
+    }
+  }
 }

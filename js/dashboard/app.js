@@ -92,6 +92,29 @@ class App {
             });
         }
         if (Utils.$('btnSaveNote')) Utils.$('btnSaveNote').onclick = NotesManager.savePatientNote;
+        if (Utils.$('btnSbQuickAddApt')) {
+            Utils.$('btnSbQuickAddApt').onclick = () => {
+                const pId = Store.state.activePatientId;
+                const name = DOM.sbName ? DOM.sbName.textContent : '';
+                const phone = (DOM.sbPhone && DOM.sbPhone.textContent !== '-') ? DOM.sbPhone.textContent : '';
+                PatientUI.closeSidebar();
+                AppointmentManager.openAddModalWithPatient(pId, name, phone);
+            };
+        }
+        if (Utils.$('btnViewAllAppointments')) {
+            Utils.$('btnViewAllAppointments').onclick = () => {
+                PatientUI.switchSidebarTab('appointments');
+            };
+        }
+        const aptFilterChips = document.querySelectorAll('#sbAptFilterChips .sb-filter-chip');
+        aptFilterChips.forEach(chip => {
+            chip.onclick = () => {
+                aptFilterChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                Store.state.patientAppointmentsFilter = chip.dataset.filter || 'all';
+                PatientUI.renderPatientAppointments();
+            };
+        });
         if (Utils.$('tabCalendar')) Utils.$('tabCalendar').onclick = () => {
             Dashboard.switchMainTab('calendar');
             if (window.innerWidth <= 768) closeMobileNav();
@@ -274,7 +297,7 @@ class App {
                 }
             };
         }
-        ['sbTabOverview', 'sbTabFinance', 'sbTabNotes'].forEach(id => {
+        ['sbTabOverview', 'sbTabAppointments', 'sbTabFinance', 'sbTabNotes'].forEach(id => {
             const btn = Utils.$(id);
             if (btn) {
                 btn.onclick = () => {

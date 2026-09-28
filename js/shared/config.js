@@ -37,7 +37,8 @@ export const CONFIG = {
         UPDATE_SETTINGS: 'ayarlar-guncelle',
         GET_SETTINGS: 'ayarlar-getir',
         LOGIN: 'kullanici-girisi',
-        GET_PATIENTS: 'musteriler'
+        GET_PATIENTS: 'musteriler',
+        CLIENT_APTS: 'musteri-randevulari'
     },
     UI: {
         LOADER: 'Yükleniyor...',
