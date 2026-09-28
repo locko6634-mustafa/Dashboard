@@ -36,7 +36,8 @@ export const CONFIG = {
         ADD_NOTE: 'not-ekle', DEL_NOTE: 'not-sil', DEL_APT: 'randevu-sil', GET_OVERVIEW: 'genel-istatistik', GET_APTS: 'randevulari-getir',
         UPDATE_SETTINGS: 'ayarlar-guncelle',
         GET_SETTINGS: 'ayarlar-getir',
-        LOGIN: 'kullanici-girisi'
+        LOGIN: 'kullanici-girisi',
+        GET_PATIENTS: 'musteriler'
     },
     UI: {
         LOADER: 'Yükleniyor...',

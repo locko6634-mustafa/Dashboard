@@ -3,20 +3,18 @@ import { prisma } from '../config/prisma.js';
 export class ClientService {
   static async searchClients(tenantId: string, query: string) {
     const q = (query || '').trim();
-    if (!q) {
-      return [];
+    const whereClause: any = { tenant_id: tenantId };
+    if (q && q !== '*') {
+      whereClause.OR = [
+        { ad_soyad: { contains: q, mode: 'insensitive' } },
+        { telefon: { contains: q } },
+      ];
     }
 
     const clients = await prisma.client.findMany({
-      where: {
-        tenant_id: tenantId,
-        OR: [
-          { ad_soyad: { contains: q, mode: 'insensitive' } },
-          { telefon: { contains: q } },
-        ],
-      },
-      orderBy: { ad_soyad: 'asc' },
-      take: 20,
+      where: whereClause,
+      orderBy: q ? { ad_soyad: 'asc' } : { created_at: 'desc' },
+      take: q ? 50 : 200,
     });
 
     return clients.map((c) => ({

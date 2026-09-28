@@ -40,7 +40,11 @@ export class Store {
         isAgendaCollapsed: false,
         sidebarTab: 'overview',
         pendingDeletes: [],
-        activeUndo: null
+        activeUndo: null,
+        calendarFilter: { status: 'all', query: '' },
+        patientsList: [],
+        patientsFilter: { status: 'all', query: '' },
+        isLoadingPatients: false
     };
 }
 

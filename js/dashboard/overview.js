@@ -12,7 +12,7 @@ import { Store } from './store.js';
 import { DOM } from './dom.js';
 import { UndoManager } from './undo-manager.js';
 
-import { PatientUI, PatientManager } from './patient.js';
+import { PatientUI, PatientManager, PatientCRM } from './patient.js';
 
 class Dashboard {
     static renderDailyAgenda = () => {
@@ -70,21 +70,26 @@ class Dashboard {
         if (Store.state.activeMainTab === tabName) return;
         Store.state.activeMainTab = tabName;
         
-        DOM.tabCalendar.classList.toggle('active', tabName === 'calendar');
-        DOM.tabOverview.classList.toggle('active', tabName === 'overview');
-        DOM.tabSettings.classList.toggle('active', tabName === 'settings');
+        if (DOM.tabCalendar) DOM.tabCalendar.classList.toggle('active', tabName === 'calendar');
+        if (DOM.tabPatients) DOM.tabPatients.classList.toggle('active', tabName === 'patients');
+        if (DOM.tabOverview) DOM.tabOverview.classList.toggle('active', tabName === 'overview');
+        if (DOM.tabSettings) DOM.tabSettings.classList.toggle('active', tabName === 'settings');
         
-        DOM.viewCalendar.classList.add('hidden');
-        DOM.viewOverview.classList.add('hidden');
-        DOM.viewSettings.classList.add('hidden');
+        if (DOM.viewCalendar) DOM.viewCalendar.classList.add('hidden');
+        if (DOM.viewPatients) DOM.viewPatients.classList.add('hidden');
+        if (DOM.viewOverview) DOM.viewOverview.classList.add('hidden');
+        if (DOM.viewSettings) DOM.viewSettings.classList.add('hidden');
 
         if (tabName === 'calendar') {
-            DOM.viewCalendar.classList.remove('hidden');
+            if (DOM.viewCalendar) DOM.viewCalendar.classList.remove('hidden');
+        } else if (tabName === 'patients') {
+            if (DOM.viewPatients) DOM.viewPatients.classList.remove('hidden');
+            await PatientCRM.loadPatients();
         } else if (tabName === 'overview') {
-            DOM.viewOverview.classList.remove('hidden');
+            if (DOM.viewOverview) DOM.viewOverview.classList.remove('hidden');
             if (!Store.state.overviewData) await Dashboard.loadOverviewData();
         } else if (tabName === 'settings') {
-            DOM.viewSettings.classList.remove('hidden');
+            if (DOM.viewSettings) DOM.viewSettings.classList.remove('hidden');
         }
     };
 

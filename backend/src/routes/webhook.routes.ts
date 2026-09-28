@@ -19,8 +19,9 @@ router.get('/genel-istatistik', authMiddleware, StatsController.getOverview);
 router.post('/randevulari-getir', authMiddleware, AppointmentController.getAppointments);
 router.get('/randevulari-getir', authMiddleware, AppointmentController.getAppointments);
 
-// 4. Live Search
+// 4. Live Search & Clients List
 router.get('/arama', authMiddleware, ClientController.searchClients);
+router.get('/musteriler', authMiddleware, ClientController.searchClients);
 
 // 5. Add appointment
 router.post('/ekle-dashboard', authMiddleware, AppointmentController.createAppointment);

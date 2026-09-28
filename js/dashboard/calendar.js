@@ -215,18 +215,92 @@ class Calendar {
         }
     };
 
+    static getFilteredAppointments = (apps) => {
+        const filter = Store.state.calendarFilter || { status: 'all', query: '' };
+        return apps.filter(app => {
+            if (filter.status && filter.status !== 'all' && app.durum !== filter.status) {
+                return false;
+            }
+            if (filter.query) {
+                const q = filter.query.toLowerCase();
+                const name = (app.ad_soyad || '').toLowerCase();
+                const service = (app.hizmet || '').toLowerCase();
+                const phone = (app.telefon || '').toLowerCase();
+                if (!name.includes(q) && !service.includes(q) && !phone.includes(q)) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    };
+
+    static updateFilterCountBadge = (filteredCount, totalCount) => {
+        const badge = Utils.$('calFilterCount');
+        if (!badge) return;
+        const filter = Store.state.calendarFilter || { status: 'all', query: '' };
+        const isFiltering = (filter.status && filter.status !== 'all') || Boolean(filter.query);
+        if (isFiltering) {
+            badge.textContent = `${filteredCount} / ${totalCount} Randevu`;
+            badge.classList.add('is-filtered');
+        } else {
+            badge.textContent = `${totalCount} Randevu`;
+            badge.classList.remove('is-filtered');
+        }
+    };
+
+    static initCalendarFilters = () => {
+        const chips = document.querySelectorAll('.cal-filter-chip');
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                const status = chip.getAttribute('data-status') || 'all';
+                Store.state.calendarFilter.status = status;
+                Calendar.renderCalendar();
+            });
+        });
+
+        const searchInput = Utils.$('calendarSearchInput');
+        const clearBtn = Utils.$('btnClearCalSearch');
+        if (searchInput) {
+            let debounceTimer;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(debounceTimer);
+                const val = e.target.value.trim();
+                if (clearBtn) clearBtn.classList.toggle('hidden', !val);
+                debounceTimer = setTimeout(() => {
+                    Store.state.calendarFilter.query = val;
+                    Calendar.renderCalendar();
+                }, 200);
+            });
+        }
+
+        if (clearBtn && searchInput) {
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                clearBtn.classList.add('hidden');
+                Store.state.calendarFilter.query = '';
+                Calendar.renderCalendar();
+                searchInput.focus();
+            });
+        }
+    };
+
     static renderCalendar = () => {
         const grid = document.querySelector('.calendar-grid');
         if (!grid) return;
         
         const apps = Object.values(Store.state.appointments);
+        const filteredApps = Calendar.getFilteredAppointments(apps);
+        Calendar.updateFilterCountBadge(filteredApps.length, apps.length);
+
         const selectedStr = Store.state.currentViewDate;
         const viewMode = Store.state.calendarViewMode || 'week';
         
         grid.className = 'calendar-grid' + (viewMode === 'day' ? ' day-view-mode' : '') + (viewMode === 'month' ? ' month-view-mode' : '');
         
         if (viewMode === 'month') {
-            Calendar.renderMonthCalendar(grid, apps, selectedStr);
+            Calendar.renderMonthCalendar(grid, filteredApps, selectedStr);
             return;
         }
 
@@ -261,7 +335,7 @@ class Calendar {
         zones.forEach(z => z.replaceChildren());
 
         let cardIndex = 0;
-        apps.forEach(app => {
+        filteredApps.forEach(app => {
             const zone = grid.querySelector('.drop-zone[data-date="' + app.tarih + '"][data-time="' + app.saat + '"]');
             if (zone) {
                 const card = Calendar.createAppointmentCard(app);

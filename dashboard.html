@@ -140,6 +140,10 @@
                     <span class="menu-icon"><svg width="16" height="16"><use href="#icon-calendar"></use></svg></span>
                     <span class="menu-label">Takvim</span>
                 </button>
+                <button id="tabPatients" class="nav-menu-item">
+                    <span class="menu-icon"><svg width="16" height="16"><use href="#icon-users"></use></svg></span>
+                    <span class="menu-label">Müşteriler</span>
+                </button>
                 <button id="tabOverview" class="nav-menu-item">
                     <span class="menu-icon"><svg width="16" height="16"><use href="#icon-chart"></use></svg></span>
                     <span class="menu-label">Genel Görünüm</span>
@@ -328,7 +332,34 @@
 
                 <!-- Section: Calendar View -->
                 <div id="viewCalendar" class="view-section active">
-
+                    <!-- Takvim Durum & Arama Filtresi Çubuğu -->
+                    <div class="calendar-filter-bar glass" id="calendarFilterBar">
+                        <div class="cal-filter-left">
+                            <span class="cal-filter-label">Durum:</span>
+                            <div class="cal-filter-chips" id="calStatusChips">
+                                <button type="button" class="cal-filter-chip active" data-status="all">
+                                    <span class="chip-dot dot-all"></span>Tümü
+                                </button>
+                                <button type="button" class="cal-filter-chip" data-status="Bekliyor">
+                                    <span class="chip-dot dot-waiting"></span>Bekliyor
+                                </button>
+                                <button type="button" class="cal-filter-chip" data-status="Tamamlandı">
+                                    <span class="chip-dot dot-completed"></span>Tamamlandı
+                                </button>
+                                <button type="button" class="cal-filter-chip" data-status="İptal">
+                                    <span class="chip-dot dot-canceled"></span>İptal
+                                </button>
+                            </div>
+                        </div>
+                        <div class="cal-filter-right">
+                            <div class="cal-search-wrap">
+                                <svg width="13" height="13" class="cal-search-icon"><use href="#icon-search"></use></svg>
+                                <input type="text" id="calendarSearchInput" class="cal-search-input" placeholder="Randevu süz (isim, hizmet)...">
+                                <button type="button" id="btnClearCalSearch" class="cal-search-clear hidden" title="Temizle">&times;</button>
+                            </div>
+                            <div id="calFilterCount" class="cal-filter-count-badge"></div>
+                        </div>
+                    </div>
 
                     <div class="content-layout">
                         <div class="calendar-wrapper">
@@ -345,6 +376,102 @@
                             </div>
                             <div id="dailyAgendaList"></div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Section: Patients CRM View -->
+                <div id="viewPatients" class="view-section hidden">
+                    <!-- Üst KPI Özeti -->
+                    <div class="stats-grid" id="patientsKpiGrid">
+                        <div class="glass stat-card">
+                            <div class="flex-1 flex-col">
+                                <div class="stat-label">Toplam Kayıtlı Müşteri</div>
+                                <div class="stat-value flex-align-center gap-8">
+                                    <span id="crmStatTotal">0</span>
+                                </div>
+                            </div>
+                            <div class="stat-icon-wrapper">
+                                <svg width="20" height="20"><use href="#icon-users"></use></svg>
+                            </div>
+                        </div>
+                        <div class="glass stat-card">
+                            <div class="flex-1 flex-col">
+                                <div class="stat-label">Kalan Borçlu Müşteri</div>
+                                <div class="stat-value flex-align-center gap-8">
+                                    <span id="crmStatDebtCount" class="text-rose">0</span>
+                                </div>
+                            </div>
+                            <div class="stat-icon-wrapper text-rose">
+                                <svg width="20" height="20"><use href="#icon-dollar"></use></svg>
+                            </div>
+                        </div>
+                        <div class="glass stat-card">
+                            <div class="flex-1 flex-col">
+                                <div class="stat-label">Toplam Kalan Alacak</div>
+                                <div class="stat-value flex-align-center gap-8">
+                                    <span id="crmStatTotalDebt">0 ₺</span>
+                                </div>
+                            </div>
+                            <div class="stat-icon-wrapper text-amber">
+                                <svg width="20" height="20"><use href="#icon-dollar"></use></svg>
+                            </div>
+                        </div>
+                        <div class="glass stat-card">
+                            <div class="flex-1 flex-col">
+                                <div class="stat-label">Aktif Paket Sahibi</div>
+                                <div class="stat-value flex-align-center gap-8">
+                                    <span id="crmStatPackageCount" class="text-emerald">0</span>
+                                </div>
+                            </div>
+                            <div class="stat-icon-wrapper text-emerald">
+                                <svg width="20" height="20"><use href="#icon-star"></use></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CRM Toolbar -->
+                    <div class="patients-toolbar glass">
+                        <div class="crm-toolbar-left">
+                            <div class="crm-search-box">
+                                <svg width="15" height="15" class="crm-search-icon"><use href="#icon-search"></use></svg>
+                                <input type="text" id="patientsSearchInput" class="crm-search-input" placeholder="Müşteri ara (ad, soyad, telefon)...">
+                                <button type="button" id="btnClearPatientSearch" class="crm-search-clear hidden" title="Temizle">&times;</button>
+                            </div>
+                            <div class="crm-filter-chips" id="patientsFilterChips">
+                                <button type="button" class="crm-filter-chip active" data-filter="all">Tümü</button>
+                                <button type="button" class="crm-filter-chip" data-filter="debt">Borcu Olanlar</button>
+                                <button type="button" class="crm-filter-chip" data-filter="has_package">Paketi Olanlar</button>
+                                <button type="button" class="crm-filter-chip" data-filter="completed_package">Paketi Bitenler</button>
+                            </div>
+                        </div>
+                        <div class="crm-toolbar-right">
+                            <button type="button" id="btnExportPatients" class="btn-secondary-soft" title="Müşteri Listesini CSV olarak indir">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                </svg>
+                                <span>Dışa Aktar (CSV)</span>
+                            </button>
+                            <span id="patientsCountBadge" class="patients-count-badge">0 Müşteri</span>
+                        </div>
+                    </div>
+
+                    <!-- CRM Table Container -->
+                    <div class="patients-table-wrapper glass">
+                        <table class="crm-table">
+                            <thead>
+                                <tr>
+                                    <th>Müşteri Bilgisi</th>
+                                    <th>Paket & Seans İlerlemesi</th>
+                                    <th>Toplam Tutar</th>
+                                    <th>Tahsil Edilen</th>
+                                    <th>Kalan Bakiye</th>
+                                    <th style="text-align: right;">Hızlı İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patientsTableBody">
+                                <!-- Dinamik JS ile doldurulacak -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 

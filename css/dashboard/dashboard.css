@@ -3086,3 +3086,516 @@ body:not(.drag-mode) .drop-zone:empty:hover::after {
 }
 
 /* ==========================================
+   CALENDAR FILTER BAR & STATUS CHIPS
+   ========================================== */
+.calendar-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 14px;
+    margin-bottom: 12px;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    backdrop-filter: blur(12px);
+    flex-wrap: wrap;
+    transition: var(--transition-fast);
+}
+
+.cal-filter-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.cal-filter-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+.cal-filter-chips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cal-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    user-select: none;
+}
+
+.cal-filter-chip:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+}
+
+.cal-filter-chip.active {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+.chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.dot-all { background: currentColor; opacity: 0.6; }
+.dot-waiting { background: var(--amber); }
+.dot-completed { background: var(--emerald); }
+.dot-canceled { background: var(--rose); }
+
+.cal-filter-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cal-search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.cal-search-icon {
+    position: absolute;
+    left: 9px;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.cal-search-input {
+    padding: 5px 26px 5px 28px;
+    font-size: 12px;
+    height: 30px;
+    width: 190px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    color: var(--text-main);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.cal-search-input:focus {
+    width: 230px;
+    border-color: var(--accent);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.cal-search-clear {
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.cal-search-clear:hover {
+    color: var(--text-main);
+}
+
+.cal-filter-count-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.cal-filter-count-badge.is-filtered {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+
+/* ==========================================
+   PATIENTS CRM VIEW & TABLE STYLES
+   ========================================== */
+#viewPatients {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.patients-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+}
+
+.crm-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.crm-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 240px;
+    max-width: 320px;
+    flex: 1;
+}
+
+.crm-search-icon {
+    position: absolute;
+    left: 10px;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.crm-search-input {
+    width: 100%;
+    height: 34px;
+    padding: 6px 28px 6px 32px;
+    font-size: 13px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    color: var(--text-main);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.crm-search-input:focus {
+    border-color: var(--accent);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.crm-search-clear {
+    position: absolute;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.crm-filter-chips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.crm-filter-chip {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    user-select: none;
+}
+
+.crm-filter-chip:hover {
+    color: var(--text-main);
+    background: var(--bg-hover);
+    border-color: var(--border-strong);
+}
+
+.crm-filter-chip.active {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+.crm-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.patients-count-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+}
+
+.patients-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+}
+
+.crm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+
+.crm-table thead th {
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    white-space: nowrap;
+}
+
+.crm-table-row {
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background 0.15s ease;
+    cursor: pointer;
+}
+
+.crm-table-row:hover {
+    background: var(--bg-hover);
+}
+
+.crm-table-row:last-child {
+    border-bottom: none;
+}
+
+.crm-table-row td {
+    padding: 12px 16px;
+    vertical-align: middle;
+}
+
+.crm-client-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.crm-client-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px var(--accent-glow);
+}
+
+.crm-client-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.crm-client-name {
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 13px;
+}
+
+.crm-client-phone {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.crm-chronic-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--amber-dim);
+    color: var(--amber);
+    margin-top: 2px;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-package-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.crm-package-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.crm-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.crm-progress-bar {
+    width: 80px;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+}
+
+.crm-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: var(--radius-pill);
+    transition: width 0.3s ease;
+}
+
+.crm-progress-text {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.crm-amount {
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.crm-debt-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.crm-debt-badge.badge-debt {
+    background: var(--rose-dim);
+    color: var(--rose);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+.crm-debt-badge.badge-paid {
+    background: var(--emerald-dim);
+    color: var(--emerald);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.crm-actions-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.crm-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    color: var(--text-main);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.crm-action-btn:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+}
+
+.crm-action-btn.btn-wa {
+    background: rgba(37, 211, 102, 0.12);
+    color: #25d366;
+    border-color: rgba(37, 211, 102, 0.3);
+}
+
+.crm-action-btn.btn-wa:hover {
+    background: #25d366;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(37, 211, 102, 0.35);
+}
+
+.crm-action-btn.btn-view-profile:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+@media (max-width: 768px) {
+    .calendar-filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .cal-filter-left, .cal-filter-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .cal-search-input {
+        width: 100%;
+    }
+    .cal-search-input:focus {
+        width: 100%;
+    }
+    .patients-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .crm-toolbar-left, .crm-toolbar-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .crm-search-box {
+        min-width: 100%;
+    }
+}

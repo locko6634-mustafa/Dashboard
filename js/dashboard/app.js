@@ -15,7 +15,7 @@ import { UndoManager } from './undo-manager.js';
 import { Calendar, CalendarNav } from './calendar.js';
 import { DragDrop } from './drag-drop.js';
 import { HoverPopupManager, AppointmentManager, ContextMenu } from './appointment.js';
-import { PatientManager, NotesManager, PatientUI, SearchEngine } from './patient.js';
+import { PatientManager, NotesManager, PatientUI, SearchEngine, PatientCRM } from './patient.js';
 import { Dashboard, ChartTooltip } from './overview.js';
 import { SettingsManager } from './settings.js';
 
@@ -94,6 +94,10 @@ class App {
         if (Utils.$('btnSaveNote')) Utils.$('btnSaveNote').onclick = NotesManager.savePatientNote;
         if (Utils.$('tabCalendar')) Utils.$('tabCalendar').onclick = () => {
             Dashboard.switchMainTab('calendar');
+            if (window.innerWidth <= 768) closeMobileNav();
+        };
+        if (Utils.$('tabPatients')) Utils.$('tabPatients').onclick = () => {
+            Dashboard.switchMainTab('patients');
             if (window.innerWidth <= 768) closeMobileNav();
         };
         if (Utils.$('tabOverview')) Utils.$('tabOverview').onclick = () => {
@@ -387,6 +391,8 @@ class App {
             
             App.initEventListeners();
             App.initSearchEngines();
+            Calendar.initCalendarFilters();
+            PatientCRM.initEventListeners();
             DragDrop.init();
             ContextMenu.init();
 
