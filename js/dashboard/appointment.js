@@ -202,7 +202,7 @@ class AppointmentManager {
         Store.state.activeAptId = id;
         DOM.modalTitleText.textContent = Utils.formatName(app.ad_soyad); 
         DOM.modalSub.textContent = (app.hizmet || '') + ' | ' + app.telefon; 
-        DOM.newDate.min = todayStr;
+        DOM.newDate.min = (app.tarih && app.tarih < todayStr) ? app.tarih : todayStr;
         DOM.newDate.value = app.tarih; 
         DOM.newTime.value = app.saat;
         DOM.newDuration.value = app.sure || Utils.getServiceDuration(app.hizmet) || 30;
@@ -243,33 +243,48 @@ class AppointmentManager {
         const statusVal = Utils.$('newStatus').value;
         const todayStr = DateUtils.getTodayLocalISO();
         const app = Store.state.appointments[Store.state.activeAptId], card = Utils.$('card-' + Store.state.activeAptId);
-        if (dVal < todayStr) return Utils.showToast(CONFIG.UI.MSG_PAST_DATE_NOT_ALLOWED, "warning");
+        if (dVal < todayStr && dVal !== app?.tarih) return Utils.showToast(CONFIG.UI.MSG_PAST_DATE_NOT_ALLOWED, "warning");
         Utils.$('modalLoading').classList.remove('hidden');
         if (await AppointmentManager.silentSync(Store.state.activeAptId, statusVal, dVal, tVal, card, durationVal)) {
-            app.tarih = dVal; app.saat = tVal; app.durum = statusVal; app.sure = durationVal;
-            const heightPx = Math.max((durationVal / CONFIG.CALENDAR.SLOT_MINS) * CONFIG.CALENDAR.SLOT_PX - 2, CONFIG.CALENDAR.MIN_PX);
-            card.style.height = heightPx + 'px';
-            card.dataset.duration = durationVal;
-            const durationClass = durationVal <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : (durationVal === 45 ? ' medium-apt' : '');
-            card.className = 'apt-card ' + Utils.getSafeStatusClass(statusVal) + durationClass;
-            Calendar.updateCardActions(card, Store.state.activeAptId, statusVal);
-            const tSpan = card.querySelector('.apt-time'); if(tSpan) tSpan.textContent = Utils.getTimeRangeText(tVal, durationVal);
-            const targetZone = document.querySelector('.drop-zone[data-date="' + dVal + '"][data-time="' + tVal + '"]');
-            targetZone ? targetZone.appendChild(card) : card.style.display = 'none';
+            if (app) {
+                app.tarih = dVal; app.saat = tVal; app.durum = statusVal; app.sure = durationVal;
+            }
+            if (card) {
+                const heightPx = Math.max((durationVal / CONFIG.CALENDAR.SLOT_MINS) * CONFIG.CALENDAR.SLOT_PX - 2, CONFIG.CALENDAR.MIN_PX);
+                card.style.height = heightPx + 'px';
+                card.dataset.duration = durationVal;
+                const durationClass = durationVal <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : (durationVal === 45 ? ' medium-apt' : '');
+                card.className = 'apt-card ' + Utils.getSafeStatusClass(statusVal) + durationClass;
+                Calendar.updateCardActions(card, Store.state.activeAptId, statusVal);
+                const tSpan = card.querySelector('.apt-time'); if(tSpan) tSpan.textContent = Utils.getTimeRangeText(tVal, durationVal);
+                const targetZone = document.querySelector('.drop-zone[data-date="' + dVal + '"][data-time="' + tVal + '"]');
+                targetZone ? targetZone.appendChild(card) : card.style.display = 'none';
+                Calendar.adjustOverlapPositions();
+            }
             Dashboard.updateDashboardStats();
-            Calendar.adjustOverlapPositions();
-            Utils.$('modalLoading').classList.add('hidden'); AppointmentManager.closeModal();
+            if (window.ReportsManager && typeof window.ReportsManager.loadReportData === 'function' && DOM.viewReports && !DOM.viewReports.classList.contains('hidden')) {
+                window.ReportsManager.loadReportData();
+            }
+            Utils.$('modalLoading').classList.add('hidden'); 
+            AppointmentManager.closeModal();
+            Utils.showToast('Randevu başarıyla güncellendi.', 'success');
         }
     };
 
     static silentSync = async (id, status, dVal, tVal, card, sure) => {
-        if (!card) return false;
-        card.style.opacity = '0.5';
+        if (card) card.style.opacity = '0.5';
         const success = await ApiService.call(CONFIG.ENDPOINTS.ACTION, { payload: { id, durum: status, tarih: dVal, saat: tVal, sure, bitis_saati: Utils.calcBitisSaati(tVal, sure) }, customErrorMsg: null });
         if (success) {
-            card.style.opacity = '1'; return true;
+            if (card) card.style.opacity = '1'; 
+            return true;
         } else {
-            card.style.opacity = '1'; card.style.borderLeftColor = CONFIG.COLORS.ERROR; Utils.$('modalLoading').classList.add('hidden'); Utils.showToast(CONFIG.UI.MSG_SYNC_ERROR, 'error'); return false;
+            if (card) {
+                card.style.opacity = '1'; 
+                card.style.borderLeftColor = CONFIG.COLORS.ERROR; 
+            }
+            Utils.$('modalLoading').classList.add('hidden'); 
+            Utils.showToast(CONFIG.UI.MSG_SYNC_ERROR, 'error'); 
+            return false;
         }
     };
 
@@ -314,6 +329,9 @@ class AppointmentManager {
         
         Dashboard.updateDashboardStats(); 
         Calendar.adjustOverlapPositions();
+        if (window.ReportsManager && typeof window.ReportsManager.loadReportData === 'function' && DOM.viewReports && !DOM.viewReports.classList.contains('hidden')) {
+            window.ReportsManager.loadReportData();
+        }
         
         UndoManager.registerAction('delete', { id: rId, app: appCopy, card }, 
             // Geri Al fonksiyonu
@@ -323,6 +341,9 @@ class AppointmentManager {
                 Store.state.pendingDeletes = Store.state.pendingDeletes.filter(id => id !== rId);
                 Dashboard.updateDashboardStats();
                 Calendar.adjustOverlapPositions();
+                if (window.ReportsManager && typeof window.ReportsManager.loadReportData === 'function' && DOM.viewReports && !DOM.viewReports.classList.contains('hidden')) {
+                    window.ReportsManager.loadReportData();
+                }
                 Utils.showToast("Silme işlemi geri alındı.", "success");
             },
             // Onayla (Veritabanından sil) fonksiyonu

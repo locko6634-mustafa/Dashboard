@@ -4,6 +4,8 @@ import { showToast } from '../shared/toast.js';
 import { ApiService } from '../shared/api-client.js';
 import { Store } from './store.js';
 import { DOM } from './dom.js';
+import { AppointmentManager } from './appointment.js';
+import { PatientUI } from './patient.js';
 
 class ReportsManager {
     static isInitialized = false;
@@ -335,6 +337,55 @@ class ReportsManager {
                     </span>
                 </td>
             `;
+
+            // Satıra tıklandığında randevu detay/düzenleme modalını aç
+            tr.style.cursor = 'pointer';
+            tr.title = 'Randevu detayını düzenlemek için tıklayın';
+            tr.onclick = () => {
+                const rId = apt.randevu_id || apt.id;
+                if (!rId) return;
+
+                // Randevunun Store.state.appointments içinde bulunmasını sağla
+                if (!Store.state.appointments[rId]) {
+                    Store.state.appointments[rId] = {
+                        id: rId,
+                        randevu_id: rId,
+                        hasta_id: apt.hasta_id,
+                        ad_soyad: apt.ad_soyad || CONFIG.DEFAULTS.NAME,
+                        telefon: apt.telefon || '',
+                        hizmet: apt.hizmet || '',
+                        durum: apt.durum || CONFIG.STATUS.WAITING,
+                        tarih: apt.tarih,
+                        saat: (apt.saat || apt.baslangic_saati || '').substring(0, 5),
+                        sure: parseInt(apt.sure, 10) || 30,
+                        kronik_rahatsizlik: apt.kronik_rahatsizlik || '',
+                        paket_adi: apt.paket_adi || CONFIG.DEFAULTS.PACKAGE,
+                        toplam_seans: parseInt(apt.toplam_seans, 10) || 0,
+                        gelinen_seans: parseInt(apt.gelinen_seans, 10) || 0,
+                        toplam_tutar: parseFloat(apt.toplam_tutar) || 0,
+                        alinan_odeme: parseFloat(apt.alinan_odeme) || 0
+                    };
+                }
+
+                const aptMgr = window.AppointmentManager || AppointmentManager;
+                if (aptMgr && typeof aptMgr.openAptModal === 'function') {
+                    aptMgr.openAptModal(rId);
+                }
+            };
+
+            // Müşteri kartına tıklandığında doğrudan müşteri profil çekmecesini aç
+            const clientCell = tr.querySelector('.crm-client-cell');
+            if (clientCell) {
+                clientCell.style.cursor = 'pointer';
+                clientCell.title = 'Müşteri profili ve geçmişini açmak için tıklayın';
+                clientCell.onclick = (e) => {
+                    e.stopPropagation();
+                    const pUI = window.PatientUI || PatientUI;
+                    if (pUI && typeof pUI.openSidebar === 'function') {
+                        pUI.openSidebar(apt);
+                    }
+                };
+            }
 
             frag.appendChild(tr);
         });
