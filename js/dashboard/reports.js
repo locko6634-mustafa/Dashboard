@@ -12,26 +12,28 @@ class ReportsManager {
      * Raporlama sekmesini ilklendirir.
      */
     static initReports() {
-        // İlk yüklemede tarih aralığını son 30 güne ayarla
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - 30);
-
-        const toISO = (d) => d.toISOString().split('T')[0];
-        if (DOM.reportDateStart) DOM.reportDateStart.value = toISO(startDate);
-        if (DOM.reportDateEnd) DOM.reportDateEnd.value = toISO(endDate);
-
-        // Hizmet dropdown'ını CONFIG.SERVICES.LIST'ten doldur (string dizisi)
-        if (DOM.reportServiceFilter) {
-            DOM.reportServiceFilter.innerHTML = '<option value="all">Tüm Hizmetler</option>';
-            CONFIG.SERVICES.LIST.forEach(service => {
-                const option = document.createElement('option');
-                option.value = service;
-                option.textContent = service;
-                DOM.reportServiceFilter.appendChild(option);
-            });
+        const todayStr = DateUtils.getTodayLocalISO();
+        
+        // Eğer tarihler daha önce seçilmemişse son 30 günü varsayılan yap
+        if (DOM.reportDateStart && !DOM.reportDateStart.value) {
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            const startStr = new Intl.DateTimeFormat('fr-CA', { 
+                timeZone: 'Europe/Istanbul', 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit' 
+            }).format(startDate);
+            DOM.reportDateStart.value = startStr;
+        }
+        if (DOM.reportDateEnd && !DOM.reportDateEnd.value) {
+            DOM.reportDateEnd.value = todayStr;
         }
 
+        // Hizmet dropdown'ını doldur
+        this.updateServiceFilterDropdown();
+
+        // Rapor verilerini sunucudan çek
         this.loadReportData();
 
         if (!this.isInitialized) {
@@ -41,25 +43,83 @@ class ReportsManager {
     }
 
     /**
-     * API'den randevu verilerini yükler (Eğer aralık büyükse aylık parçalarla)
+     * Hizmet dropdown'ını hem ayarlardan hem de mevcut randevulardan dinamik doldurur
+     */
+    static updateServiceFilterDropdown() {
+        if (!DOM.reportServiceFilter) return;
+
+        const currentVal = DOM.reportServiceFilter.value || 'all';
+        const serviceSet = new Set();
+
+        // 1. CONFIG ve ayarlardaki hizmetler
+        (CONFIG.SERVICES.LIST || []).forEach(s => {
+            if (s && typeof s === 'string' && s.trim()) serviceSet.add(s.trim());
+        });
+
+        // 2. Yüklenmiş rapor verisindeki gerçek hizmetler
+        (Store.state.reportData || []).forEach(apt => {
+            if (apt.hizmet && typeof apt.hizmet === 'string' && apt.hizmet.trim() && apt.hizmet !== CONFIG.STATUS.WAITING) {
+                serviceSet.add(apt.hizmet.trim());
+            }
+        });
+
+        // 3. Bellekteki randevulardaki hizmetler
+        Object.values(Store.state.appointments || {}).forEach(apt => {
+            if (apt.hizmet && typeof apt.hizmet === 'string' && apt.hizmet.trim() && apt.hizmet !== CONFIG.STATUS.WAITING) {
+                serviceSet.add(apt.hizmet.trim());
+            }
+        });
+
+        DOM.reportServiceFilter.innerHTML = '<option value="all">Tüm Hizmetler</option>';
+        Array.from(serviceSet).sort().forEach(service => {
+            const option = document.createElement('option');
+            option.value = service;
+            option.textContent = service;
+            if (service.toLowerCase() === currentVal.toLowerCase()) {
+                option.selected = true;
+            }
+            DOM.reportServiceFilter.appendChild(option);
+        });
+    }
+
+    /**
+     * API'den randevu verilerini yükler (Aylık parçalar ve tarih aralığıyla)
      */
     static async loadReportData() {
-        const startDateStr = DOM.reportDateStart.value;
-        const endDateStr = DOM.reportDateEnd.value;
+        let startDateStr = DOM.reportDateStart?.value || '';
+        let endDateStr = DOM.reportDateEnd?.value || '';
         
         if (!startDateStr || !endDateStr) {
-            showToast('Lütfen geçerli bir tarih aralığı seçin.', 'warning');
-            return;
+            const todayStr = DateUtils.getTodayLocalISO();
+            const d = new Date();
+            d.setDate(d.getDate() - 30);
+            const startStr = new Intl.DateTimeFormat('fr-CA', { 
+                timeZone: 'Europe/Istanbul', 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit' 
+            }).format(d);
+            
+            if (!startDateStr && DOM.reportDateStart) {
+                DOM.reportDateStart.value = startStr;
+                startDateStr = startStr;
+            }
+            if (!endDateStr && DOM.reportDateEnd) {
+                DOM.reportDateEnd.value = todayStr;
+                endDateStr = todayStr;
+            }
+        }
+
+        // Eğer başlangıç tarihi bitişten büyükse ters çevir
+        if (startDateStr > endDateStr) {
+            const temp = startDateStr;
+            startDateStr = endDateStr;
+            endDateStr = temp;
+            if (DOM.reportDateStart) DOM.reportDateStart.value = startDateStr;
+            if (DOM.reportDateEnd) DOM.reportDateEnd.value = endDateStr;
         }
 
         Store.state.reportDateRange = { start: startDateStr, end: endDateStr };
-        
-        const startDate = new Date(startDateStr);
-        const endDate = new Date(endDateStr);
-        
-        // Ayın başını al (verileri o ay için çekmek maksadıyla)
-        let currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
-        const endMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
 
         try {
             if (DOM.reportTableBody) {
@@ -68,28 +128,71 @@ class ReportsManager {
             
             let allAppointments = [];
 
+            // Bellekte takvimden kalan randevuları da dahil et
+            const localApts = Object.values(Store.state.appointments || {});
+            if (localApts.length) {
+                allAppointments.push(...localApts);
+            }
+
+            // Yıl ve ay sınırlarını alarak güvenli tam sayı döngüsü kur
+            const [sYear, sMonth] = startDateStr.split('-').map(Number);
+            const [eYear, eMonth] = endDateStr.split('-').map(Number);
+            
+            let curY = sYear;
+            let curM = sMonth;
+
             // Aylar arasında gezinip verileri çekiyoruz
-            while (currentDate <= endMonth) {
-                const monthStr = currentDate.toISOString().split('T')[0];
+            while (curY < eYear || (curY === eYear && curM <= eMonth)) {
+                const monthDateStr = `${curY}-${String(curM).padStart(2, '0')}-01`;
                 
-                const response = await ApiService.call(CONFIG.ENDPOINTS.GET_APTS, {
-                    method: 'POST',
-                    payload: { tarih: monthStr, gorunum: 'month' }
-                });
+                const response = await ApiService.call(
+                    `${CONFIG.ENDPOINTS.GET_APTS}?date=${monthDateStr}&view=month&startDate=${startDateStr}&endDate=${endDateStr}`, 
+                    {
+                        method: 'POST',
+                        payload: { 
+                            date: monthDateStr, 
+                            tarih: monthDateStr, 
+                            view: 'month', 
+                            gorunum: 'month',
+                            startDate: startDateStr,
+                            endDate: endDateStr,
+                            baslangic: startDateStr,
+                            bitis: endDateStr
+                        },
+                        returnData: true
+                    }
+                );
 
                 // API yanıtı dizi veya {data: [...]} olabilir
-                const apts = Array.isArray(response) ? response : (response?.data || []);
-                if (apts.length) {
-                    allAppointments = [...allAppointments, ...apts];
+                const rawItems = Array.isArray(response) ? response : (response?.data || response?.appointments || []);
+                if (Array.isArray(rawItems)) {
+                    rawItems.forEach(item => {
+                        const j = item.json || item;
+                        if (j && (j.id || j.randevu_id)) {
+                            allAppointments.push(j);
+                        }
+                    });
                 }
 
-                currentDate.setMonth(currentDate.getMonth() + 1);
+                // Sonraki aya geç
+                curM++;
+                if (curM > 12) {
+                    curM = 1;
+                    curY++;
+                }
             }
 
             // Mükerrerleri ID bazında temizle
-            const uniqueApts = Array.from(new Map(allAppointments.map(item => [item.id, item])).values());
-            
-            Store.state.reportData = uniqueApts;
+            const uniqueMap = new Map();
+            allAppointments.forEach(item => {
+                const key = item.id || item.randevu_id;
+                if (key) {
+                    uniqueMap.set(String(key), item);
+                }
+            });
+
+            Store.state.reportData = Array.from(uniqueMap.values());
+            this.updateServiceFilterDropdown();
             this.applyFilters();
             
         } catch (error) {
@@ -112,25 +215,32 @@ class ReportsManager {
 
         const filtered = (Store.state.reportData || []).filter(apt => {
             const aptDate = apt.tarih;
+            if (!aptDate) return false;
             
-            // Tarih aralığı kontrolü
+            // Tarih aralığı kontrolü (YYYY-MM-DD string karşılaştırması)
             if (startDate && aptDate < startDate) return false;
             if (endDate && aptDate > endDate) return false;
 
-            // Durum kontrolü
-            if (statusFilter && statusFilter !== 'all' && apt.durum !== statusFilter) return false;
+            // Durum kontrolü (küçük/büyük harf duyarsız)
+            if (statusFilter && statusFilter !== 'all') {
+                if ((apt.durum || '').toLowerCase() !== statusFilter.toLowerCase()) return false;
+            }
 
-            // Hizmet kontrolü
-            if (serviceFilter && serviceFilter !== 'all' && apt.hizmet !== serviceFilter) return false;
+            // Hizmet kontrolü (küçük/büyük harf duyarsız)
+            if (serviceFilter && serviceFilter !== 'all') {
+                if ((apt.hizmet || '').toLowerCase() !== serviceFilter.toLowerCase()) return false;
+            }
 
             return true;
         });
 
-        // Tarihe göre sırala (yeniden eskiye)
+        // Tarihe ve saate göre sırala (yeniden eskiye)
         filtered.sort((a, b) => {
-            const dateA = new Date(`${a.tarih}T${a.baslangic_saati || '00:00'}`);
-            const dateB = new Date(`${b.tarih}T${b.baslangic_saati || '00:00'}`);
-            return dateB - dateA;
+            const comp = (b.tarih || '').localeCompare(a.tarih || '');
+            if (comp !== 0) return comp;
+            const timeA = a.saat || a.baslangic_saati || '00:00';
+            const timeB = b.saat || b.baslangic_saati || '00:00';
+            return timeB.localeCompare(timeA);
         });
 
         Store.state.reportFiltered = filtered;
@@ -177,36 +287,41 @@ class ReportsManager {
 
             let statusClass = 'status-waiting';
             let dotClass = 'dot-waiting';
-            if (apt.durum === CONFIG.STATUS.COMPLETED) {
+            const durum = (apt.durum || '').trim();
+            if (durum.toLowerCase() === (CONFIG.STATUS.COMPLETED || 'tamamlandı').toLowerCase()) {
                 statusClass = 'status-completed';
                 dotClass = 'dot-completed';
-            } else if (apt.durum === CONFIG.STATUS.CANCELED) {
+            } else if (durum.toLowerCase() === (CONFIG.STATUS.CANCELED || 'iptal').toLowerCase()) {
                 statusClass = 'status-canceled';
                 dotClass = 'dot-canceled';
             }
 
-            const timeRange = apt.baslangic_saati && apt.bitis_saati 
-                ? `${apt.baslangic_saati.substring(0,5)} - ${apt.bitis_saati.substring(0,5)}` 
-                : (apt.baslangic_saati ? apt.baslangic_saati.substring(0,5) : '-');
+            const startH = (apt.saat || apt.baslangic_saati || '').substring(0, 5);
+            let endH = (apt.bitis_saati || '').substring(0, 5);
+            if (!endH && startH && apt.sure) {
+                endH = Utils.calcBitisSaati(startH, apt.sure);
+            }
+            const timeRange = startH && endH ? `${startH} - ${endH}` : (startH || '-');
 
             let dateDisplay = apt.tarih || '-';
-            try {
-                if (apt.tarih) {
-                    const d = new Date(apt.tarih);
-                    if (!isNaN(d)) {
-                        dateDisplay = d.toLocaleDateString(CONFIG.LOCALE, { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    }
+            if (apt.tarih && apt.tarih.includes('-')) {
+                const parts = apt.tarih.split('-');
+                if (parts.length === 3) {
+                    dateDisplay = `${parts[2]}.${parts[1]}.${parts[0]}`;
                 }
-            } catch (e) {}
+            }
+
+            const clientName = Utils.formatName(apt.ad_soyad || CONFIG.DEFAULTS.NAME);
+            const clientInitial = (clientName || 'M').charAt(0).toUpperCase();
 
             tr.innerHTML = `
                 <td><span class="font-medium text-main font-12">${dateDisplay}</span></td>
                 <td><span class="text-muted font-12">${timeRange}</span></td>
                 <td>
                     <div class="crm-client-cell">
-                        <div class="crm-client-avatar">${(apt.ad_soyad || 'M').charAt(0).toUpperCase()}</div>
+                        <div class="crm-client-avatar">${clientInitial}</div>
                         <div class="crm-client-info">
-                            <span class="crm-client-name">${Utils.formatName(apt.ad_soyad || 'Bilinmiyor')}</span>
+                            <span class="crm-client-name">${clientName}</span>
                             <span class="crm-client-phone">${apt.telefon || '-'}</span>
                         </div>
                     </div>
@@ -236,8 +351,8 @@ class ReportsManager {
         const filtered = Store.state.reportFiltered || [];
         
         const totalApts = filtered.length;
-        const completedApts = filtered.filter(a => a.durum === CONFIG.STATUS.COMPLETED).length;
-        const canceledApts = filtered.filter(a => a.durum === CONFIG.STATUS.CANCELED).length;
+        const completedApts = filtered.filter(a => (a.durum || '').toLowerCase() === (CONFIG.STATUS.COMPLETED || 'tamamlandı').toLowerCase()).length;
+        const canceledApts = filtered.filter(a => (a.durum || '').toLowerCase() === (CONFIG.STATUS.CANCELED || 'iptal').toLowerCase()).length;
         
         const totalDuration = filtered.reduce((acc, curr) => acc + (parseInt(curr.sure, 10) || 0), 0);
         const avgDuration = totalApts > 0 ? Math.round(totalDuration / totalApts) : 0;
@@ -312,18 +427,19 @@ class ReportsManager {
         
         const rows = data.map(apt => {
             let dateDisplay = apt.tarih || '';
-            try {
-                if (apt.tarih) {
-                    const d = new Date(apt.tarih);
-                    if (!isNaN(d)) {
-                        dateDisplay = d.toLocaleDateString(CONFIG.LOCALE, { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    }
+            if (apt.tarih && apt.tarih.includes('-')) {
+                const parts = apt.tarih.split('-');
+                if (parts.length === 3) {
+                    dateDisplay = `${parts[2]}.${parts[1]}.${parts[0]}`;
                 }
-            } catch (e) {}
+            }
 
-            const timeStr = apt.baslangic_saati && apt.bitis_saati 
-                ? `${apt.baslangic_saati.substring(0,5)} - ${apt.bitis_saati.substring(0,5)}` 
-                : (apt.baslangic_saati ? apt.baslangic_saati.substring(0,5) : '-');
+            const startH = (apt.saat || apt.baslangic_saati || '').substring(0, 5);
+            let endH = (apt.bitis_saati || '').substring(0, 5);
+            if (!endH && startH && apt.sure) {
+                endH = Utils.calcBitisSaati(startH, apt.sure);
+            }
+            const timeStr = startH && endH ? `${startH} - ${endH}` : (startH || '-');
             
             const customer = (apt.ad_soyad || '').replace(/"/g, '""');
             const phone = (apt.telefon || '').replace(/"/g, '""');
@@ -368,7 +484,18 @@ class ReportsManager {
      */
     static initEventListeners() {
         if (DOM.btnApplyReportFilter) {
-            DOM.btnApplyReportFilter.addEventListener('click', () => this.applyFilters());
+            DOM.btnApplyReportFilter.addEventListener('click', () => {
+                const s = DOM.reportDateStart?.value || '';
+                const e = DOM.reportDateEnd?.value || '';
+                const currentRange = Store.state.reportDateRange || {};
+                
+                // Eğer tarihler değişmişse veya hiç veri yüklenmemişse verileri yeniden çek
+                if (s !== currentRange.start || e !== currentRange.end || !Store.state.reportData || Store.state.reportData.length === 0) {
+                    this.loadReportData();
+                } else {
+                    this.applyFilters();
+                }
+            });
         }
 
         const exportBtn = Utils.$('btnExportReport');

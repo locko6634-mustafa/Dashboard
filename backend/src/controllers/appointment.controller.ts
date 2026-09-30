@@ -6,11 +6,14 @@ export class AppointmentController {
   static async getAppointments(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = req.tenantId!;
-      const dateStr = (req.query.date as string) || (req.body?.date as string);
-      const viewMode = (req.query.view as string) || (req.body?.view as string) || 'week';
-      const lastSync = (req.body?.last_sync as string) || (req.query.last_sync as string);
+      const body = req.body?.payload || req.body || {};
+      const dateStr = (req.query.date || req.query.tarih || body.date || body.tarih) as string;
+      const viewMode = (req.query.view || req.query.gorunum || body.view || body.gorunum || 'week') as string;
+      const startDate = (req.query.startDate || req.query.start_date || req.query.baslangic || body.startDate || body.start_date || body.baslangic) as string;
+      const endDate = (req.query.endDate || req.query.end_date || req.query.bitis || body.endDate || body.end_date || body.bitis) as string;
+      const lastSync = (body.last_sync || req.query.last_sync) as string;
 
-      const appointments = await AppointmentService.getAppointments(tenantId, dateStr, viewMode, lastSync);
+      const appointments = await AppointmentService.getAppointments(tenantId, dateStr, viewMode, lastSync, startDate, endDate);
       res.json(appointments);
     } catch (err) {
       next(err);

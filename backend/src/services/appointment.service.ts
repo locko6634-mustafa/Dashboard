@@ -28,22 +28,40 @@ export function calculateEndTime(startTime: string, durationMinutes: number): st
 }
 
 export class AppointmentService {
-  static async getAppointments(tenantId: string, dateStr?: string, viewMode: string = 'week', lastSync?: string) {
-    const today = new Date();
-    const todayStr = new Intl.DateTimeFormat('fr-CA', {
-      timeZone: 'Europe/Istanbul',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(today);
+  static async getAppointments(
+    tenantId: string, 
+    dateStr?: string, 
+    viewMode: string = 'week', 
+    lastSync?: string,
+    startDate?: string,
+    endDate?: string
+  ) {
+    let minDate: string;
+    let maxDate: string;
 
-    const queryDateStr = dateStr || todayStr;
-    const targetDate = new Date(queryDateStr);
+    if (startDate && endDate) {
+      minDate = startDate <= endDate ? startDate : endDate;
+      maxDate = startDate <= endDate ? endDate : startDate;
+    } else if (startDate && !endDate) {
+      minDate = startDate;
+      maxDate = '2099-12-31';
+    } else if (!startDate && endDate) {
+      minDate = '1970-01-01';
+      maxDate = endDate;
+    } else if (viewMode === 'all') {
+      minDate = '1970-01-01';
+      maxDate = '2099-12-31';
+    } else if (viewMode === 'month') {
+      const today = new Date();
+      const todayStr = new Intl.DateTimeFormat('fr-CA', {
+        timeZone: 'Europe/Istanbul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(today);
 
-    let baslangicStr: string;
-    let bitisStr: string;
-
-    if (viewMode === 'month') {
+      const queryDateStr = dateStr || todayStr;
+      const targetDate = new Date(queryDateStr);
       const year = targetDate.getFullYear();
       const month = targetDate.getMonth();
       const firstDay = new Date(year, month, 1);
@@ -56,9 +74,19 @@ export class AppointmentService {
       const end = new Date(start);
       end.setDate(start.getDate() + 41);
 
-      baslangicStr = start.toISOString().split('T')[0];
-      bitisStr = end.toISOString().split('T')[0];
+      minDate = start.toISOString().split('T')[0];
+      maxDate = end.toISOString().split('T')[0];
     } else {
+      const today = new Date();
+      const todayStr = new Intl.DateTimeFormat('fr-CA', {
+        timeZone: 'Europe/Istanbul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(today);
+
+      const queryDateStr = dateStr || todayStr;
+      const targetDate = new Date(queryDateStr);
       const day = targetDate.getDay();
       const diffToMon = targetDate.getDate() - day + (day === 0 ? -6 : 1);
       const mon = new Date(targetDate);
@@ -67,13 +95,12 @@ export class AppointmentService {
       const sun = new Date(mon);
       sun.setDate(mon.getDate() + 6);
 
-      baslangicStr = mon.toISOString().split('T')[0];
-      bitisStr = sun.toISOString().split('T')[0];
-    }
+      const baslangicStr = mon.toISOString().split('T')[0];
+      const bitisStr = sun.toISOString().split('T')[0];
 
-    // Min date = min(baslangicStr, todayStr), Max date = max(bitisStr, todayStr)
-    const minDate = baslangicStr < todayStr ? baslangicStr : todayStr;
-    const maxDate = bitisStr > todayStr ? bitisStr : todayStr;
+      minDate = baslangicStr < todayStr ? baslangicStr : todayStr;
+      maxDate = bitisStr > todayStr ? bitisStr : todayStr;
+    }
 
     const whereClause: any = {
       tenant_id: tenantId,
