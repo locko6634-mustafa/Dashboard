@@ -193,7 +193,10 @@ class App {
         // Mobile Sidebar Controls (Aç/Kapat Toggle Desteği)
         const closeMobileNav = () => {
             const sidebar = Utils.$('left-sidebar');
-            if (sidebar) sidebar.classList.remove('mobile-active');
+            if (sidebar) {
+                sidebar.classList.remove('mobile-active');
+                sidebar.classList.remove('mobile-open');
+            }
             if (DOM.overlay) DOM.overlay.classList.remove('active');
             const menuBtn = Utils.$('btnMobileMenu');
             if (menuBtn) menuBtn.classList.remove('active');
@@ -296,6 +299,15 @@ class App {
             const btnWeek = Utils.$('btnViewWeek');
             if (btnDay) btnDay.classList.add('active');
             if (btnWeek) btnWeek.classList.remove('active');
+
+            Store.state.isAgendaCollapsed = true;
+            const panel = Utils.$('agendaPanel');
+            if (panel) panel.classList.add('collapsed');
+            const btnAgenda = Utils.$('btnToggleAgenda');
+            if (btnAgenda) {
+                btnAgenda.classList.remove('active');
+                btnAgenda.textContent = '📅 Ajanda';
+            }
         }
         if (Utils.$('btnToggleAgenda')) {
             Utils.$('btnToggleAgenda').onclick = () => {
@@ -307,7 +319,7 @@ class App {
                 const btn = Utils.$('btnToggleAgenda');
                 if (btn) {
                     btn.classList.toggle('active', !Store.state.isAgendaCollapsed);
-                    btn.textContent = Store.state.isAgendaCollapsed ? '📅 Göster' : 'Ajanda';
+                    btn.textContent = Store.state.isAgendaCollapsed ? '📅 Ajanda' : 'Ajanda';
                 }
             };
         }
