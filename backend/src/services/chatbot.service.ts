@@ -275,29 +275,71 @@ export class ChatbotService {
     };
   }
 
-  static async getConversationState(phone: string) {
+  static async getConversationState(identifier: string) {
+    if (!identifier) return null;
+    const cleaned = identifier.replace(/\D/g, '');
     return await prisma.conversationState.findFirst({
-      where: { phone_number: phone },
+      where: {
+        OR: [
+          { conversation_id: String(identifier) },
+          { phone_number: identifier },
+          ...(cleaned.length >= 10 ? [{ phone_number: { contains: cleaned.slice(-10) } }] : []),
+        ],
+      },
+      orderBy: { updated_at: 'desc' },
     });
   }
 
-  static async setConversationState(phone: string, data: { intent?: string; stage?: string; context?: any }) {
-    const convId = `conv_${phone}`;
+  static async setConversationState(
+    identifier: string,
+    data: {
+      intent?: string;
+      current_intent?: string;
+      stage?: string;
+      current_stage?: string;
+      context?: any;
+      context_data?: any;
+      phone?: string;
+      phone_number?: string;
+    }
+  ) {
+    const convId = String(identifier || (data.phone ? `conv_${data.phone}` : `conv_${Date.now()}`));
+    const ph = data.phone_number || data.phone || '';
+    const it = data.current_intent || data.intent || null;
+    const st = data.current_stage || data.stage || 'START';
+    const ctx = data.context_data || data.context || {};
+
     return await prisma.conversationState.upsert({
       where: { conversation_id: convId },
       update: {
-        current_intent: data.intent,
-        current_stage: data.stage,
-        context_data: data.context || {},
+        current_intent: it,
+        current_stage: st,
+        context_data: ctx,
+        ...(ph ? { phone_number: ph } : {}),
         updated_at: new Date(),
       },
       create: {
         conversation_id: convId,
-        phone_number: phone,
-        current_intent: data.intent,
-        current_stage: data.stage,
-        context_data: data.context || {},
+        phone_number: ph,
+        current_intent: it,
+        current_stage: st,
+        context_data: ctx,
       },
     });
+  }
+
+  static async deleteConversationState(identifier: string) {
+    if (!identifier) return { success: false, message: 'ID belirtilmedi' };
+    const cleaned = identifier.replace(/\D/g, '');
+    await prisma.conversationState.deleteMany({
+      where: {
+        OR: [
+          { conversation_id: String(identifier) },
+          { phone_number: identifier },
+          ...(cleaned.length >= 10 ? [{ phone_number: { contains: cleaned.slice(-10) } }] : []),
+        ],
+      },
+    });
+    return { success: true, message: 'State silindi' };
   }
 }

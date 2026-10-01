@@ -19,6 +19,7 @@ import { PatientManager, NotesManager, PatientUI, SearchEngine, PatientCRM } fro
 import { Dashboard, ChartTooltip } from './overview.js';
 import { SettingsManager } from './settings.js';
 import { ReportsManager } from './reports.js';
+import { Terminology } from '../shared/terminology.js';
 
 class App {
     static initEventListeners() {
@@ -406,6 +407,10 @@ class App {
                             if (val.currency) CONFIG.DEFAULTS.CURRENCY = val.currency;
                             if (val.colors) CONFIG.COLORS = { ...CONFIG.COLORS, ...val.colors };
                             CONFIG.UI_PREFERENCES = val;
+                        } else if (key === 'sector') {
+                            CONFIG.SECTOR = val;
+                        } else if (key === 'terminology') {
+                            CONFIG.TERMINOLOGY = val;
                         } else {
                             const upperKey = key.toUpperCase();
                             if (CONFIG[upperKey] && typeof CONFIG[upperKey] === 'object' && !Array.isArray(CONFIG[upperKey])) {
@@ -417,6 +422,10 @@ class App {
                     }
                 });
             }
+
+            // Terminoloji motorunu başlat ve DOM'daki etiketlere uygula
+            Terminology.init(CONFIG.SECTOR, CONFIG.TERMINOLOGY);
+            Terminology.applyToDOM();
 
             await CalendarNav.silentUpdate();
 

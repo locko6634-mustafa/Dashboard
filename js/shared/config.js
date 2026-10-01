@@ -26,6 +26,18 @@ export const CONFIG = {
         TIME: 'Belirsiz'
     },
     LOCALE: 'tr-TR',
+    SECTOR: 'beauty',
+    TERMINOLOGY: {
+        client_singular: 'Müşteri',
+        client_plural: 'Müşteriler',
+        service_singular: 'Hizmet',
+        service_plural: 'Hizmetler',
+        session_singular: 'Seans',
+        session_plural: 'Seanslar',
+        extra_info: 'Özel İstek / Alerji Notu',
+        extra_info_placeholder: 'Özel istek, alerji durumu veya işlem notu (opsiyonel)',
+        staff_singular: 'Uzman / Stilist'
+    },
     TIMERS: {
         TOAST: 3000, SEARCH_DEBOUNCE: 400, SYNC_RELOAD: 1500, DRAG_BLOCK: 50, UI_ANIM: 300,
         NOTE_LOAD: 800, BTN_RESET: 2000, NOTE_DEL: 260
@@ -133,5 +145,7 @@ export const CONFIG = {
     }
 };
 
-window.CONFIG = CONFIG;
+if (typeof window !== 'undefined') {
+    window.CONFIG = CONFIG;
+}
 export default CONFIG;

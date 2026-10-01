@@ -13,6 +13,7 @@ import { DOM } from './dom.js';
 import { UndoManager } from './undo-manager.js';
 
 import { Calendar } from './calendar.js';
+import { Terminology, SECTOR_PRESETS } from '../shared/terminology.js';
 
 class SettingsManager {
     static getBrandName = () => {
@@ -60,9 +61,63 @@ class SettingsManager {
         DOM.setColWaiting.value = cols.WAITING || '#F59E0B';
         DOM.setColCompleted.value = cols.COMPLETED || '#22C55E';
         DOM.setColCanceled.value = cols.CANCELED || '#EF4444';
+
+        // Sektör ve Terminoloji Doldurma
+        SettingsManager.populateSectorSettings();
+
         SettingsManager.applyBranding();
         SettingsManager.renderServiceCards();
         SettingsManager.updateServiceSelect();
+    };
+
+    static populateSectorSettings = () => {
+        if (!DOM.setSectorSelect) return;
+        
+        DOM.setSectorSelect.value = CONFIG.SECTOR || 'beauty';
+        
+        if (DOM.setTermClientSingular) DOM.setTermClientSingular.value = Terminology.t('client_singular');
+        if (DOM.setTermClientPlural) DOM.setTermClientPlural.value = Terminology.t('client_plural');
+        if (DOM.setTermServiceSingular) DOM.setTermServiceSingular.value = Terminology.t('service_singular');
+        if (DOM.setTermSessionSingular) DOM.setTermSessionSingular.value = Terminology.t('session_singular');
+        if (DOM.setTermExtraInfo) DOM.setTermExtraInfo.value = Terminology.t('extra_info');
+
+        // Sektör seçici listener (tek seferlik bağlama)
+        if (!DOM.setSectorSelect._hasListener) {
+            DOM.setSectorSelect.addEventListener('change', (e) => {
+                const selectedSector = e.target.value;
+                const preset = SECTOR_PRESETS[selectedSector];
+                if (preset && preset.terms) {
+                    if (DOM.setTermClientSingular) DOM.setTermClientSingular.value = preset.terms.client_singular;
+                    if (DOM.setTermClientPlural) DOM.setTermClientPlural.value = preset.terms.client_plural;
+                    if (DOM.setTermServiceSingular) DOM.setTermServiceSingular.value = preset.terms.service_singular;
+                    if (DOM.setTermSessionSingular) DOM.setTermSessionSingular.value = preset.terms.session_singular;
+                    if (DOM.setTermExtraInfo) DOM.setTermExtraInfo.value = preset.terms.extra_info;
+                }
+            });
+            DOM.setSectorSelect._hasListener = true;
+        }
+
+        // Örnek Hizmetleri İçe Aktarma Butonu
+        if (DOM.btnImportSectorServices && !DOM.btnImportSectorServices._hasListener) {
+            DOM.btnImportSectorServices.addEventListener('click', () => {
+                const currentSector = DOM.setSectorSelect ? DOM.setSectorSelect.value : (CONFIG.SECTOR || 'beauty');
+                const preset = SECTOR_PRESETS[currentSector];
+                if (preset && preset.sample_services && preset.sample_services.length > 0) {
+                    let addedCount = 0;
+                    preset.sample_services.forEach(srv => {
+                        if (!CONFIG.SERVICES.LIST.includes(srv.name)) {
+                            CONFIG.SERVICES.LIST.push(srv.name);
+                            CONFIG.SERVICES.MAP[srv.name] = srv.duration;
+                            addedCount++;
+                        }
+                    });
+                    SettingsManager.renderServiceCards();
+                    SettingsManager.updateServiceSelect();
+                    Utils.showToast(`✅ ${preset.name} için ${addedCount} örnek hizmet listeye eklendi.`, 'success');
+                }
+            });
+            DOM.btnImportSectorServices._hasListener = true;
+        }
     };
 
     static renderServiceCards = () => {
@@ -146,10 +201,25 @@ class SettingsManager {
             }
         };
 
+        const sector = DOM.setSectorSelect ? DOM.setSectorSelect.value : (CONFIG.SECTOR || 'beauty');
+        const terminology = {
+            client_singular: (DOM.setTermClientSingular ? DOM.setTermClientSingular.value.trim() : '') || Terminology.t('client_singular'),
+            client_plural: (DOM.setTermClientPlural ? DOM.setTermClientPlural.value.trim() : '') || Terminology.t('client_plural'),
+            service_singular: (DOM.setTermServiceSingular ? DOM.setTermServiceSingular.value.trim() : '') || Terminology.t('service_singular'),
+            service_plural: (DOM.setTermServiceSingular ? (DOM.setTermServiceSingular.value.trim() + 'ler') : '') || Terminology.t('service_plural'),
+            session_singular: (DOM.setTermSessionSingular ? DOM.setTermSessionSingular.value.trim() : '') || Terminology.t('session_singular'),
+            session_plural: (DOM.setTermSessionSingular ? (DOM.setTermSessionSingular.value.trim() + 'lar') : '') || Terminology.t('session_plural'),
+            extra_info: (DOM.setTermExtraInfo ? DOM.setTermExtraInfo.value.trim() : '') || Terminology.t('extra_info'),
+            extra_info_placeholder: (SECTOR_PRESETS[sector]?.terms?.extra_info_placeholder) || 'Özel not veya açıklama (opsiyonel)',
+            staff_singular: (SECTOR_PRESETS[sector]?.terms?.staff_singular) || 'Personel'
+        };
+
         const payload = [
             { setting_key: 'calendar', setting_value: calendarSettings },
             { setting_key: 'services', setting_value: servicesSettings },
-            { setting_key: 'ui_preferences', setting_value: uiPreferences }
+            { setting_key: 'ui_preferences', setting_value: uiPreferences },
+            { setting_key: 'sector', setting_value: sector },
+            { setting_key: 'terminology', setting_value: terminology }
         ];
 
         const success = await ApiService.call(CONFIG.ENDPOINTS.UPDATE_SETTINGS, { 

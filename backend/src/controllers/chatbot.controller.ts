@@ -115,13 +115,43 @@ export class ChatbotController {
 
   static async getState(req: Request, res: Response, next: NextFunction) {
     try {
-      const phone = (req.query.phone as string) || (req.query.telefon as string);
-      if (!phone) {
-        res.status(400).json({ success: false, error: 'Telefon zorunludur' });
+      const identifier =
+        (req.query.conversation_id as string) ||
+        (req.query.conversationId as string) ||
+        (req.query.phone as string) ||
+        (req.query.telefon as string);
+
+      if (!identifier) {
+        res.json({
+          conversation_id: '',
+          current_intent: '',
+          current_stage: 'START',
+          step: '',
+          context_data: {},
+        });
         return;
       }
-      const state = await ChatbotService.getConversationState(phone);
-      res.json({ success: true, state });
+
+      const state = await ChatbotService.getConversationState(identifier);
+      if (state) {
+        res.json({
+          id: state.conversation_id,
+          conversation_id: state.conversation_id,
+          phone_number: state.phone_number,
+          current_intent: state.current_intent || '',
+          current_stage: state.current_stage || 'START',
+          step: state.current_stage || '',
+          context_data: state.context_data || {},
+        });
+      } else {
+        res.json({
+          conversation_id: '',
+          current_intent: '',
+          current_stage: 'START',
+          step: '',
+          context_data: {},
+        });
+      }
     } catch (err) {
       next(err);
     }
@@ -129,14 +159,51 @@ export class ChatbotController {
 
   static async setState(req: Request, res: Response, next: NextFunction) {
     try {
-      const { phone, telefon, intent, stage, context } = req.body;
-      const ph = phone || telefon;
-      if (!ph) {
-        res.status(400).json({ success: false, error: 'Telefon zorunludur' });
+      const {
+        conversation_id,
+        conversationId,
+        phone,
+        telefon,
+        intent,
+        current_intent,
+        stage,
+        current_stage,
+        context,
+        context_data,
+      } = req.body;
+
+      const identifier = conversation_id || conversationId || phone || telefon;
+      if (!identifier) {
+        res.status(400).json({ success: false, error: 'conversation_id veya telefon zorunludur' });
         return;
       }
-      const state = await ChatbotService.setConversationState(ph, { intent, stage, context });
+
+      const state = await ChatbotService.setConversationState(String(identifier), {
+        intent,
+        current_intent,
+        stage,
+        current_stage,
+        context,
+        context_data,
+        phone: phone || telefon,
+      });
       res.json({ success: true, state });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async deleteState(req: Request, res: Response, next: NextFunction) {
+    try {
+      const identifier =
+        (req.body?.conversation_id as string) ||
+        (req.body?.conversationId as string) ||
+        (req.query?.conversation_id as string) ||
+        (req.body?.phone as string) ||
+        (req.query?.phone as string);
+
+      const result = await ChatbotService.deleteConversationState(identifier);
+      res.json(result);
     } catch (err) {
       next(err);
     }

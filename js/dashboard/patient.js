@@ -13,6 +13,7 @@ import { DOM } from './dom.js';
 import { UndoManager } from './undo-manager.js';
 
 import { AppointmentManager } from './appointment.js';
+import { Terminology } from '../shared/terminology.js';
 
 class PatientManager {
     static fillPatientForm = (prefix, app) => {
@@ -605,9 +606,10 @@ class PatientCRM {
         if (packageCountEl) packageCountEl.textContent = packageCount;
 
         if (countBadge) {
+            const clientLabel = Terminology.t('client_singular');
             countBadge.textContent = filteredList.length === allList.length
-                ? `${allList.length} Müşteri`
-                : `${filteredList.length} / ${allList.length} Müşteri`;
+                ? `${allList.length} ${clientLabel}`
+                : `${filteredList.length} / ${allList.length} ${clientLabel}`;
         }
 
         // 2. Tabloyu Doldur
@@ -622,7 +624,7 @@ class PatientCRM {
                             <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="text-muted mb-8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                             </svg>
-                            <p class="font-14 font-bold text-main">Müşteri Kaydı Bulunamadı</p>
+                            <p class="font-14 font-bold text-main">${Terminology.format('{client} Kaydı Bulunamadı')}</p>
                             <p class="font-11 text-muted">Arama kriterlerinize veya seçilen filtreye uygun kayıt yok.</p>
                         </div>
                     </td>
@@ -709,11 +711,14 @@ class PatientCRM {
     static exportToCSV = () => {
         const list = PatientCRM.getFilteredPatients();
         if (list.length === 0) {
-            Utils.showToast('Dışa aktarılacak müşteri bulunamadı.', 'warning');
+            Utils.showToast(Terminology.format('Dışa aktarılacak {client} bulunamadı.'), 'warning');
             return;
         }
 
-        const headers = ['Müşteri Adı', 'Telefon', 'Kronik Rahatsızlık', 'Paket Adı', 'Toplam Seans', 'Gelinen Seans', 'Toplam Tutar (TL)', 'Tahsil Edilen (TL)', 'Kalan Borç (TL)'];
+        const clientLabel = Terminology.t('client_singular');
+        const sessionLabel = Terminology.t('session_singular');
+        const extraLabel = Terminology.t('extra_info');
+        const headers = [`${clientLabel} Adı`, 'Telefon', extraLabel, 'Paket Adı', `Toplam ${sessionLabel}`, `Gelinen ${sessionLabel}`, 'Toplam Tutar (TL)', 'Tahsil Edilen (TL)', 'Kalan Borç (TL)'];
         
         const rows = list.map(c => [
             `"${(c.ad_soyad || '').replace(/"/g, '""')}"`,
@@ -734,13 +739,13 @@ class PatientCRM {
         const a = document.createElement('a');
         const today = new Date().toISOString().slice(0, 10);
         a.href = url;
-        a.download = `musteri_listesi_${today}.csv`;
+        a.download = `${clientLabel.toLowerCase()}_listesi_${today}.csv`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        Utils.showToast(`${list.length} müşteri CSV olarak dışa aktarıldı.`, 'success');
+        Utils.showToast(Terminology.format(`${list.length} {client} CSV olarak dışa aktarıldı.`), 'success');
     };
 
     static openAddPatientModal = () => {
@@ -788,7 +793,7 @@ class PatientCRM {
         try {
             const res = await ApiService.call(CONFIG.ENDPOINTS.ADD_PATIENT, { method: 'POST', payload });
             if (res && !res.error) {
-                showToast('✅ Müşteri başarıyla eklendi!', 'success');
+                showToast(Terminology.format('✅ {client} başarıyla eklendi!'), 'success');
                 PatientCRM.closeAddPatientModal();
                 await PatientCRM.loadPatients(true);
             } else {

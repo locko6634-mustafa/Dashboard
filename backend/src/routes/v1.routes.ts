@@ -59,5 +59,7 @@ router.post('/chatbot/cancel', ChatbotController.cancelAppointment);
 router.post('/chatbot/reschedule', ChatbotController.rescheduleAppointment);
 router.get('/chatbot/state', ChatbotController.getState);
 router.post('/chatbot/state', ChatbotController.setState);
+router.delete('/chatbot/state', ChatbotController.deleteState);
+router.post('/chatbot/state/delete', ChatbotController.deleteState);
 
 export default router;

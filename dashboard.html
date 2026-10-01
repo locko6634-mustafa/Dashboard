@@ -142,7 +142,7 @@
                 </button>
                 <button id="tabPatients" class="nav-menu-item">
                     <span class="menu-icon"><svg width="16" height="16"><use href="#icon-users"></use></svg></span>
-                    <span class="menu-label">Müşteriler</span>
+                    <span class="menu-label" data-t="client_plural">Müşteriler</span>
                 </button>
                 <button id="tabOverview" class="nav-menu-item">
                     <span class="menu-icon"><svg width="16" height="16"><use href="#icon-chart"></use></svg></span>
@@ -254,7 +254,7 @@
                                 <button type="button" class="sb-filter-chip" data-filter="completed">Tamamlandı</button>
                                 <button type="button" class="sb-filter-chip" data-filter="canceled">İptal</button>
                             </div>
-                            <button type="button" id="btnSbQuickAddApt" class="sb-quick-add-btn" title="Bu Müşteriye Randevu Ekle">
+                            <button type="button" id="btnSbQuickAddApt" class="sb-quick-add-btn" title="Bu Müşteriye Randevu Ekle" data-t-title="Bu {client}'ye Randevu Ekle">
                                 <svg width="12" height="12"><use href="#icon-plus"></use></svg>
                                 <span>Yeni Randevu</span>
                             </button>
@@ -269,7 +269,7 @@
                     <!-- Finans & Paketler Sekmesi -->
                     <div id="sbPanelFinance" class="sidebar-tab-panel">
                         <div class="info-card bento-widget">
-                            <div class="info-title">Paket / Seans Durumu</div>
+                            <div class="info-title" data-t-format="Paket / {session} Durumu">Paket / Seans Durumu</div>
                             <div class="flex-row items-center gap-16 mt-8" style="display: flex; align-items: center; gap: 16px; margin-top: 8px;">
                                 <div class="progress-ring">
                                     <svg viewBox="0 0 60 60">
@@ -301,7 +301,8 @@
                         <div class="info-card">
                             <div class="info-title">Hızlı Not Ekle</div>
                             <textarea id="sbNoteInput" class="modal-input w-full h-70 no-resize font-12 mb-8"
-                                placeholder="Randevu esnasında müşteri için not alın..."></textarea>
+                                placeholder="Randevu esnasında müşteri için not alın..."
+                                data-t-placeholder="Randevu esnasında {client} için not alın..."></textarea>
                             <button id="btnSaveNote"
                                 class="modal-btn modal-btn-save w-full font-12">Notu Kaydet</button>
                         </div>
@@ -340,7 +341,7 @@
                                     <use href="#icon-search"></use>
                                 </svg>
                             </div>
-                            <input type="text" id="searchInput" class="focus-glow" autocomplete="off" placeholder="Müşteri Arama... (Ad Soyad, Telefon)">
+                            <input type="text" id="searchInput" class="focus-glow" autocomplete="off" placeholder="Müşteri Arama... (Ad Soyad, Telefon)" data-t-placeholder="{client} Arama... (Ad Soyad, Telefon)">
                             <div class="search-badge">Ctrl+K</div>
                         </div>
                         <div id="searchResults" class="hidden"></div>
@@ -428,7 +429,7 @@
                     <div class="stats-grid" id="patientsKpiGrid">
                         <div class="glass stat-card">
                             <div class="flex-1 flex-col">
-                                <div class="stat-label">Toplam Kayıtlı Müşteri</div>
+                                <div class="stat-label" data-t-format="Toplam Kayıtlı {client}">Toplam Kayıtlı Müşteri</div>
                                 <div class="stat-value flex-align-center gap-8">
                                     <span id="crmStatTotal">0</span>
                                 </div>
@@ -439,7 +440,7 @@
                         </div>
                         <div class="glass stat-card">
                             <div class="flex-1 flex-col">
-                                <div class="stat-label">Kalan Borçlu Müşteri</div>
+                                <div class="stat-label" data-t-format="Kalan Borçlu {client}">Kalan Borçlu Müşteri</div>
                                 <div class="stat-value flex-align-center gap-8">
                                     <span id="crmStatDebtCount" class="text-rose">0</span>
                                 </div>
@@ -477,7 +478,7 @@
                         <div class="crm-toolbar-left">
                             <div class="crm-search-box">
                                 <svg width="15" height="15" class="crm-search-icon"><use href="#icon-search"></use></svg>
-                                <input type="text" id="patientsSearchInput" class="crm-search-input" placeholder="Müşteri ara (ad, soyad, telefon)...">
+                                <input type="text" id="patientsSearchInput" class="crm-search-input" placeholder="Müşteri ara (ad, soyad, telefon)..." data-t-placeholder="{client} ara (ad, soyad, telefon)...">
                                 <button type="button" id="btnClearPatientSearch" class="crm-search-clear hidden" title="Temizle">&times;</button>
                             </div>
                             <div class="crm-filter-chips" id="patientsFilterChips">
@@ -488,13 +489,13 @@
                             </div>
                         </div>
                         <div class="crm-toolbar-right">
-                            <button type="button" id="btnAddPatientCRM" class="btn-primary-soft" title="Yeni Müşteri Ekle">
+                            <button type="button" id="btnAddPatientCRM" class="btn-primary-soft" title="Yeni Müşteri Ekle" data-t-title="Yeni {client} Ekle">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                 </svg>
-                                <span>Yeni Müşteri</span>
+                                <span data-t-format="Yeni {client}">Yeni Müşteri</span>
                             </button>
-                            <button type="button" id="btnExportPatients" class="btn-secondary-soft" title="Müşteri Listesini CSV olarak indir">
+                            <button type="button" id="btnExportPatients" class="btn-secondary-soft" title="Müşteri Listesini CSV olarak indir" data-t-title="{client} Listesini CSV olarak indir">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                                 </svg>
@@ -509,8 +510,8 @@
                         <table class="crm-table">
                             <thead>
                                 <tr>
-                                    <th>Müşteri Bilgisi</th>
-                                    <th>Paket & Seans İlerlemesi</th>
+                                    <th data-t-format="{client} Bilgisi">Müşteri Bilgisi</th>
+                                    <th data-t-format="Paket & {session} İlerlemesi">Paket & Seans İlerlemesi</th>
                                     <th>Toplam Tutar</th>
                                     <th>Tahsil Edilen</th>
                                     <th>Kalan Bakiye</th>
@@ -604,6 +605,58 @@
                 <!-- Section: Settings View -->
                 <div id="viewSettings" class="view-section hidden">
                     <div class="settings-layout">
+                        <!-- Sektör ve Terminoloji Ayarları -->
+                        <div class="glass settings-card">
+                            <div class="flex-between mb-16">
+                                <div class="info-title mb-0">Sektör & Terminoloji</div>
+                                <div class="stat-icon-wrapper text-accent"><svg width="18" height="18"><use href="#icon-star"></use></svg></div>
+                            </div>
+                            <div class="form-section">
+                                <label class="form-label">Faaliyet Sektörünüz</label>
+                                <select id="setSectorSelect" class="modal-input w-full mb-12 cursor-pointer font-bold">
+                                    <option value="beauty">✂️ Güzellik, Berber & Kişisel Bakım</option>
+                                    <option value="healthcare">🩺 Klinik, Sağlık & Terapi</option>
+                                    <option value="consulting">⚖️ Hukuk & Profesyonel Danışmanlık</option>
+                                    <option value="education">🎓 Eğitim, Özel Ders & Koçluk</option>
+                                    <option value="automotive">🚗 Oto Servis, Ekspertiz & Bakım</option>
+                                    <option value="custom">⚙️ Özel (Kendi Terimlerini Belirle)</option>
+                                </select>
+                                
+                                <div class="mb-12">
+                                    <button type="button" id="btnImportSectorServices" class="modal-btn btn-secondary-soft w-full font-11" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px;">
+                                        <svg width="14" height="14"><use href="#icon-plus"></use></svg>
+                                        <span>Bu Sektörün Örnek Hizmetlerini Listeye Aktar</span>
+                                    </button>
+                                </div>
+
+                                <div class="info-title font-12 mb-8 text-muted" style="text-transform: uppercase; letter-spacing: 0.5px;">Terim Özelleştirme</div>
+                                <div class="input-row mb-8">
+                                    <div class="flex-1">
+                                        <label class="form-label font-10">Müşteri (Tekil)</label>
+                                        <input type="text" id="setTermClientSingular" class="modal-input w-full font-11" placeholder="Müşteri">
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="form-label font-10">Müşteriler (Çoğul)</label>
+                                        <input type="text" id="setTermClientPlural" class="modal-input w-full font-11" placeholder="Müşteriler">
+                                    </div>
+                                </div>
+                                <div class="input-row mb-8">
+                                    <div class="flex-1">
+                                        <label class="form-label font-10">Hizmet / İşlem</label>
+                                        <input type="text" id="setTermServiceSingular" class="modal-input w-full font-11" placeholder="Hizmet">
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="form-label font-10">Seans / Randevu</label>
+                                        <input type="text" id="setTermSessionSingular" class="modal-input w-full font-11" placeholder="Seans">
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label font-10">Ek Bilgi / Not Başlığı</label>
+                                    <input type="text" id="setTermExtraInfo" class="modal-input w-full font-11" placeholder="Özel Not / Rahatsızlık">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="glass settings-card">
                             <div class="flex-between mb-16">
                                 <div class="info-title mb-0">Genel / Marka</div>
@@ -706,8 +759,8 @@
                 <button id="btnCancelAddModal" class="btn-close-x">&times;</button>
             </div>
             <div class="tab-container">
-                <button id="tabNew" class="tab-btn tab-btn-active">Yeni Müşteri</button>
-                <button id="tabExist" class="tab-btn tab-btn-inactive">Kayıtlı Müşteri (Ara)</button>
+                <button id="tabNew" class="tab-btn tab-btn-active" data-t-format="Yeni {client}">Yeni Müşteri</button>
+                <button id="tabExist" class="tab-btn tab-btn-inactive" data-t-format="Kayıtlı {client} (Ara)">Kayıtlı Müşteri (Ara)</button>
             </div>
             <div class="form-section">
                 <div id="addNewFields">
@@ -717,9 +770,10 @@
                     <input type="text" id="addPhone" class="modal-input w-full mb-12">
                 </div>
                 <div id="addExistFields" class="hidden mb-12 relative">
-                    <label class="form-label">Kayıtlı Müşteri Ara</label>
+                    <label class="form-label" data-t-format="Kayıtlı {client} Ara">Kayıtlı Müşteri Ara</label>
                     <input type="text" id="addSearchInput" autocomplete="off" class="modal-input w-full"
-                        placeholder="Müşteri Arama... (Ad Soyad, Telefon)">
+                        placeholder="Müşteri Arama... (Ad Soyad, Telefon)"
+                        data-t-placeholder="{client} Arama... (Ad Soyad, Telefon)">
                     <div id="addSearchResults" class="hidden search-results-popover"></div>
                     <div id="selectedPatientCard" class="hidden selected-patient-badge">
                         <div>
@@ -729,7 +783,7 @@
                         <button id="btnClearSelectedPatient" class="btn-icon-danger">&times;</button>
                     </div>
                 </div>
-                <label class="form-label">Hizmet</label>
+                <label class="form-label" data-t="service_singular">Hizmet</label>
                 <select id="addService" class="modal-input w-full mb-12 cursor-pointer"></select>
                 <label class="form-label">Tarih & Saat Ayarı</label>
                 <div class="input-row"><input type="date" id="addDate" class="modal-input"><input
@@ -758,19 +812,19 @@
             <p id="modalSub" class="text-muted font-11 mb-16"></p>
 
             <div id="inlineEditSection" class="hidden inline-edit-box">
-                <h3 class="label-pink-caps">Müşteri Bilgileri</h3>
+                <h3 class="label-pink-caps" data-t-format="{client} Bilgileri">Müşteri Bilgileri</h3>
                 <label class="label-uppercase-muted">Ad Soyad</label>
                 <input type="text" id="inlineEditName" class="modal-input w-full mb-8" placeholder="Ad Soyad">
                 <label class="label-uppercase-muted">Telefon</label>
                 <input type="text" id="inlineEditPhone" class="modal-input w-full mb-8" placeholder="Telefon">
-                <label class="label-uppercase-muted">Ek Bilgi / Not</label>
-                <textarea id="inlineEditChronic" class="modal-input w-full h-70 no-resize mb-8" placeholder="Ek Bilgi / Not"></textarea>
+                <label class="label-uppercase-muted" data-t="extra_info">Ek Bilgi / Not</label>
+                <textarea id="inlineEditChronic" class="modal-input w-full h-70 no-resize mb-8" placeholder="Ek Bilgi / Not" data-t-placeholder="extra_info"></textarea>
                 <label class="label-uppercase-muted">Paket Adı</label>
                 <input type="text" id="inlineEditPackage" class="modal-input w-full mb-8" placeholder="Paket Adı">
                 <div class="input-row mb-8">
                     <div class="flex-1">
-                        <label class="label-uppercase-muted">Toplam Seans</label>
-                        <input type="number" id="inlineEditTotalSession" class="modal-input w-full" placeholder="Toplam Seans" min="0">
+                        <label class="label-uppercase-muted" data-t-format="Toplam {session}">Toplam Seans</label>
+                        <input type="number" id="inlineEditTotalSession" class="modal-input w-full" placeholder="Toplam Seans" min="0" data-t-placeholder="Toplam {session}">
                     </div>
                     <div class="flex-1">
                         <label class="label-uppercase-muted">Gelinen</label>
@@ -832,19 +886,19 @@
                 <div class="spinner"></div><span class="loading-text">Kaydediliyor...</span>
             </div>
             <div class="flex-between mb-16">
-                <h2 class="modal-title-bold m-0">Müşteri Bilgilerini Düzenle</h2>
+                <h2 class="modal-title-bold m-0" data-t-format="{client} Bilgilerini Düzenle">Müşteri Bilgilerini Düzenle</h2>
                 <button id="btnCancelEditPatient" class="btn-close-x">&times;</button>
             </div>
             <div class="form-section scroll-y-half">
                 <label class="form-label">Kişisel Bilgiler</label>
                 <input type="text" id="editName" class="modal-input w-full mb-8" placeholder="Ad Soyad">
                 <input type="text" id="editPhone" class="modal-input w-full mb-8" placeholder="Telefon">
-                <textarea id="editChronic" class="modal-input w-full h-70 no-resize mb-12" placeholder="Ek Bilgi / Not"></textarea>
+                <textarea id="editChronic" class="modal-input w-full h-70 no-resize mb-12" placeholder="Ek Bilgi / Not" data-t-placeholder="extra_info"></textarea>
                 
-                <label class="form-label">Paket ve Seans</label>
+                <label class="form-label" data-t-format="Paket ve {session}">Paket ve Seans</label>
                 <input type="text" id="editPackage" class="modal-input w-full mb-8" placeholder="Paket Adı">
                 <div class="input-row mb-12">
-                    <input type="number" id="editTotalSession" class="modal-input flex-1" placeholder="Toplam Seans" min="0">
+                    <input type="number" id="editTotalSession" class="modal-input flex-1" placeholder="Toplam Seans" min="0" data-t-placeholder="Toplam {session}">
                     <input type="number" id="editCurrentSession" class="modal-input flex-1" placeholder="Gelinen" min="0">
                 </div>
                 
@@ -876,20 +930,20 @@
                 <div class="spinner"></div><span class="loading-text">Kaydediliyor...</span>
             </div>
             <div class="flex-between mb-16">
-                <h2 class="modal-title-bold m-0">Yeni Müşteri Ekle</h2>
+                <h2 class="modal-title-bold m-0" data-t-format="Yeni {client} Ekle">Yeni Müşteri Ekle</h2>
                 <button id="btnCancelAddPatient" class="btn-close-x">&times;</button>
             </div>
             <div class="form-section scroll-y-half">
                 <label class="form-label">Kişisel Bilgiler</label>
                 <input type="text" id="addPtName" class="modal-input w-full mb-8" placeholder="Ad Soyad" required>
                 <input type="text" id="addPtPhone" class="modal-input w-full mb-8" placeholder="Telefon (05XX XXX XXXX)">
-                <textarea id="addPtChronic" class="modal-input w-full h-70 no-resize mb-12" placeholder="Kronik rahatsızlık veya ek bilgi (opsiyonel)"></textarea>
+                <textarea id="addPtChronic" class="modal-input w-full h-70 no-resize mb-12" placeholder="Kronik rahatsızlık veya ek bilgi (opsiyonel)" data-t-placeholder="extra_info_placeholder"></textarea>
 
-                <label class="form-label">Paket ve Seans</label>
+                <label class="form-label" data-t-format="Paket ve {session}">Paket ve Seans</label>
                 <input type="text" id="addPtPackage" class="modal-input w-full mb-8" placeholder="Paket Adı (opsiyonel)">
                 <div class="input-row mb-12">
-                    <input type="number" id="addPtTotalSession" class="modal-input flex-1" placeholder="Toplam Seans" min="0">
-                    <input type="number" id="addPtCurrentSession" class="modal-input flex-1" placeholder="Gelinen Seans" min="0">
+                    <input type="number" id="addPtTotalSession" class="modal-input flex-1" placeholder="Toplam Seans" min="0" data-t-placeholder="Toplam {session}">
+                    <input type="number" id="addPtCurrentSession" class="modal-input flex-1" placeholder="Gelinen Seans" min="0" data-t-placeholder="Gelinen {session}">
                 </div>
 
                 <label class="form-label">Finansal Bilgiler</label>
@@ -898,7 +952,7 @@
                     <input type="number" id="addPtPaidAmount" class="modal-input flex-1" placeholder="Alınan Ödeme (₺)" min="0">
                 </div>
             </div>
-            <button id="btnSubmitAddPatient" class="modal-btn modal-btn-complete w-full mb-8">🚀 Müşteriyi Kaydet</button>
+            <button id="btnSubmitAddPatient" class="modal-btn modal-btn-complete w-full mb-8" data-t-format="🚀 {client} Kaydet">🚀 Müşteriyi Kaydet</button>
         </div>
     </div>
 
