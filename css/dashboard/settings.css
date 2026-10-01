@@ -1,0 +1,123 @@
+/* ==========================================================================
+   RANDEMU PANELI - SETTINGS (AYARLAR SAYFASI)
+   - Salon çalışma saatleri, randevu süreleri, renk teması paleti ve profil formları.
+   ========================================================================== */
+
+/* Ayarlar Sayfası */
+.settings-layout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.settings-card {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.accent-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.accent-preset-btn {
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s var(--anim-ease);
+}
+
+.accent-preset-btn span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.accent-preset-btn.active {
+    color: var(--text-main);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+.accent-preset-btn:active {
+    transform: scale(0.97);
+}
+
+.service-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.service-setting-card {
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.service-setting-card strong {
+    display: block;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.service-setting-card span {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-family: 'Geist Mono', monospace;
+}
+
+.service-delete-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--danger-soft);
+    color: var(--danger);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.service-add-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 84px auto;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Koyu Temada Tarih ve Saat Seçici İkonlarının Okunaklılığı */
+/* Koyu Temada Tarih ve Saat Seçici İkonlarının Okunaklılığı */
+.dark-theme input[type="date"]::-webkit-calendar-picker-indicator,
+.dark-theme input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.9) brightness(1.2) !important;
+    cursor: pointer;
+}

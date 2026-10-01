@@ -1,0 +1,277 @@
+/* ==========================================================================
+   RANDEMU PANELI - RESPONSIVE & MOBILE ADAPTATION
+   - Tablet (1024px) ve Mobil (768px) ekran uyarlamaları, kompakt başlıklar,
+     mobil alt/üst bar, esnek tablolar ve hareket azaltma tercihi.
+   ========================================================================== */
+
+/* Tablet Görünümü (<= 1024px) */
+@media (max-width: 1024px) {
+    .left-sidebar {
+        width: 70px;
+    }
+    .left-sidebar .brand-name,
+    .left-sidebar .menu-label,
+    .left-sidebar .record-badge {
+        display: none;
+    }
+    .left-sidebar .sidebar-brand {
+        justify-content: center;
+        padding: 20px 0;
+    }
+    .left-sidebar .nav-menu-item {
+        justify-content: center;
+        padding: 12px 0;
+    }
+    .left-sidebar .sidebar-footer {
+        justify-content: center;
+    }
+    .calendar-grid {
+        grid-template-columns: 50px 1fr;
+    }
+    .day-col:not(.focus-day) {
+        display: none;
+    }
+}
+
+/* Mobil Görünüm (<= 768px) */
+@media (max-width: 768px) {
+    /* Genel Düzen ve İskelet */
+    html, body {
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+    }
+    
+    .app-layout {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    .main-content {
+        height: auto;
+        overflow: visible;
+    }
+
+    .container {
+        height: auto;
+        overflow: visible;
+    }
+
+    .view-section {
+        height: auto;
+        overflow: visible;
+    }
+
+    /* Sol Sidebar Mobil Uyarlama */
+    .left-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 260px;
+        transform: translateX(-100%);
+        z-index: 2000;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .left-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    .left-sidebar.collapsed {
+        width: 260px;
+    }
+
+    .left-sidebar.collapsed .sidebar-header,
+    .left-sidebar.collapsed .sidebar-profile,
+    .left-sidebar.collapsed .nav-group-title,
+    .left-sidebar.collapsed .nav-label,
+    .left-sidebar.collapsed .nav-badge {
+        display: flex;
+    }
+
+    .left-sidebar.collapsed .nav-group-title {
+        display: block;
+    }
+
+    .left-sidebar.collapsed .nav-item {
+        justify-content: flex-start;
+        padding: 9px 12px;
+    }
+
+    .left-sidebar.collapsed .sidebar-toggle-btn {
+        display: none;
+    }
+
+    /* Mobil Üst Bar */
+    .mobile-top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: var(--bg-card);
+        backdrop-filter: var(--glass-blur);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .mobile-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        font-size: 15px;
+    }
+
+    .mobile-menu-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-main);
+    }
+
+    /* Kompakt Main Header */
+    .main-header {
+        padding: 10px 12px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .header-brand {
+        display: none;
+    }
+
+    .header-stats {
+        display: none;
+    }
+
+    /* Kompakt Arama */
+    .search-wrap {
+        flex: 1;
+        min-width: 0;
+        order: 1;
+    }
+
+    #searchInput {
+        font-size: 13px;
+        padding: 8px 12px 8px 34px;
+    }
+
+    .search-icon-wrap {
+        left: 10px;
+    }
+
+    /* Kompakt Navigasyon Kontrolleri */
+    .nav-controls {
+        width: 100%;
+        order: 2;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .btn-add-primary {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .nav-btn-group {
+        gap: 2px;
+    }
+
+    .nav-btn {
+        padding: 6px 8px;
+    }
+
+    .nav-btn-today {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    .view-toggle-group {
+        padding: 2px;
+    }
+
+    .view-toggle-btn {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+
+    /* Grid ve Yerleşimler */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-content-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-panel, .right-sidebar {
+        width: 100%;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    /* Takvim Filtre Barı & CRM Araç Çubuğu Mobil */
+    .calendar-filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .cal-filter-left, .cal-filter-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .cal-search-input {
+        width: 100%;
+    }
+    .cal-search-input:focus {
+        width: 100%;
+    }
+    .patients-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .crm-toolbar-left, .crm-toolbar-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .crm-search-box {
+        min-width: 100%;
+    }
+
+    /* Raporlar Mobil */
+    .reports-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .reports-filters {
+        flex-direction: column;
+    }
+    .report-date-input, .report-select {
+        width: 100%;
+        min-width: 100%;
+    }
+    .reports-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* Hareket Azaltma Tercihi (Reduced Motion) */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

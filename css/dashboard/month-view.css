@@ -1,0 +1,94 @@
+/* ==========================================================================
+   RANDEMU PANELI - MONTH VIEW (AY GÖRÜNÜMÜ)
+   - 7 sütunlu aylık ızgara, gün hücreleri, randevu etiketleri ve yoğunluk noktaları.
+   ========================================================================== */
+
+/* --- Month View --- */
+.month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: max-content repeat(6, 1fr);
+    gap: 8px;
+    padding: 12px;
+    background: transparent;
+    width: 100%;
+    height: 100%;
+}
+.month-day-header-cell {
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 12px;
+    padding-bottom: 8px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+.month-day-cell {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+}
+.month-day-cell:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-color: var(--accent);
+}
+.month-day-cell.other-month {
+    opacity: 0.4;
+    background: var(--bg-main);
+}
+.month-day-cell.is-today {
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb, 138, 115, 230), 0.05);
+}
+.month-day-number {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-main);
+    align-self: flex-start;
+}
+.month-day-cell.is-today .month-day-number {
+    background: var(--accent);
+    color: white;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+.month-density-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: auto;
+}
+.month-density-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+.month-density-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.density-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+}
+.density-dot.wait { background: var(--gold); border: 1px solid var(--gold); box-shadow: 0 0 5px var(--gold); }
+.density-dot.comp { background: var(--accent); border: 1px solid var(--accent); box-shadow: 0 0 5px var(--accent); }
+.density-dot.canc { background: var(--rose); border: 1px solid var(--rose); box-shadow: 0 0 5px var(--rose); }

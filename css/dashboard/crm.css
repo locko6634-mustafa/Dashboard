@@ -1,0 +1,915 @@
+/* ==========================================================================
+   RANDEMU PANELI - CRM & PATIENTS VIEW
+   - Müşteriler sekmesi araç çubuğu, arama, veri tablosu, sayfalama,
+     sağdan kayan hasta detay çekmecesi, seans/finans sayaçları ve randevu geçmişi.
+   ========================================================================== */
+
+/* CRM Tablosu ve Müşteri Listesi Görünümü */
+/* ==========================================
+   PATIENTS CRM VIEW & TABLE STYLES
+   ========================================== */
+#viewPatients {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.patients-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+}
+
+.crm-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.crm-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 240px;
+    max-width: 320px;
+    flex: 1;
+}
+
+.crm-search-icon {
+    position: absolute;
+    left: 10px;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.crm-search-input {
+    width: 100%;
+    height: 34px;
+    padding: 6px 28px 6px 32px;
+    font-size: 13px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    color: var(--text-main);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.crm-search-input:focus {
+    border-color: var(--accent);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.crm-search-clear {
+    position: absolute;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.crm-filter-chips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.crm-filter-chip {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    user-select: none;
+}
+
+.crm-filter-chip:hover {
+    color: var(--text-main);
+    background: var(--bg-hover);
+    border-color: var(--border-strong);
+}
+
+.crm-filter-chip.active {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+.crm-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.patients-count-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+}
+
+.patients-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+}
+
+.crm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+
+.crm-table thead th {
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    white-space: nowrap;
+}
+
+.crm-table-row {
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background 0.15s ease;
+    cursor: pointer;
+}
+
+.crm-table-row:hover {
+    background: var(--bg-hover);
+}
+
+.crm-table-row:last-child {
+    border-bottom: none;
+}
+
+.crm-table-row td {
+    padding: 12px 16px;
+    vertical-align: middle;
+}
+
+.crm-client-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.crm-client-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px var(--accent-glow);
+}
+
+.crm-client-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.crm-client-name {
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 13px;
+}
+
+.crm-client-phone {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.crm-chronic-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--amber-dim);
+    color: var(--amber);
+    margin-top: 2px;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-package-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.crm-package-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.crm-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.crm-progress-bar {
+    width: 80px;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+}
+
+.crm-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: var(--radius-pill);
+    transition: width 0.3s ease;
+}
+
+.crm-progress-text {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.crm-amount {
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.crm-debt-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.crm-debt-badge.badge-debt {
+    background: var(--rose-dim);
+    color: var(--rose);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+.crm-debt-badge.badge-paid {
+    background: var(--emerald-dim);
+    color: var(--emerald);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.crm-actions-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.crm-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 5px 12px;
+    font-size: 11.5px;
+    font-weight: 500;
+    font-family: inherit;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-subtle);
+    color: var(--text-main);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.crm-action-btn svg {
+    flex-shrink: 0;
+    stroke: currentColor;
+    opacity: 0.85;
+    transition: transform 0.18s ease, stroke 0.18s ease;
+}
+
+.crm-action-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.crm-action-btn:hover svg {
+    opacity: 1;
+    stroke: var(--accent);
+    transform: scale(1.08);
+}
+
+.crm-action-btn:active {
+    transform: translateY(0);
+}
+
+/* Yeni Müşteri Ekleme Butonu */
+/* ==========================================
+   YENİ MÜŞTERI EKLEME BUTONU
+   ========================================== */
+.btn-primary-soft {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    line-height: 1.4;
+    text-decoration: none;
+}
+
+.btn-primary-soft svg {
+    flex-shrink: 0;
+    stroke: currentColor;
+    transition: transform 0.2s ease;
+}
+
+.btn-primary-soft:hover {
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 20%, transparent);
+    transform: translateY(-1px);
+}
+
+.btn-primary-soft:hover svg {
+    transform: scale(1.08);
+}
+
+.btn-primary-soft:active {
+    transform: translateY(0);
+}
+
+/* CRM Yan Panel (Sidebar) - Slide-over Drawer Uyumlu */
+/* CRM Yan Panel (Sidebar) - Slide-over Drawer Uyumlu */
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(44, 38, 33, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.right-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    transform: translateX(100%);
+    width: 440px;
+    max-width: 100%;
+    height: 100vh;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border);
+    border-top-left-radius: var(--radius-lg);
+    border-bottom-left-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.right-sidebar.active {
+    transform: translateX(0);
+}
+
+.sidebar-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-close {
+    background: var(--bg-secondary);
+    border: none;
+    color: var(--text-muted);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-close:hover {
+    background: var(--rose-soft);
+    color: var(--rose);
+}
+
+.sb-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.sb-subtitle-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.edit-patient-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    padding: 5px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.edit-patient-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--accent);
+}
+
+/* CRM Çekmece Sekme Navigasyonu */
+.sidebar-tabs-nav {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+    padding: 0 12px;
+}
+
+.sidebar-tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 11px 2px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.sidebar-tab-btn:hover {
+    color: var(--text-main);
+}
+
+.sidebar-tab-btn.active {
+    color: var(--accent-hover);
+    border-bottom-color: var(--accent-hover);
+}
+
+.dark-theme .sidebar-tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.sidebar-content {
+    padding: 24px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sidebar-tab-panel {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sidebar-tab-panel.active {
+    display: flex;
+}
+
+.info-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+}
+
+.info-title {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.warning-box {
+    background: var(--rose-soft);
+    border: 1px solid rgba(211, 140, 140, 0.2);
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--rose);
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.masked-data {
+    filter: blur(4px);
+    transition: filter 0.2s;
+}
+
+.masked-data.revealed {
+    filter: blur(0);
+}
+
+.btn-icon-soft {
+    background: none;
+    border: none;
+    color: var(--rose);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    margin-left: auto;
+}
+
+.progress-track {
+    background: var(--border);
+    height: 5px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progress-fill {
+    background: var(--accent);
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s var(--anim-ease);
+}
+
+.finance-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+}
+
+.finance-row:last-child {
+    margin-bottom: 0;
+    border-top: 1px dashed var(--border);
+    padding-top: 8px;
+    font-weight: 700;
+}
+
+.card-compact {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+}
+
+.card-compact-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.card-history-item {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+}
+
+.delete-note-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    display: flex;
+}
+
+.delete-note-btn:hover {
+    color: var(--rose);
+    background: var(--bg-secondary);
+}
+
+/* Müşteri Çekmecesi - Tüm Randevu Geçmişi Stilleri */
+.sb-link-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: var(--radius-xs);
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sb-link-btn:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+.sb-apt-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.sb-apt-filters {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--bg-main);
+    padding: 3px;
+    border-radius: var(--radius-full, 9999px);
+    border: 1px solid var(--border);
+}
+
+.sb-filter-chip {
+    background: none;
+    border: none;
+    padding: 4px 9px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-radius: var(--radius-full, 9999px);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.sb-filter-chip:hover {
+    color: var(--text-main);
+}
+
+.sb-filter-chip.active {
+    background: var(--accent);
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.sb-quick-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 9px;
+    border-radius: var(--radius-sm);
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sb-quick-add-btn:hover {
+    background: var(--accent);
+    color: #ffffff;
+}
+
+.sb-apt-summary-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 2px 6px 2px;
+    border-bottom: 1px dashed var(--border);
+}
+
+.sb-apt-pill-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full, 9999px);
+    background: var(--emerald-dim, rgba(34, 197, 94, 0.1));
+    color: var(--emerald, #22c55e);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.sb-apt-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px;
+}
+
+.sb-apt-card {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sb-apt-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.sb-apt-card.is-upcoming {
+    border-left: 3px solid var(--cobalt, #3b82f6);
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, var(--bg-main) 40%);
+}
+
+.sb-apt-card.is-past {
+    opacity: 0.92;
+}
+
+.sb-apt-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.sb-apt-date-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sb-apt-upcoming-tag {
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--cobalt-dim, rgba(59, 130, 246, 0.15));
+    color: var(--cobalt, #3b82f6);
+}
+
+.sb-apt-date {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.sb-apt-status {
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: var(--radius-xs);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sb-status-waiting {
+    background: var(--amber-dim, rgba(245, 158, 11, 0.12));
+    color: var(--amber, #f59e0b);
+}
+
+.sb-status-completed {
+    background: var(--emerald-dim, rgba(34, 197, 94, 0.12));
+    color: var(--emerald, #22c55e);
+}
+
+.sb-status-canceled {
+    background: var(--rose-dim, rgba(239, 68, 68, 0.12));
+    color: var(--rose, #ef4444);
+}
+
+.sb-apt-card-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+
+
+.sb-apt-meta {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Koyu Temada CRM Çekmece ve Sekme İyileştirmeleri */
+.dark-theme .sidebar-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .sidebar-close {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #A1A1AA !important;
+}
+
+.dark-theme .sidebar-close:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #F4F4F6 !important;
+}
+
+/* Sidebar Tab Butonlarının Koyu Tema Uyumu */
+.dark-theme .sidebar-tab-btn {
+    color: #A1A1AA;
+}
+
+.dark-theme .sidebar-tab-btn:hover {
+    color: #F4F4F6;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Geçmiş Randevu Kartlarının Koyu Tema Görünümü */
+.dark-theme .card-history-item {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark-theme .card-history-item:hover {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}

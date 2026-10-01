@@ -1,0 +1,404 @@
+/* ==========================================================================
+   RANDEMU PANELI - MODALS & SLIDE-OVER DRAWERS
+   - Çekmece modalları (sağdan kayan), randevu oluştur/düzenle, onay pencereleri,
+     hasta ekleme/düzenleme çekmeceleri ve form alanları.
+   ========================================================================== */
+
+/* Modalları Sağdan Kayan Çekmeceye Dönüştürme */
+#aptModal, #addAptModal, #editPatientModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(44, 38, 33, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    justify-content: flex-end;
+    align-items: stretch;
+    padding: 0;
+}
+
+#aptModal.hidden, #addAptModal.hidden, #editPatientModal.hidden {
+    opacity: 0;
+    pointer-events: none;
+    display: flex !important; /* Keep display flex for child transitions */
+}
+
+.modal-panel {
+    background: var(--bg-card);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: none;
+    border-left: 1px solid var(--border);
+    border-top-left-radius: var(--radius-lg);
+    border-bottom-left-radius: var(--radius-lg);
+    padding: 24px;
+    width: 440px;
+    max-width: 100%;
+    height: 100vh;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+#aptModal:not(.hidden) .modal-panel, 
+#addAptModal:not(.hidden) .modal-panel, 
+#editPatientModal:not(.hidden) .modal-panel {
+    transform: translateX(0);
+}
+
+.modal-overlay-loader {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.spinner {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent-hover);
+    animation: spin 0.6s linear infinite;
+}
+
+.spinner-sm {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+}
+
+.spinner-center-sm {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+    margin: 12px auto;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-weight: 500;
+}
+
+.modal-title-bold {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    color: var(--text-main);
+    letter-spacing: -0.03em;
+}
+
+.modal-scroll-container {
+    max-height: 100vh;
+    overflow-y: auto;
+}
+
+.tab-container {
+    display: flex;
+    background: var(--bg-secondary);
+    padding: 2px;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.tab-btn-active {
+    background: var(--bg-main);
+    color: var(--text-main);
+    box-shadow: var(--shadow);
+}
+
+.tab-btn-inactive {
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.form-section {
+    margin-bottom: 16px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.form-label {
+    display: block;
+    font-size: 11px;
+    text-transform: none;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.input-row {
+    display: flex;
+    gap: 8px;
+}
+
+.modal-input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-main);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    outline: none;
+    font-family: inherit;
+    font-size: 12px;
+    transition: 0.2s;
+}
+
+.modal-input:focus {
+    border-color: var(--accent);
+    background: var(--bg-main);
+    box-shadow: 0 0 0 3px rgba(226, 178, 178, 0.2);
+}
+
+.modal-input-sm {
+    flex: none;
+    width: 105px;
+}
+
+.modal-btn {
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-family: inherit;
+    font-size: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-btn:hover { filter: brightness(1.03); }
+.modal-btn:active { transform: scale(0.98); }
+
+.modal-btn-save {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 2px 6px rgba(226, 178, 178, 0.2);
+}
+
+.modal-btn-complete {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+.modal-btn-cancel {
+    background: var(--rose);
+    color: white;
+    box-shadow: 0 2px 6px rgba(211, 140, 140, 0.2);
+}
+
+.btn-secondary-soft {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-main);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    line-height: 1.4;
+    text-decoration: none;
+}
+
+.btn-secondary-soft svg {
+    flex-shrink: 0;
+    stroke: currentColor;
+    opacity: 0.85;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-secondary-soft:hover {
+    background: var(--border);
+    border-color: var(--border-hover);
+    color: var(--text-main);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secondary-soft:hover svg {
+    opacity: 1;
+}
+
+.btn-secondary-soft:active {
+    transform: translateY(0);
+}
+
+.modal-btn.btn-secondary-soft {
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.btn-close-x {
+    background: none;
+    border: none;
+    color: var(--rose);
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.btn-close-x:hover {
+    background: var(--rose-soft);
+}
+
+.btn-trash-fixed {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--rose-soft);
+    color: var(--rose);
+}
+
+.btn-trash-fixed:hover {
+    background: var(--rose);
+    color: white;
+}
+
+/* Onay Modalı Özel Kuralları */
+#confirmModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(44, 38, 33, 0.35);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+}
+
+#confirmModal.hidden {
+    opacity: 0;
+    pointer-events: none;
+    display: flex !important;
+}
+
+#confirmModal .modal-panel {
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s var(--anim-ease), opacity 0.3s;
+    height: auto;
+    width: 320px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    justify-content: center;
+    align-items: center;
+}
+
+#confirmModal:not(.hidden) .modal-panel {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.confirm-modal-box {
+    max-width: 300px;
+    text-align: center;
+    padding: 20px;
+}
+.confirm-modal-title {
+    font-size: 14px;
+    margin-bottom: 4px;
+    font-weight: 700;
+}
+
+/* addPatientModal — Çekmece Stili */
+/* addPatientModal — Çekmece Stili (editPatientModal ile aynı davranış) */
+#addPatientModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(44, 38, 33, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    justify-content: flex-end;
+    transition: opacity 0.25s;
+}
+#addPatientModal.hidden {
+    opacity: 0;
+    pointer-events: none;
+    display: flex !important;
+}
+#addPatientModal .modal-panel {
+    transform: translateX(0);
+    transition: transform 0.3s var(--anim-ease);
+}
+#addPatientModal.hidden .modal-panel {
+    transform: translateX(100%);
+}
+
+/* Koyu Temada Modal ve Çekmece Okunabilirlik İyileştirmeleri */
+/* Koyu Temada Detay Paneli ve Sidebar Okunaklılık İyileştirmeleri */
+.dark-theme .right-sidebar, 
+.dark-theme .modal-panel {
+    background: rgba(18, 18, 22, 0.97) !important;
+    backdrop-filter: blur(30px) !important;
+    -webkit-backdrop-filter: blur(30px) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+}
+
+.dark-theme .form-label {
+    color: #A1A1AA !important;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.dark-theme .modal-input {
+    background: #18181B !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #F4F4F6 !important;
+}
+
+.dark-theme .modal-input:focus {
+    border-color: var(--accent) !important;
+    background: #202024 !important;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15) !important;
+}
