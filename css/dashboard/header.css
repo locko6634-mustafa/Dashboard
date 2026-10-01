@@ -16,6 +16,13 @@
     flex-shrink: 0;
 }
 
+/* Takvim harici sekmelerde üst takvim başlığını gizle */
+body:not([data-active-tab="calendar"]) .main-header,
+.container:has(#viewCalendar.hidden) .main-header,
+.main-header.hidden {
+    display: none !important;
+}
+
 .header-brand h1 {
     font-size: 16px;
     font-weight: 800;
