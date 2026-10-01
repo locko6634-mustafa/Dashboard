@@ -250,6 +250,20 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#viewCalendar {
+    overflow: hidden;
+}
+
+#viewSettings,
+#viewPatients,
+#viewOverview,
+#viewReports {
+    padding-bottom: 32px;
+    padding-right: 4px;
 }
 
 .glass {
@@ -287,6 +301,7 @@
     gap: 16px;
     position: relative;
     z-index: 500;
+    flex-shrink: 0;
 }
 
 .header-brand h1 {
