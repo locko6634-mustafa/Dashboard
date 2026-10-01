@@ -4,15 +4,7 @@ Bu dosya, Randevu Paneli projesinde çalışmaya başlamadan önce okunması ger
 
 ---
 
-## 1. Yetenek ve Tasarım Referansları
-Bu projede frontend veya tasarım çalışması yapmadan önce aşağıdaki global kural dosyaları KESİNLİKLE okunmalıdır:
-* Tasarım İlkeleri: [design-taste-frontend RULES.md](file:///C:/Users/Mustafa/.gemini/antigravity/skills/design-taste-frontend/RULES.md)
-* Yeniden Tasarım Kuralları: [redesign-existing-projects RULES.md](file:///C:/Users/Mustafa/.gemini/antigravity/skills/redesign-existing-projects/RULES.md)
-* Görsel Doğrulama ve Playwright Kuralı: [playwright-visual-verification RULES.md](file:///C:/Users/Mustafa/.gemini/antigravity/skills/playwright-visual-verification/RULES.md)
-
----
-
-## 2. Proje Genel Yapısı
+## 1. Proje Genel Yapısı
 Randevu Paneli (Appointment Dashboard); randevu takvimi, müşteri yönetimi, seans takipleri, raporlama ve finansal özet analizlerini sunan tek sayfalık modern bir web uygulamasıdır.
 * **Frontend:** HTML5, modüler Vanilla JavaScript (ES Modules: `js/shared/`, `js/home/`, `js/login/`, `js/dashboard/`) ve Geist tipografisine dayalı modüler saf CSS (`css/shared/`, `css/home/`, `css/login/`, `css/dashboard/`).
 * **Backend:** Bağımsız Node.js (TypeScript) + Express REST API servisi (`backend/` dizini), Prisma ORM ve PostgreSQL veritabanı. Docker konteyneri (`randevu-api`) ve Traefik ters ters vekil (reverse proxy) üzerinden çalışır.
@@ -20,7 +12,7 @@ Randevu Paneli (Appointment Dashboard); randevu takvimi, müşteri yönetimi, se
 
 ---
 
-## 3. PostgreSQL & Prisma Veritabanı Mimarisi
+## 2. PostgreSQL & Prisma Veritabanı Mimarisi
 Veritabanı ilişkisel yapıda olup her işlem `tenant_id` (salon/kullanıcı bazlı) izolasyonu ile yürütülür.
 
 ### A. Temel Modeller (Prisma / PostgreSQL)
@@ -48,7 +40,7 @@ Veritabanı ilişkisel yapıda olup her işlem `tenant_id` (salon/kullanıcı ba
 
 ---
 
-## 4. Bağımsız Backend API Servisi & Endpoint Mimarisi
+## 3. Bağımsız Backend API Servisi & Endpoint Mimarisi
 Backend servisi Express ve TypeScript tabanlı olup iki ana routing katmanı sunar:
 
 ### 1. Modern RESTful API Uç Noktaları (`/api/v1/` ve `/api/`)
@@ -83,8 +75,15 @@ Eski frontend çağrılarını karşılamak için backend `/webhook/` altında e
 
 ---
 
-## 5. Güvenlik ve Kimlik Doğrulama Protokolü
+## 4. Güvenlik ve Kimlik Doğrulama Protokolü
 * Tüm korumalı isteklere istemci tarafından **`authorization`** (Bearer JWT token) ve **`x-tenant-id`** başlıkları gönderilir.
 * `authMiddleware` (`backend/src/middlewares/auth.middleware.ts`) token'ı doğrular ve isteğin yalnızca ilgili `tenant_id` kapsamındaki verilere erişmesine izin verir.
 * Şifreler Argon2 algoritması ile güvenli şekilde hash'lenir.
 * CORS ve Helmet başlıkları üretim ortamı standartlarına göre yapılandırılmıştır.
+
+---
+
+## 5. Git, GitHub ve Otomatik Dağıtım (Deploy) Kuralları
+* **Her Değişiklikten Sonra Commit & Push:** Yapılan her geliştirme, hata düzeltmesi veya güncelleme sonrasında yapılan işi özetleyen, Türkçe ve anlamlı bir commit mesajı ile değişiklikler commit'lenmeli ve GitHub'a push edilmelidir (`git add .`, `git commit -m "..."`, `git push`).
+* **Otomatik Dağıtım (CI/CD):** Deploy süreci GitHub üzerinden otomatik olarak yürütülmektedir. Değişiklikler GitHub'a push edildiğinde sistem otomatik olarak canlıya alınır; bu nedenle kesinlikle **manuel deploy işlemi yapılmamalıdır**.
+

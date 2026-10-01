@@ -29,6 +29,8 @@
 
 html:has(body.landing-page),
 body.landing-page {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
   background:
     radial-gradient(circle at 82% 8%, rgba(16, 185, 129, 0.16), transparent 28rem),
     radial-gradient(circle at 14% 28%, rgba(244, 234, 216, 0.04), transparent 22rem),
@@ -86,15 +88,20 @@ body.landing-page .container {
 }
 
 .landing-page .site-header {
-  position: sticky;
+  position: fixed;
   top: 10px;
-  z-index: 100;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
   padding-inline: 12px;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   height: auto !important;
+  pointer-events: none;
+  transform: none !important;
 }
 
 @media (min-width: 768px) {
@@ -105,6 +112,7 @@ body.landing-page .container {
 }
 
 .landing-page .nav-shell {
+  pointer-events: auto;
   width: min(100%, var(--container));
   min-height: 52px;
   margin: 0 auto;
@@ -226,14 +234,14 @@ body.landing-page .container {
   display: grid;
   align-items: center;
   overflow: hidden;
-  padding: 4.5rem 0 3rem;
+  padding: 6.5rem 0 3rem;
   background: transparent !important;
 }
 
 @media (min-width: 1024px) {
   .landing-page .hero {
     min-height: 100dvh;
-    padding: 4.5rem 0 2rem;
+    padding: 7rem 0 2rem;
   }
 }
 
@@ -1152,7 +1160,7 @@ body.landing-page .container {
 /* Dikey yüksekliği kısıtlı ekranlar için Hero alanını ölçekleme */
 @media (min-width: 1024px) and (max-height: 820px) {
   .landing-page .hero {
-    padding: 3.5rem 0 1rem;
+    padding: 5.5rem 0 1rem;
   }
   .landing-page .operation-panel {
     transform: rotateX(3deg) rotateY(-6deg) scale(0.85) translateY(-20px);
