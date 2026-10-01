@@ -87,3 +87,13 @@ Eski frontend çağrılarını karşılamak için backend `/webhook/` altında e
 * **Her Değişiklikten Sonra Commit & Push:** Yapılan her geliştirme, hata düzeltmesi veya güncelleme sonrasında yapılan işi özetleyen, Türkçe ve anlamlı bir commit mesajı ile değişiklikler commit'lenmeli ve GitHub'a push edilmelidir (`git add .`, `git commit -m "..."`, `git push`).
 * **Otomatik Dağıtım (CI/CD):** Deploy süreci GitHub üzerinden otomatik olarak yürütülmektedir. Değişiklikler GitHub'a push edildiğinde sistem otomatik olarak canlıya alınır; bu nedenle kesinlikle **manuel deploy işlemi yapılmamalıdır**.
 
+---
+
+## 6. Test ve Bağımsız Sunucu Başlatma Kuralları
+* **Doğrudan / Manuel Sunucu Başlatma Yasaktır:** Agent, test veya yerel doğrulama amacıyla terminalden rastgele veya doğrudan sunucu başlatmamalıdır (`python -m http.server`, geçici `run_command` oturumları vb. oturum bitiminde kapanır veya kontrolsüz port çakışması yaratır).
+* **Hazır Betikleri Kullanma Zorunluluğu:** Yerel statik sunucu ihtiyacı olduğunda proje kök dizinindeki hazır başlatma betikleri tetiklenmelidir:
+  * **Linux / macOS Ortamı:** `./sunucu_baslat.sh` (veya `bash sunucu_baslat.sh`)
+  * **Windows Ortamı:** `.\sunucu_baslat.ps1` (veya `powershell -ExecutionPolicy Bypass -File .\sunucu_baslat.ps1`)
+* **Çalışma Mantığı:** Betikler 8000 portunu kontrol eder; port zaten kullanımda ise çakışma yaratmadan adresi (`http://localhost:8000/`) bildirir, boşsa Python HTTP sunucusunu bağımsız arka plan süreci olarak başlatır.
+
+

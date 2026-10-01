@@ -82,6 +82,12 @@ class Dashboard {
         if (DOM.viewSettings) DOM.viewSettings.classList.add('hidden');
         if (DOM.viewReports) DOM.viewReports.classList.add('hidden');
 
+        document.body.dataset.activeTab = tabName;
+        const mainHeader = document.querySelector('.main-header');
+        if (mainHeader) {
+            mainHeader.classList.toggle('hidden', tabName !== 'calendar');
+        }
+
         if (tabName === 'calendar') {
             if (DOM.viewCalendar) DOM.viewCalendar.classList.remove('hidden');
         } else if (tabName === 'patients') {
