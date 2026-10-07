@@ -141,6 +141,24 @@
   font-size: 0.92rem;
   font-family: inherit;
   transition: all 0.2s ease;
+  color-scheme: dark;
+}
+
+.admin-select {
+  cursor: pointer;
+}
+
+.admin-select option {
+  background-color: #13151c;
+  color: #ffffff;
+  padding: 10px 12px;
+}
+
+.admin-select option:hover,
+.admin-select option:focus,
+.admin-select option:checked {
+  background-color: #2a2e3d;
+  color: #ffd875;
 }
 
 .admin-input:focus, .admin-select:focus, .admin-textarea:focus {
