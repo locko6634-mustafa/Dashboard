@@ -1,11 +1,15 @@
-// ==========================================
-// HOME / LANDING PAGE SCRIPTS
-// ==========================================
+// ==========================================================================
+// SALONZEKA - HOME / LANDING PAGE JAVASCRIPT
+// ==========================================================================
 
 import { isAuthenticated } from '../shared/auth-session.js';
-import { showToast } from '../shared/toast.js';
 
-// --- 1. AUTH CHECK & NAV UPDATE ---
+// WhatsApp İletişim Sabiti
+const WHATSAPP_NUMBER = '905510653051';
+const WHATSAPP_DEFAULT_MSG = encodeURIComponent('Merhaba, salonum için SalonZeka Yapay Zeka Asistanı ve Yönetim Paneli hakkında bilgi almak istiyorum.');
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_DEFAULT_MSG}`;
+
+// --- 1. AUTH KONTROLÜ (GİRİŞ YAPMIŞSA PANELE YÖNLENDİR) ---
 function checkAuthNav() {
     if (isAuthenticated()) {
         const loginBtn = document.getElementById('navLoginBtn');
@@ -16,114 +20,120 @@ function checkAuthNav() {
     }
 }
 
-// --- 2. REVEAL ENGINE (IntersectionObserver) ---
-function initReveal() {
-    const revealItems = document.querySelectorAll('[data-reveal]');
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        revealItems.forEach((item) => item.classList.add('is-visible'));
-        return;
-    }
-    const observer = new IntersectionObserver(
-        (entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        },
-        { threshold: 0.16 }
-    );
-    revealItems.forEach((item) => observer.observe(item));
+// --- 2. HEADER SCROLL ETKİSİ ---
+function initHeaderScroll() {
+    const header = document.querySelector('.sz-header');
+    if (!header) return;
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 20) {
+            header.classList.add('is-scrolled');
+        } else {
+            header.classList.remove('is-scrolled');
+        }
+    }, { passive: true });
 }
 
-// --- 3. 3D HERO MOTION ---
-function initHeroMotion() {
-    const hero = document.querySelector('.hero');
-    if (!hero || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        return;
+// --- 3. CANLI WHATSAPP & TAKVİM SİMÜLASYONU MOTORU ---
+function initLiveSimulation() {
+    const msg1 = document.getElementById('simMsg1'); // Müşteri: Merhaba, yarın cilt bakımı...
+    const typing = document.getElementById('simTyping'); // Bot yazıyor...
+    const msg2 = document.getElementById('simMsg2'); // Bot: Merhaba Sevil Hanım! Yarın için 14:00...
+    const msg3 = document.getElementById('simMsg3'); // Müşteri: 14:00 olsun lütfen.
+    const msg4 = document.getElementById('simMsg4'); // Bot: ✅ Randevunuz onaylandı...
+    const calSlot = document.getElementById('simCalSlot'); // Takvimdeki slot
+    const calKpi = document.getElementById('simCalKpiCount');
+
+    if (!msg1 || !typing || !msg2 || !msg3 || !msg4 || !calSlot) return;
+
+    function resetSimulation() {
+        msg1.classList.remove('is-visible');
+        msg2.classList.remove('is-visible');
+        msg3.classList.remove('is-visible');
+        msg4.classList.remove('is-visible');
+        typing.classList.remove('is-active');
+        calSlot.classList.remove('has-booking');
+        calSlot.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:700; color:var(--sz-gold);">14:00 - 15:00</span>
+                <span style="color:var(--sz-ink-muted); font-size:0.7rem;">Müsait</span>
+            </div>
+            <span style="font-style:italic;">Boş Randevu Aralığı</span>
+        `;
+        if (calKpi) calKpi.textContent = '7';
     }
-    function updateDepth() {
-        const rect = hero.getBoundingClientRect();
-        const progress = Math.min(1, Math.max(0, Math.abs(rect.top) / Math.max(1, rect.height)));
-        document.documentElement.style.setProperty('--scroll-depth', progress.toFixed(3));
+
+    function runSimulationStep() {
+        resetSimulation();
+
+        // Adım 1: Müşteri sorusu görünür
+        setTimeout(() => {
+            msg1.classList.add('is-visible');
+        }, 500);
+
+        // Adım 2: Bot yazıyor...
+        setTimeout(() => {
+            typing.classList.add('is-active');
+        }, 1600);
+
+        // Adım 3: Bot müsait saatleri sunar
+        setTimeout(() => {
+            typing.classList.remove('is-active');
+            msg2.classList.add('is-visible');
+        }, 3000);
+
+        // Adım 4: Müşteri saat seçer
+        setTimeout(() => {
+            msg3.classList.add('is-visible');
+        }, 4600);
+
+        // Adım 5: Bot yazıyor... (Onay için)
+        setTimeout(() => {
+            typing.classList.add('is-active');
+        }, 5500);
+
+        // Adım 6: Bot onay şablonunu gönderir
+        setTimeout(() => {
+            typing.classList.remove('is-active');
+            msg4.classList.add('is-visible');
+
+            // Takvime canlı işlenir!
+            calSlot.classList.add('has-booking');
+            calSlot.innerHTML = `
+                <div class="sz-slot-client">
+                    <span>14:00 - 15:00</span>
+                    <span style="background:var(--sz-emerald); color:#fff; font-size:0.65rem; padding:1px 6px; border-radius:999px;">Onaylandı</span>
+                </div>
+                <div style="font-weight:700; color:var(--sz-ink-primary);">Sevil K. (0532 *** **)</div>
+                <div class="sz-slot-service">Cilt Bakımı • Seans 3/8</div>
+            `;
+            if (calKpi) calKpi.textContent = '8';
+        }, 6800);
+
+        // Adım 7: 12 saniye sonra tekrar başa sarar
+        setTimeout(runSimulationStep, 13000);
     }
-    updateDepth();
-    window.addEventListener('scroll', updateDepth, { passive: true });
+
+    // İlk çalıştırma
+    runSimulationStep();
 }
 
-// --- 4. FORM HANDLER ---
-export function handleApply(e) {
-    if (e && e.preventDefault) e.preventDefault();
-    const form = document.getElementById('leadForm');
-    const name = document.getElementById('name')?.value.trim();
-    const company = document.getElementById('company')?.value.trim();
-    const email = document.getElementById('email')?.value.trim();
-    const phone = document.getElementById('phone')?.value.trim();
-    const need = document.getElementById('need')?.value;
-    const btnText = document.getElementById('applyBtnText');
-    const btnSubmit = document.getElementById('btnSubmitApply');
-
-    // Hata mesajlarını sıfırla
-    document.querySelectorAll('.field-error').forEach((el) => (el.textContent = ''));
-
-    let hasError = false;
-
-    if (!name) {
-        const errEl = document.querySelector('[data-error-for="name"]');
-        if (errEl) errEl.textContent = 'Ad Soyad zorunludur.';
-        hasError = true;
-    }
-    if (!company) {
-        const errEl = document.querySelector('[data-error-for="company"]');
-        if (errEl) errEl.textContent = 'Salon adı zorunludur.';
-        hasError = true;
-    }
-    if (!email) {
-        const errEl = document.querySelector('[data-error-for="email"]');
-        if (errEl) errEl.textContent = 'E-posta zorunludur.';
-        hasError = true;
-    }
-    if (!phone) {
-        const errEl = document.querySelector('[data-error-for="phone"]');
-        if (errEl) errEl.textContent = 'Telefon zorunludur.';
-        hasError = true;
-    }
-    if (!need) {
-        const errEl = document.querySelector('[data-error-for="need"]');
-        if (errEl) errEl.textContent = 'Bu alan zorunludur.';
-        hasError = true;
-    }
-
-    if (hasError) {
-        showToast('Lütfen formdaki hataları düzeltin.', 'error');
-        return;
-    }
-
-    if (btnText) btnText.style.opacity = '0.5';
-    if (btnSubmit) btnSubmit.disabled = true;
-
-    setTimeout(() => {
-        showToast('Başvurunuz başarıyla alındı! En kısa sürede sizinle iletişime geçeceğiz.', 'success', 5000);
-        if (form) form.reset();
-        if (btnText) btnText.style.opacity = '1';
-        if (btnSubmit) btnSubmit.disabled = false;
-    }, 1200);
+// --- 4. TÜM WHATSAPP DÜĞMELERİNİ YÖNLENDİRME ---
+function setupWhatsAppLinks() {
+    const waButtons = document.querySelectorAll('.sz-wa-link');
+    waButtons.forEach((btn) => {
+        btn.href = WHATSAPP_URL;
+        btn.target = '_blank';
+        btn.rel = 'noopener noreferrer';
+    });
 }
 
-// Window scope'a da ekle (HTML onsubmit="handleApply(event)" için)
-window.handleApply = handleApply;
-
-// --- INITIALIZATION ---
+// --- BAŞLATMA ---
 function init() {
     checkAuthNav();
-    initReveal();
-    initHeroMotion();
-    
-    const leadForm = document.getElementById('leadForm');
-    if (leadForm) {
-        leadForm.addEventListener('submit', handleApply);
-    }
+    initHeaderScroll();
+    initLiveSimulation();
+    setupWhatsAppLinks();
 }
 
 if (document.readyState === 'loading') {
