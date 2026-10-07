@@ -9,35 +9,30 @@ export class AdminService {
    * Süper Admin ve Multi-tenant tablolarının/kolonlarının varlığını garantiye alır.
    */
   static async ensureSchema() {
-    try {
-      // super_admins tablosu
-      await prisma.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS public.super_admins (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          email VARCHAR(255) UNIQUE NOT NULL,
-          password_hash VARCHAR(255) NOT NULL,
-          ad_soyad VARCHAR(255) NOT NULL,
-          created_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP
-        );
-      `);
+    const queries = [
+      `CREATE TABLE IF NOT EXISTS public.super_admins (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        ad_soyad VARCHAR(255) NOT NULL,
+        created_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP
+      )`,
+      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS whatsapp_phone VARCHAR(50)`,
+      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS n8n_webhook_url VARCHAR(500)`,
+      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS chatwoot_inbox_id VARCHAR(100)`,
+      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS api_key VARCHAR(100)`,
+      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS durum VARCHAR(20) DEFAULT 'Aktif'`,
+      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_tipi VARCHAR(50) DEFAULT 'Standart'`,
+      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_bitis_tarihi TIMESTAMPTZ(6)`,
+      `ALTER TABLE public.conversation_states ADD COLUMN IF NOT EXISTS tenant_id UUID`,
+    ];
 
-      // tenants tablosuna ek kolonlar
-      await prisma.$executeRawUnsafe(`
-        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS whatsapp_phone VARCHAR(50);
-        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS n8n_webhook_url VARCHAR(500);
-        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS chatwoot_inbox_id VARCHAR(100);
-        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS api_key VARCHAR(100) UNIQUE;
-        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS durum VARCHAR(20) DEFAULT 'Aktif';
-        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_tipi VARCHAR(50) DEFAULT 'Standart';
-        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_bitis_tarihi TIMESTAMPTZ(6);
-      `);
-
-      // conversation_states tablosuna tenant_id
-      await prisma.$executeRawUnsafe(`
-        ALTER TABLE public.conversation_states ADD COLUMN IF NOT EXISTS tenant_id UUID;
-      `);
-    } catch (err) {
-      console.warn('ensureSchema warning:', err);
+    for (const sql of queries) {
+      try {
+        await prisma.$executeRawUnsafe(sql);
+      } catch (e) {
+        console.warn('SQL execution note:', e);
+      }
     }
   }
 
@@ -141,6 +136,7 @@ export class AdminService {
    * Platform genel KPI istatistiklerini hesaplar.
    */
   static async getSystemStats() {
+    await AdminService.ensureSchema();
     const [totalTenants, activeTenants, totalClients, totalAppointments] = await Promise.all([
       prisma.tenant.count(),
       prisma.tenant.count({ where: { durum: 'Aktif' } }),
@@ -175,6 +171,7 @@ export class AdminService {
    * İşletmeleri listeleme, arama ve filtreleme
    */
   static async listTenants(search?: string, durum?: string) {
+    await AdminService.ensureSchema();
     const where: any = {};
 
     if (durum && durum !== 'Tümü') {
