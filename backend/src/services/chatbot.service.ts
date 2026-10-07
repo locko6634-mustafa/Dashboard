@@ -61,10 +61,26 @@ export class ChatbotService {
   }
 
   static async getAvailableSlots(date: string, durationMinutes: number = 30, tenantId?: string) {
-    // Salon working hours: 09:00 - 19:00
-    const startHour = 9;
-    const endHour = 19;
-    const slotStep = 15; // 15 mins
+    // Salon çalışma saatleri (varsayılan: 09:00 - 19:00)
+    let startHour = 9;
+    let endHour = 19;
+    let slotStep = 15; // 15 dk
+
+    if (tenantId) {
+      try {
+        const calSetting = await prisma.appSetting.findFirst({
+          where: { tenant_id: tenantId, setting_key: 'calendar' },
+        });
+        if (calSetting && calSetting.setting_value) {
+          const val = calSetting.setting_value as any;
+          if (val.START_HOUR !== undefined) startHour = Number(val.START_HOUR);
+          if (val.END_HOUR !== undefined) endHour = Number(val.END_HOUR);
+          if (val.SLOT_MINS !== undefined) slotStep = Number(val.SLOT_MINS);
+        }
+      } catch {
+        // Varsayılan ayarlarla devam et
+      }
+    }
 
     // Get all existing appointments on this date
     const existing = await prisma.appointment.findMany({
@@ -213,8 +229,8 @@ export class ChatbotService {
     };
   }
 
-  static async cancelAppointment(appointmentId: string, phone: string) {
-    const client = await this.getClientByPhone(phone);
+  static async cancelAppointment(appointmentId: string, phone: string, tenantId?: string) {
+    const client = await this.getClientByPhone(phone, tenantId);
     if (!client) {
       return { success: false, message: 'Bu telefon numarasına ait müşteri bulunamadı' };
     }
@@ -224,6 +240,7 @@ export class ChatbotService {
         id: appointmentId,
         hasta_id: client.id,
         deleted_at: null,
+        ...(tenantId ? { tenant_id: tenantId } : {}),
       },
     });
 
@@ -239,10 +256,14 @@ export class ChatbotService {
     return { success: true, message: 'Randevunuz başarıyla iptal edildi.' };
   }
 
-  static async rescheduleAppointment(appointmentId: string, newDate: string, newTime: string, phone?: string) {
-    let whereClause: any = { id: appointmentId, deleted_at: null };
+  static async rescheduleAppointment(appointmentId: string, newDate: string, newTime: string, phone?: string, tenantId?: string) {
+    let whereClause: any = {
+      id: appointmentId,
+      deleted_at: null,
+      ...(tenantId ? { tenant_id: tenantId } : {}),
+    };
     if (phone) {
-      const client = await this.getClientByPhone(phone);
+      const client = await this.getClientByPhone(phone, tenantId);
       if (!client) return { success: false, message: 'Müşteri bulunamadı' };
       whereClause.hasta_id = client.id;
     }

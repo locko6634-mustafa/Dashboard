@@ -77,16 +77,17 @@ export class ChatbotController {
 
   static async cancelAppointment(req: Request, res: Response, next: NextFunction) {
     try {
-      const { appointment_id, id, telefon, phone } = req.body;
+      const { appointment_id, id, telefon, phone, tenant_id } = req.body;
       const aptId = appointment_id || id;
       const ph = telefon || phone;
+      const tenantId = tenant_id || (req.headers['x-tenant-id'] as string);
 
       if (!aptId || !ph) {
         res.status(400).json({ success: false, error: 'Randevu ID ve telefon numarası zorunludur' });
         return;
       }
 
-      const result = await ChatbotService.cancelAppointment(aptId, ph);
+      const result = await ChatbotService.cancelAppointment(aptId, ph, tenantId);
       res.json(result);
     } catch (err) {
       next(err);
@@ -95,18 +96,19 @@ export class ChatbotController {
 
   static async rescheduleAppointment(req: Request, res: Response, next: NextFunction) {
     try {
-      const { appointment_id, id, tarih, date, saat, time, telefon, phone } = req.body;
+      const { appointment_id, id, tarih, date, saat, time, telefon, phone, tenant_id } = req.body;
       const aptId = appointment_id || id;
       const newDate = tarih || date;
       const newTime = saat || time;
       const ph = telefon || phone;
+      const tenantId = tenant_id || (req.headers['x-tenant-id'] as string);
 
       if (!aptId || !newDate || !newTime) {
         res.status(400).json({ success: false, error: 'Randevu ID, yeni tarih ve yeni saat zorunludur' });
         return;
       }
 
-      const result = await ChatbotService.rescheduleAppointment(aptId, newDate, newTime, ph);
+      const result = await ChatbotService.rescheduleAppointment(aptId, newDate, newTime, ph, tenantId);
       res.json(result);
     } catch (err) {
       next(err);
