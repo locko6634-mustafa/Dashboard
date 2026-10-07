@@ -140,7 +140,6 @@
                 <th>İletişim & E-posta</th>
                 <th>WhatsApp No</th>
                 <th>API Key</th>
-                <th>Paket / Bitiş</th>
                 <th>Kayıtlar</th>
                 <th>Durum</th>
                 <th style="text-align: right;">İşlemler</th>
@@ -148,7 +147,7 @@
             </thead>
             <tbody id="tenantsTableBody">
               <tr>
-                <td colspan="8" style="text-align: center; padding: 40px; color: #9ca3af;">İşletmeler yükleniyor...</td>
+                <td colspan="7" style="text-align: center; padding: 40px; color: #9ca3af;">İşletmeler yükleniyor...</td>
               </tr>
             </tbody>
           </table>
@@ -164,67 +163,170 @@
           <button class="admin-modal-close" id="btnCloseTenantModal">&times;</button>
         </div>
 
+        <!-- MODAL SEKMELERİ -->
+        <div class="admin-modal-tabs">
+          <button type="button" class="admin-tab-btn active" data-tab="tabPaneBasic">1. Temel & İletişim</button>
+          <button type="button" class="admin-tab-btn" data-tab="tabPaneSector">2. Sektör & Terminoloji</button>
+          <button type="button" class="admin-tab-btn" data-tab="tabPaneCalendar">3. Mesai & Takvim</button>
+          <button type="button" class="admin-tab-btn" data-tab="tabPaneServices">4. Hizmet Yönetimi</button>
+        </div>
+
         <form id="formTenantModal">
           <input type="hidden" id="tenantEditId">
 
-          <div class="admin-grid-2">
-            <div class="admin-form-group">
-              <label class="admin-label" for="tenantSalonAdi">Salon Adı *</label>
-              <input class="admin-input" type="text" id="tenantSalonAdi" placeholder="Örn: İnci Güzellik Merkezi" required>
+          <!-- SEKME 1: TEMEL & İLETİŞİM -->
+          <div id="tabPaneBasic" class="admin-tab-pane active">
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label class="admin-label" for="tenantSalonAdi">İşletme / Salon Adı *</label>
+                <input class="admin-input" type="text" id="tenantSalonAdi" placeholder="Örn: İnci Güzellik Merkezi" required>
+              </div>
+              <div class="admin-form-group">
+                <label class="admin-label" for="tenantEmail">Yönetici E-posta *</label>
+                <input class="admin-input" type="email" id="tenantEmail" placeholder="yonetim@inciguzellik.com" required>
+              </div>
             </div>
+
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label class="admin-label" for="tenantPassword" id="lblTenantPassword">Giriş Şifresi *</label>
+                <input class="admin-input" type="password" id="tenantPassword" placeholder="En az 6 karakter">
+                <small style="font-size: 0.72rem; color: #9ca3af;" id="helpPasswordNote">Yeni oluştururken zorunludur.</small>
+              </div>
+              <div class="admin-form-group">
+                <label class="admin-label" for="tenantWhatsapp">WhatsApp İşletme Numarası</label>
+                <input class="admin-input" type="text" id="tenantWhatsapp" placeholder="Örn: 905321234567">
+              </div>
+            </div>
+
             <div class="admin-form-group">
-              <label class="admin-label" for="tenantEmail">Yönetici E-posta *</label>
-              <input class="admin-input" type="email" id="tenantEmail" placeholder="yonetim@inciguzellik.com" required>
+              <label class="admin-label" for="tenantWebhook">n8n Webhook URL (Randevu Bildirimleri)</label>
+              <input class="admin-input" type="url" id="tenantWebhook" placeholder="https://n8n.domain.com/webhook/salon-bildirim">
+            </div>
+
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label class="admin-label" for="tenantChatwoot">Chatwoot Gelen Kutusu ID</label>
+                <input class="admin-input" type="text" id="tenantChatwoot" placeholder="Örn: 14 veya inbox_xyz">
+              </div>
+              <div class="admin-form-group">
+                <label class="admin-label" for="tenantDurum">Hesap Durumu</label>
+                <select class="admin-select" id="tenantDurum">
+                  <option value="Aktif">Aktif</option>
+                  <option value="Askıda">Askıda (Dondurulmuş)</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          <div class="admin-grid-2">
+          <!-- SEKME 2: SEKTÖR & TERMİNOLOJİ -->
+          <div id="tabPaneSector" class="admin-tab-pane">
             <div class="admin-form-group">
-              <label class="admin-label" for="tenantPassword" id="lblTenantPassword">Giriş Şifresi *</label>
-              <input class="admin-input" type="password" id="tenantPassword" placeholder="En az 6 karakter">
-              <small style="font-size: 0.72rem; color: #9ca3af;" id="helpPasswordNote">Yeni oluştururken zorunludur.</small>
-            </div>
-            <div class="admin-form-group">
-              <label class="admin-label" for="tenantWhatsapp">WhatsApp İşletme Numarası</label>
-              <input class="admin-input" type="text" id="tenantWhatsapp" placeholder="Örn: 905321234567">
-            </div>
-          </div>
-
-          <div class="admin-form-group">
-            <label class="admin-label" for="tenantWebhook">n8n Webhook URL (Bildirimler İçin)</label>
-            <input class="admin-input" type="url" id="tenantWebhook" placeholder="https://n8n.domain.com/webhook/salon-bildirim">
-          </div>
-
-          <div class="admin-grid-2">
-            <div class="admin-form-group">
-              <label class="admin-label" for="tenantChatwoot">Chatwoot Gelen Kutusu ID</label>
-              <input class="admin-input" type="text" id="tenantChatwoot" placeholder="Örn: 14 veya inbox_xyz">
-            </div>
-            <div class="admin-form-group">
-              <label class="admin-label" for="tenantPlan">Abonelik Paketi</label>
-              <select class="admin-select" id="tenantPlan">
-                <option value="Standart">Standart Plan</option>
-                <option value="Premium">Premium Plan</option>
-                <option value="Enterprise">Enterprise (Özel)</option>
+              <label class="admin-label" for="selectAdminSector">Faaliyet Sektörü</label>
+              <select class="admin-select" id="selectAdminSector">
+                <option value="beauty">✂️ Güzellik, Berber & Kişisel Bakım</option>
+                <option value="healthcare">🩺 Klinik, Sağlık & Terapi</option>
+                <option value="consulting">⚖️ Hukuk & Profesyonel Danışmanlık</option>
+                <option value="education">🎓 Eğitim, Özel Ders & Koçluk</option>
+                <option value="automotive">🚗 Oto Servis, Ekspertiz & Bakım</option>
               </select>
             </div>
+
+            <div style="margin-bottom: 20px;">
+              <button type="button" class="admin-btn admin-btn-secondary" id="btnImportPresetServices" style="width: 100%; border-style: dashed;">
+                + Bu Sektörün Örnek Hizmetlerini Listeye Aktar
+              </button>
+            </div>
+
+            <div style="font-size: 0.8rem; font-weight: 600; color: #ffd875; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;">
+              Terim Özelleştirme
+            </div>
+
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label class="admin-label" for="termClientSingular">Müşteri (Tekil)</label>
+                <input class="admin-input" type="text" id="termClientSingular" placeholder="Müşteri">
+              </div>
+              <div class="admin-form-group">
+                <label class="admin-label" for="termClientPlural">Müşteriler (Çoğul)</label>
+                <input class="admin-input" type="text" id="termClientPlural" placeholder="Müşteriler">
+              </div>
+            </div>
+
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label class="admin-label" for="termServiceSingular">Hizmet / İşlem</label>
+                <input class="admin-input" type="text" id="termServiceSingular" placeholder="Hizmet">
+              </div>
+              <div class="admin-form-group">
+                <label class="admin-label" for="termSessionSingular">Seans / Randevu</label>
+                <input class="admin-input" type="text" id="termSessionSingular" placeholder="Seans">
+              </div>
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-label" for="termExtraInfo">Ek Bilgi / Not Başlığı</label>
+              <input class="admin-input" type="text" id="termExtraInfo" placeholder="Özel İstek / Alerji Notu">
+            </div>
           </div>
 
-          <div class="admin-grid-2">
-            <div class="admin-form-group">
-              <label class="admin-label" for="tenantDurum">Hesap Durumu</label>
-              <select class="admin-select" id="tenantDurum">
-                <option value="Aktif">Aktif</option>
-                <option value="Askıda">Askıda (Dondurulmuş)</option>
-              </select>
+          <!-- SEKME 3: MESAİ & TAKVİM -->
+          <div id="tabPaneCalendar" class="admin-tab-pane">
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label class="admin-label" for="calStartHour">Mesai Başlangıç (Saat)</label>
+                <input class="admin-input" type="number" id="calStartHour" min="6" max="14" value="9" required>
+              </div>
+              <div class="admin-form-group">
+                <label class="admin-label" for="calEndHour">Mesai Bitiş (Saat)</label>
+                <input class="admin-input" type="number" id="calEndHour" min="15" max="24" value="19" required>
+              </div>
             </div>
-            <div class="admin-form-group">
-              <label class="admin-label" for="tenantBitisTarihi">Paket Bitiş Tarihi</label>
-              <input class="admin-input" type="date" id="tenantBitisTarihi">
+
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label class="admin-label" for="calSlotMins">Varsayılan Slot Süresi</label>
+                <select class="admin-select" id="calSlotMins">
+                  <option value="15">15 Dakika</option>
+                  <option value="30" selected>30 Dakika</option>
+                  <option value="45">45 Dakika</option>
+                  <option value="60">60 Dakika</option>
+                </select>
+              </div>
+              <div class="admin-form-group">
+                <label class="admin-label" for="uiCurrency">Para Birimi Sembolü</label>
+                <input class="admin-input" type="text" id="uiCurrency" value="₺" placeholder="₺">
+              </div>
             </div>
           </div>
 
-          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+          <!-- SEKME 4: HİZMET YÖNETİMİ -->
+          <div id="tabPaneServices" class="admin-tab-pane">
+            <label class="admin-label">Tanımlı Hizmetler (<span id="countAdminServices">0</span> adet)</label>
+            <div class="admin-service-list" id="adminServiceCardList">
+              <!-- Dinamik çipler buraya eklenecek -->
+            </div>
+
+            <div style="font-size: 0.8rem; font-weight: 600; color: #d1d5db; margin-bottom: 8px;">
+              Yeni Hizmet Ekle
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-end;">
+              <div style="flex: 2;">
+                <input class="admin-input" type="text" id="newServiceName" placeholder="Hizmet adı (Örn: Cilt Bakımı)">
+              </div>
+              <div style="flex: 1; max-width: 110px;">
+                <input class="admin-input" type="number" id="newServiceDuration" min="10" max="360" step="5" value="30" placeholder="dk">
+              </div>
+              <div>
+                <button type="button" class="admin-btn admin-btn-secondary" id="btnAddServiceItem" style="white-space: nowrap;">
+                  + Ekle
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- MODAL BUTONLARI -->
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px;">
             <button type="button" class="admin-btn admin-btn-secondary" id="btnCancelTenantModal">Vazgeç</button>
             <button type="submit" class="admin-btn admin-btn-primary" id="btnSaveTenant" style="width: auto;">İşletmeyi Kaydet</button>
           </div>

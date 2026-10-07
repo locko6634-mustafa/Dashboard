@@ -2,6 +2,8 @@
 // SALONZEKA - SUPER ADMIN DASHBOARD LOGIC
 // ==========================================
 
+import { SECTOR_PRESETS } from '../shared/terminology.js';
+
 const isLocal = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
 const API_BASE = isLocal 
   ? 'http://localhost:3000/api/v1' 
@@ -54,9 +56,31 @@ const helpPasswordNote = document.getElementById('helpPasswordNote');
 const tenantWhatsapp = document.getElementById('tenantWhatsapp');
 const tenantWebhook = document.getElementById('tenantWebhook');
 const tenantChatwoot = document.getElementById('tenantChatwoot');
-const tenantPlan = document.getElementById('tenantPlan');
 const tenantDurum = document.getElementById('tenantDurum');
-const tenantBitisTarihi = document.getElementById('tenantBitisTarihi');
+
+// Sektör & Terminoloji DOM Elements
+const selectAdminSector = document.getElementById('selectAdminSector');
+const btnImportPresetServices = document.getElementById('btnImportPresetServices');
+const termClientSingular = document.getElementById('termClientSingular');
+const termClientPlural = document.getElementById('termClientPlural');
+const termServiceSingular = document.getElementById('termServiceSingular');
+const termSessionSingular = document.getElementById('termSessionSingular');
+const termExtraInfo = document.getElementById('termExtraInfo');
+
+// Mesai & Takvim DOM Elements
+const calStartHour = document.getElementById('calStartHour');
+const calEndHour = document.getElementById('calEndHour');
+const calSlotMins = document.getElementById('calSlotMins');
+const uiCurrency = document.getElementById('uiCurrency');
+
+// Hizmet Yönetimi DOM Elements & State
+const adminServiceCardList = document.getElementById('adminServiceCardList');
+const countAdminServices = document.getElementById('countAdminServices');
+const newServiceName = document.getElementById('newServiceName');
+const newServiceDuration = document.getElementById('newServiceDuration');
+const btnAddServiceItem = document.getElementById('btnAddServiceItem');
+
+let localServices = [];
 
 // Yardımcı: Token Alma
 function getAdminToken() {
@@ -178,17 +202,13 @@ async function loadTenants() {
 // 3. İŞLETMELER TABLOSUNU ÇİZ
 function renderTenantsTable(tenants) {
   if (!tenants || tenants.length === 0) {
-    tenantsTableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px; color: #9ca3af;">Kayıtlı işletme bulunamadı.</td></tr>`;
+    tenantsTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: #9ca3af;">Kayıtlı işletme bulunamadı.</td></tr>`;
     return;
   }
 
   tenantsTableBody.innerHTML = tenants.map(t => {
     const isActive = t.durum === 'Aktif';
     const badgeClass = isActive ? 'admin-badge-active' : 'admin-badge-suspended';
-    const bitisStr = t.plan_bitis_tarihi 
-      ? new Date(t.plan_bitis_tarihi).toLocaleDateString('tr-TR') 
-      : 'Süresiz';
-
     const apiKeyShort = t.api_key ? (t.api_key.substring(0, 12) + '...') : '-';
 
     return `
@@ -210,10 +230,6 @@ function renderTenantsTable(tenants) {
             <code style="font-size: 0.78rem; background: rgba(255,255,255,0.06); padding: 3px 6px; border-radius: 6px;">${apiKeyShort}</code>
             ${t.api_key ? `<button class="admin-action-btn" style="padding: 2px 6px; font-size: 0.72rem;" onclick="copyApiKey('${t.api_key}')" title="Kopyala">Kopyala</button>` : ''}
           </div>
-        </td>
-        <td>
-          <span class="admin-badge admin-badge-plan">${escapeHtml(t.plan_tipi || 'Standart')}</span>
-          <div style="font-size: 0.74rem; color: #9ca3af; margin-top: 4px;">Bitiş: ${bitisStr}</div>
         </td>
         <td>
           <div style="font-size: 0.82rem;">👥 <strong>${t.client_count ?? 0}</strong> müşteri</div>
@@ -331,7 +347,96 @@ inputSearchTenants?.addEventListener('input', () => {
 
 selectStatusFilter?.addEventListener('change', loadTenants);
 
-// 5. MODAL İŞLEMLERİ
+// 5. MODAL SEKMELERİ & HİZMET YÖNETİMİ
+function switchModalTab(tabPaneId) {
+  document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabPaneId);
+  });
+  document.querySelectorAll('.admin-tab-pane').forEach(pane => {
+    pane.classList.toggle('active', pane.id === tabPaneId);
+  });
+}
+
+document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    switchModalTab(btn.dataset.tab);
+  });
+});
+
+function renderAdminServices() {
+  if (!adminServiceCardList) return;
+  adminServiceCardList.innerHTML = '';
+  countAdminServices.textContent = localServices.length;
+
+  if (localServices.length === 0) {
+    adminServiceCardList.innerHTML = `<span style="font-size: 0.8rem; color: #9ca3af; padding: 4px;">Henüz hizmet eklenmedi.</span>`;
+    return;
+  }
+
+  localServices.forEach((srv, idx) => {
+    const chip = document.createElement('div');
+    chip.className = 'admin-service-chip';
+    chip.innerHTML = `
+      <strong>${escapeHtml(srv.name)}</strong>
+      <span>${srv.duration} dk</span>
+      <button type="button" class="admin-service-del" title="Hizmeti Sil">&times;</button>
+    `;
+    chip.querySelector('.admin-service-del').addEventListener('click', () => {
+      localServices.splice(idx, 1);
+      renderAdminServices();
+    });
+    adminServiceCardList.appendChild(chip);
+  });
+}
+
+btnAddServiceItem?.addEventListener('click', () => {
+  const name = newServiceName?.value.trim();
+  const dur = parseInt(newServiceDuration?.value, 10) || 30;
+  if (!name) {
+    alert('Lütfen hizmet adını giriniz.');
+    return;
+  }
+  if (localServices.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+    alert('Bu hizmet zaten listede mevcut.');
+    return;
+  }
+  localServices.push({ name, duration: dur });
+  newServiceName.value = '';
+  newServiceDuration.value = '30';
+  renderAdminServices();
+});
+
+function applySectorPreset(sectorId, updateServices = false) {
+  const preset = SECTOR_PRESETS[sectorId] || SECTOR_PRESETS.beauty;
+  if (preset && preset.terms) {
+    if (termClientSingular) termClientSingular.value = preset.terms.client_singular;
+    if (termClientPlural) termClientPlural.value = preset.terms.client_plural;
+    if (termServiceSingular) termServiceSingular.value = preset.terms.service_singular;
+    if (termSessionSingular) termSessionSingular.value = preset.terms.session_singular;
+    if (termExtraInfo) termExtraInfo.value = preset.terms.extra_info;
+  }
+  if (updateServices && preset && preset.sample_services) {
+    preset.sample_services.forEach(srv => {
+      if (!localServices.some(s => s.name.toLowerCase() === srv.name.toLowerCase())) {
+        localServices.push({ name: srv.name, duration: srv.duration });
+      }
+    });
+    renderAdminServices();
+  }
+}
+
+selectAdminSector?.addEventListener('change', (e) => {
+  applySectorPreset(e.target.value, false);
+});
+
+btnImportPresetServices?.addEventListener('click', () => {
+  const sector = selectAdminSector ? selectAdminSector.value : 'beauty';
+  const beforeCount = localServices.length;
+  applySectorPreset(sector, true);
+  const diff = localServices.length - beforeCount;
+  alert(`${diff} adet örnek hizmet listeye aktarıldı.`);
+});
+
 function openNewTenantModal() {
   modalTenantTitle.textContent = 'Yeni İşletme Kaydet';
   tenantEditId.value = '';
@@ -339,6 +444,17 @@ function openNewTenantModal() {
   tenantPassword.required = true;
   lblTenantPassword.textContent = 'Giriş Şifresi *';
   helpPasswordNote.textContent = 'Yeni oluştururken zorunludur.';
+
+  switchModalTab('tabPaneBasic');
+  selectAdminSector.value = 'beauty';
+  localServices = [];
+  applySectorPreset('beauty', true);
+
+  calStartHour.value = 9;
+  calEndHour.value = 19;
+  calSlotMins.value = 30;
+  uiCurrency.value = '₺';
+
   modalTenant.classList.remove('hidden');
 }
 
@@ -357,13 +473,53 @@ window.openEditTenantModal = function(id) {
   tenantWhatsapp.value = tenant.whatsapp_phone || '';
   tenantWebhook.value = tenant.n8n_webhook_url || '';
   tenantChatwoot.value = tenant.chatwoot_inbox_id || '';
-  tenantPlan.value = tenant.plan_tipi || 'Standart';
   tenantDurum.value = tenant.durum || 'Aktif';
-  
-  if (tenant.plan_bitis_tarihi) {
-    tenantBitisTarihi.value = new Date(tenant.plan_bitis_tarihi).toISOString().split('T')[0];
+
+  switchModalTab('tabPaneBasic');
+
+  // Mevcut Ayarları Yükle (app_settings)
+  const settingsMap = {};
+  if (Array.isArray(tenant.app_settings)) {
+    tenant.app_settings.forEach(s => {
+      settingsMap[s.setting_key] = s.setting_value;
+    });
+  }
+
+  // Sektör & Terminoloji
+  const sector = settingsMap.sector || 'beauty';
+  selectAdminSector.value = sector;
+  const terms = settingsMap.terminology || (SECTOR_PRESETS[sector]?.terms || {});
+  termClientSingular.value = terms.client_singular || 'Müşteri';
+  termClientPlural.value = terms.client_plural || 'Müşteriler';
+  termServiceSingular.value = terms.service_singular || 'Hizmet';
+  termSessionSingular.value = terms.session_singular || 'Seans';
+  termExtraInfo.value = terms.extra_info || 'Özel İstek / Alerji Notu';
+
+  // Mesai & Takvim
+  const cal = settingsMap.calendar || {};
+  calStartHour.value = cal.START_HOUR ?? 9;
+  calEndHour.value = cal.END_HOUR ?? 19;
+  calSlotMins.value = cal.SLOT_MINS ?? 30;
+
+  const uiPrefs = settingsMap.ui_preferences || {};
+  uiCurrency.value = uiPrefs.currency || '₺';
+
+  // Hizmetler
+  localServices = [];
+  const srvSettings = settingsMap.services;
+  if (srvSettings && srvSettings.MAP) {
+    Object.entries(srvSettings.MAP).forEach(([name, dur]) => {
+      localServices.push({ name, duration: Number(dur) || 30 });
+    });
+  } else if (srvSettings && Array.isArray(srvSettings.LIST)) {
+    srvSettings.LIST.forEach(name => {
+      localServices.push({ name, duration: 30 });
+    });
+  }
+  if (localServices.length === 0) {
+    applySectorPreset(sector, true);
   } else {
-    tenantBitisTarihi.value = '';
+    renderAdminServices();
   }
 
   modalTenant.classList.remove('hidden');
@@ -383,15 +539,49 @@ formTenantModal?.addEventListener('submit', async (e) => {
   const id = tenantEditId.value;
   const isEdit = Boolean(id);
 
+  // Hizmetler Map ve List hazırlığı
+  const servicesMap = {};
+  const servicesList = [];
+  localServices.forEach(s => {
+    servicesMap[s.name] = Number(s.duration) || 30;
+    servicesList.push(s.name);
+  });
+
   const payload = {
     salon_adi: tenantSalonAdi.value.trim(),
     email: tenantEmail.value.trim(),
     whatsapp_phone: tenantWhatsapp.value.trim() || undefined,
     n8n_webhook_url: tenantWebhook.value.trim() || undefined,
     chatwoot_inbox_id: tenantChatwoot.value.trim() || undefined,
-    plan_tipi: tenantPlan.value,
     durum: tenantDurum.value,
-    plan_bitis_tarihi: tenantBitisTarihi.value || undefined,
+    settings: {
+      calendar: {
+        START_HOUR: parseInt(calStartHour.value, 10) || 9,
+        END_HOUR: parseInt(calEndHour.value, 10) || 19,
+        SLOT_MINS: parseInt(calSlotMins.value, 10) || 30,
+        DAYS: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
+      },
+      services: {
+        DEFAULT_MINS: 30,
+        MAP: servicesMap,
+        LIST: servicesList
+      },
+      sector: selectAdminSector.value,
+      terminology: {
+        client_singular: termClientSingular.value.trim() || 'Müşteri',
+        client_plural: termClientPlural.value.trim() || 'Müşteriler',
+        service_singular: termServiceSingular.value.trim() || 'Hizmet',
+        service_plural: (termServiceSingular.value.trim() || 'Hizmet') + 'ler',
+        session_singular: termSessionSingular.value.trim() || 'Seans',
+        session_plural: (termSessionSingular.value.trim() || 'Seans') + 'lar',
+        extra_info: termExtraInfo.value.trim() || 'Özel İstek / Alerji Notu'
+      },
+      ui_preferences: {
+        currency: uiCurrency.value.trim() || '₺',
+        theme: 'light',
+        accent_preset: 'emerald'
+      }
+    }
   };
 
   if (tenantPassword.value) {
@@ -408,14 +598,14 @@ formTenantModal?.addEventListener('submit', async (e) => {
         method: 'PUT',
         body: JSON.stringify(payload),
       });
-      alert('İşletme başarıyla güncellendi.');
+      alert('İşletme ve ayarları başarıyla güncellendi.');
     } else {
       if (!payload.password) throw new Error('Yeni işletme için şifre zorunludur');
       await adminFetch('/admin/tenants', {
         method: 'POST',
         body: JSON.stringify(payload),
       });
-      alert('Yeni işletme başarıyla kaydedildi.');
+      alert('Yeni işletme, sektör ve mesai ayarlarıyla başarıyla kaydedildi.');
     }
 
     closeTenantModal();

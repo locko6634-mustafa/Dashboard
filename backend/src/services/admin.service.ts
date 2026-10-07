@@ -199,9 +199,8 @@ export class AdminService {
         chatwoot_inbox_id: true,
         api_key: true,
         durum: true,
-        plan_tipi: true,
-        plan_bitis_tarihi: true,
         created_at: true,
+        app_settings: true,
         _count: {
           select: {
             clients: true,
@@ -222,7 +221,7 @@ export class AdminService {
   }
 
   /**
-   * Yeni işletme (Tenant) kaydı oluşturma
+   * Yeni işletme (Tenant) kaydı oluşturma (Sektör, mesai ve hizmet ayarlarıyla)
    */
   static async createTenant(data: {
     salon_adi: string;
@@ -231,8 +230,14 @@ export class AdminService {
     whatsapp_phone?: string;
     n8n_webhook_url?: string;
     chatwoot_inbox_id?: string;
-    plan_tipi?: string;
-    plan_bitis_tarihi?: string;
+    durum?: string;
+    settings?: {
+      calendar?: any;
+      services?: any;
+      sector?: string;
+      terminology?: any;
+      ui_preferences?: any;
+    };
   }) {
     if (!data.salon_adi || !data.email || !data.password) {
       throw { status: 400, message: 'Salon adı, e-posta ve şifre zorunludur' };
@@ -258,33 +263,64 @@ export class AdminService {
         n8n_webhook_url: data.n8n_webhook_url ? data.n8n_webhook_url.trim() : null,
         chatwoot_inbox_id: data.chatwoot_inbox_id ? data.chatwoot_inbox_id.trim() : null,
         api_key: apiKey,
-        durum: 'Aktif',
-        plan_tipi: data.plan_tipi || 'Standart',
-        plan_bitis_tarihi: data.plan_bitis_tarihi ? new Date(data.plan_bitis_tarihi) : null,
+        durum: data.durum || 'Aktif',
       },
     });
 
-    // Varsayılan salon ayarları tohumlama (app_settings)
+    // İşletmenin ayarlarını tohumlama / kaydetme (calendar, services, sector, terminology, ui_preferences)
     try {
-      await prisma.appSetting.createMany({
-        data: [
-          {
-            setting_key: 'salon_settings',
-            tenant_id: tenant.id,
-            setting_value: {
-              salon_adi: tenant.salon_adi,
-              calisma_baslangic: '09:00',
-              calisma_bitis: '19:00',
-              randevu_araligi: 30,
-              para_birimi: '₺',
-              hizmetler: ['Cilt Bakımı', 'Lazer Epilasyon', 'Bölgesel İncelme', 'Kalıcı Makyaj'],
+      const settingsPayload: Array<{ setting_key: string; setting_value: any }> = [];
+
+      if (data.settings) {
+        if (data.settings.calendar) {
+          settingsPayload.push({ setting_key: 'calendar', setting_value: data.settings.calendar });
+        }
+        if (data.settings.services) {
+          settingsPayload.push({ setting_key: 'services', setting_value: data.settings.services });
+        }
+        if (data.settings.sector) {
+          settingsPayload.push({ setting_key: 'sector', setting_value: data.settings.sector });
+        }
+        if (data.settings.terminology) {
+          settingsPayload.push({ setting_key: 'terminology', setting_value: data.settings.terminology });
+        }
+        if (data.settings.ui_preferences) {
+          settingsPayload.push({ setting_key: 'ui_preferences', setting_value: data.settings.ui_preferences });
+        }
+      }
+
+      // Varsayılan ayarlar yedek
+      if (!settingsPayload.some(s => s.setting_key === 'calendar')) {
+        settingsPayload.push({
+          setting_key: 'calendar',
+          setting_value: { START_HOUR: 9, END_HOUR: 19, SLOT_MINS: 15, DAYS: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'] }
+        });
+      }
+      if (!settingsPayload.some(s => s.setting_key === 'services')) {
+        settingsPayload.push({
+          setting_key: 'services',
+          setting_value: { DEFAULT_MINS: 30, MAP: { 'Standart': 30 }, LIST: ['Standart'] }
+        });
+      }
+
+      for (const item of settingsPayload) {
+        await prisma.appSetting.upsert({
+          where: {
+            setting_key_tenant_id: {
+              setting_key: item.setting_key,
+              tenant_id: tenant.id,
             },
           },
-        ],
-        skipDuplicates: true,
-      });
+          update: { setting_value: item.setting_value },
+          create: {
+            setting_key: item.setting_key,
+            tenant_id: tenant.id,
+            setting_value: item.setting_value,
+          },
+        });
+      }
     } catch (e) {
-      console.warn('Default settings seeding skipped:', e);
+      console.warn('Tenant settings initialization error:', e);
     }
 
     return {
@@ -298,14 +334,12 @@ export class AdminService {
         chatwoot_inbox_id: tenant.chatwoot_inbox_id,
         api_key: tenant.api_key,
         durum: tenant.durum,
-        plan_tipi: tenant.plan_tipi,
-        plan_bitis_tarihi: tenant.plan_bitis_tarihi,
       },
     };
   }
 
   /**
-   * İşletme bilgilerini güncelleme
+   * İşletme bilgilerini ve ayarlarını güncelleme
    */
   static async updateTenant(
     id: string,
@@ -317,8 +351,13 @@ export class AdminService {
       n8n_webhook_url?: string;
       chatwoot_inbox_id?: string;
       durum?: string;
-      plan_tipi?: string;
-      plan_bitis_tarihi?: string;
+      settings?: {
+        calendar?: any;
+        services?: any;
+        sector?: string;
+        terminology?: any;
+        ui_preferences?: any;
+      };
     }
   ) {
     const tenant = await prisma.tenant.findUnique({ where: { id } });
@@ -343,10 +382,6 @@ export class AdminService {
     if (data.n8n_webhook_url !== undefined) updatePayload.n8n_webhook_url = data.n8n_webhook_url ? data.n8n_webhook_url.trim() : null;
     if (data.chatwoot_inbox_id !== undefined) updatePayload.chatwoot_inbox_id = data.chatwoot_inbox_id ? data.chatwoot_inbox_id.trim() : null;
     if (data.durum !== undefined) updatePayload.durum = data.durum;
-    if (data.plan_tipi !== undefined) updatePayload.plan_tipi = data.plan_tipi;
-    if (data.plan_bitis_tarihi !== undefined) {
-      updatePayload.plan_bitis_tarihi = data.plan_bitis_tarihi ? new Date(data.plan_bitis_tarihi) : null;
-    }
 
     const updated = await prisma.tenant.update({
       where: { id },
@@ -360,10 +395,32 @@ export class AdminService {
         chatwoot_inbox_id: true,
         api_key: true,
         durum: true,
-        plan_tipi: true,
-        plan_bitis_tarihi: true,
       },
     });
+
+    // Eğer settings geldiyse app_settings güncelle
+    if (data.settings) {
+      const settingKeys = ['calendar', 'services', 'sector', 'terminology', 'ui_preferences'];
+      for (const k of settingKeys) {
+        const val = (data.settings as any)[k];
+        if (val !== undefined) {
+          await prisma.appSetting.upsert({
+            where: {
+              setting_key_tenant_id: {
+                setting_key: k,
+                tenant_id: id,
+              },
+            },
+            update: { setting_value: val },
+            create: {
+              setting_key: k,
+              tenant_id: id,
+              setting_value: val,
+            },
+          });
+        }
+      }
+    }
 
     return { success: true, tenant: updated };
   }
