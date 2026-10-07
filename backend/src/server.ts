@@ -2,16 +2,20 @@ import { app } from './app.js';
 import { ENV } from './config/env.config.js';
 import { prisma } from './config/prisma.js';
 import { CronService } from './services/cron.service.js';
+import { AdminService } from './services/admin.service.js';
 
 const PORT = ENV.PORT;
 
-const server = app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`===============================================`);
   console.log(`🚀 Randevu Paneli Backend Server running on port ${PORT}`);
   console.log(`🌐 Environment: ${ENV.NODE_ENV}`);
   console.log(`🔌 Webhook compatibility: /webhook/*`);
   console.log(`🔌 REST API v1: /api/v1/*`);
   console.log(`===============================================`);
+
+  // Auto-migrate schema
+  await AdminService.ensureSchema();
 
   // Start appointment sweep cron (15 minutes)
   CronService.start(15);

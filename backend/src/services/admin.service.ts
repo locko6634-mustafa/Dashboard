@@ -6,9 +6,46 @@ import { prisma } from '../config/prisma.js';
 
 export class AdminService {
   /**
+   * Süper Admin ve Multi-tenant tablolarının/kolonlarının varlığını garantiye alır.
+   */
+  static async ensureSchema() {
+    try {
+      // super_admins tablosu
+      await prisma.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS public.super_admins (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          email VARCHAR(255) UNIQUE NOT NULL,
+          password_hash VARCHAR(255) NOT NULL,
+          ad_soyad VARCHAR(255) NOT NULL,
+          created_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      // tenants tablosuna ek kolonlar
+      await prisma.$executeRawUnsafe(`
+        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS whatsapp_phone VARCHAR(50);
+        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS n8n_webhook_url VARCHAR(500);
+        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS chatwoot_inbox_id VARCHAR(100);
+        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS api_key VARCHAR(100) UNIQUE;
+        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS durum VARCHAR(20) DEFAULT 'Aktif';
+        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_tipi VARCHAR(50) DEFAULT 'Standart';
+        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_bitis_tarihi TIMESTAMPTZ(6);
+      `);
+
+      // conversation_states tablosuna tenant_id
+      await prisma.$executeRawUnsafe(`
+        ALTER TABLE public.conversation_states ADD COLUMN IF NOT EXISTS tenant_id UUID;
+      `);
+    } catch (err) {
+      console.warn('ensureSchema warning:', err);
+    }
+  }
+
+  /**
    * Sistemde en az bir süper yönetici kayıtlı mı kontrol eder.
    */
   static async checkSetupStatus() {
+    await AdminService.ensureSchema();
     const count = await prisma.superAdmin.count();
     return {
       needsSetup: count === 0,
