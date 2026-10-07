@@ -104,7 +104,7 @@ export function handleApply(e) {
     if (btnSubmit) btnSubmit.disabled = true;
 
     setTimeout(() => {
-        showToast('Demo talebiniz başarıyla alındı! En kısa sürede sizinle iletişime geçeceğiz.', 'success', 5000);
+        showToast('Başvurunuz başarıyla alındı! En kısa sürede sizinle iletişime geçeceğiz.', 'success', 5000);
         if (form) form.reset();
         if (btnText) btnText.style.opacity = '1';
         if (btnSubmit) btnSubmit.disabled = false;
