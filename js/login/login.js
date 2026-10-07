@@ -1,5 +1,5 @@
 // ==========================================
-// LOGIN PAGE SCRIPT
+// LOGIN PAGE SCRIPT - SALONZEKA
 // ==========================================
 
 import { CONFIG } from '../shared/config.js';
@@ -9,13 +9,30 @@ import { saveSession, redirectIfAuthenticated } from '../shared/auth-session.js'
 // Eğer kullanıcı zaten giriş yapmışsa doğrudan dashboard'a yönlendir
 redirectIfAuthenticated('dashboard.html');
 
-function applyTheme() {
-    const theme = localStorage.getItem('theme') || 'dark';
-    if (theme === 'dark') {
-        document.body.classList.add('dark-theme');
-    } else {
-        document.body.classList.remove('dark-theme');
-    }
+function initPreloader() {
+    const preloader = document.getElementById('sz-preloader');
+    if (!preloader) return;
+
+    const fontPromise = document.fonts ? document.fonts.ready : Promise.resolve();
+    const domPromise = new Promise((resolve) => {
+        if (document.readyState === 'complete') {
+            resolve();
+        } else {
+            window.addEventListener('load', resolve, { once: true });
+        }
+    });
+
+    Promise.all([fontPromise, domPromise]).then(() => {
+        setTimeout(() => {
+            preloader.classList.add('is-hidden');
+        }, 200);
+    });
+
+    setTimeout(() => {
+        if (preloader && !preloader.classList.contains('is-hidden')) {
+            preloader.classList.add('is-hidden');
+        }
+    }, 1500);
 }
 
 export async function handleLogin(e) {
@@ -73,7 +90,7 @@ export async function handleLogin(e) {
 window.handleLogin = handleLogin;
 
 function init() {
-    applyTheme();
+    initPreloader();
     const form = document.querySelector('form');
     if (form) {
         form.addEventListener('submit', handleLogin);

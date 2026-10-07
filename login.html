@@ -3,51 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giriş - Randevu Paneli</title>
+    <title>Giriş Yap | SalonZeka</title>
+    <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="14" fill="%23c59b27"/%3E%3Cpath d="M18 20h28l-20 24h20" stroke="%23ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/%3E%3C/svg%3E'>
     <link rel="stylesheet" href="css/shared/fonts.css">
     <link rel="stylesheet" href="css/shared/base.css">
     <link rel="stylesheet" href="css/shared/toast.css">
-    <link rel="stylesheet" href="css/login/login.css">
+    <link rel="stylesheet" href="css/login/login.css?v=2.0">
     <script type="module" src="js/login/login.js"></script>
 </head>
-<body class="dark-theme">
+<body class="login-page">
+
+    <!-- PRELOADER -->
+    <div id="sz-preloader" class="sz-preloader" aria-label="Yükleniyor">
+      <div class="sz-preloader-inner">
+        <div class="sz-preloader-logo-wrap">
+          <div class="sz-preloader-logo">SZ</div>
+          <div class="sz-preloader-ring"></div>
+        </div>
+        <div class="sz-preloader-text" style="font-size:1.15rem; font-weight:800; color:var(--sz-ink-primary);">Salon<span style="color:var(--sz-gold);">Zeka</span></div>
+      </div>
+    </div>
+
     <div id="toast-container"></div>
     
     <div class="login-container">
-        <!-- Sol Görsel Alan -->
+        <!-- Sol Görsel Panel -->
         <aside class="login-sidebar">
             <div class="login-sidebar-bg"></div>
-            <div class="login-sidebar-overlay"></div>
             <div class="login-sidebar-content">
                 <a href="index.html" class="login-sidebar-brand">
-                    <span class="brand-mark">R</span>
-                    <span class="brand-text">Randevu Paneli</span>
+                    <span class="brand-mark">SZ</span>
+                    <span class="brand-text">Salon<span>Zeka</span></span>
                 </a>
                 
                 <div class="login-sidebar-middle">
-                    <span class="login-sidebar-kicker">Salon Yönetim OS</span>
+                    <span class="login-sidebar-kicker">Salon İşletim Sistemi</span>
                     <h1 class="login-sidebar-headline">Randevularınız, seanslar ve ödemeler tek akışta.</h1>
-                    <p class="login-sidebar-desc">İşletmenizin tüm yönetim süreçlerini otomatikleştirin, çakışmaları önleyin ve finansal raporlamanızı anlık olarak takip edin.</p>
+                    <p class="login-sidebar-desc">İşletmenizin tüm yönetim süreçlerini otomatikleştirin, çakışmaları önleyin ve 7/24 WhatsApp yapay zekasıyla salonunuzu büyütün.</p>
                     
                     <div class="features-bullets">
                         <div class="feature-bullet-item">
                             <span class="feature-bullet-icon">✦</span>
-                            <span>Akıllı Takvim & Sürükle Bırak Randevu</span>
+                            <span>7/24 WhatsApp'tan Randevu Alan Yapay Zeka</span>
                         </div>
                         <div class="feature-bullet-item">
                             <span class="feature-bullet-icon">✦</span>
-                            <span>Müşteri Seans Kartları & Geçmiş Notları</span>
+                            <span>Sürükle-Bırak Akıllı Takvim & Otomatik Seans Takibi</span>
                         </div>
                         <div class="feature-bullet-item">
                             <span class="feature-bullet-icon">✦</span>
-                            <span>Kalan Bakiye & Finansal Raporlama</span>
+                            <span>Anlık Kasa, Ciro & Danışan Bakiye Raporu</span>
                         </div>
                     </div>
                 </div>
                 
                 <a href="index.html" class="back-home-btn-left">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                    <span>Anasayfaya Dön</span>
+                    <span>Tanıtım Sayfasına Dön</span>
                 </a>
             </div>
         </aside>
@@ -55,28 +67,28 @@
         <!-- Sağ Giriş Formu Alanı -->
         <main class="login-main">
             <a href="index.html" class="back-home-link-top">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 Anasayfaya Dön
             </a>
             
-            <div class="glass login-card">
+            <div class="login-card">
                 <div class="login-brand">
-                    <div class="logo-text">Giriş Yap</div>
-                    <p class="logo-subtext">Hesabınıza erişmek için bilgilerinizi girin</p>
+                    <div class="logo-text">Yönetici Girişi</div>
+                    <p class="logo-subtext">Salon yönetim panelinize erişmek için bilgilerinizi girin</p>
                 </div>
                 
                 <form id="loginForm" onsubmit="handleLogin(event)">
-                    <div style="text-align: left; margin-bottom: 16px;">
-                        <label class="form-label">E-posta</label>
-                        <input type="email" id="loginEmail" class="modal-input w-full" placeholder="E-posta adresiniz" required>
+                    <div style="text-align: left; margin-bottom: 18px;">
+                        <label class="form-label">E-posta Adresi</label>
+                        <input type="email" id="loginEmail" class="modal-input" placeholder="salon@ornek.com" required autocomplete="email">
                     </div>
-                    <div style="text-align: left; margin-bottom: 24px;">
+                    <div style="text-align: left; margin-bottom: 26px;">
                         <label class="form-label">Şifre</label>
-                        <input type="password" id="loginPassword" class="modal-input w-full" placeholder="Şifreniz" required>
+                        <input type="password" id="loginPassword" class="modal-input" placeholder="••••••••" required autocomplete="current-password">
                     </div>
                     
-                    <button type="submit" id="btnLogin" class="modal-btn modal-btn-complete w-full relative">
-                        <span id="btnText">Giriş Yap</span>
+                    <button type="submit" id="btnLogin" class="modal-btn">
+                        <span id="btnText">Panele Giriş Yap</span>
                         <div id="btnSpinner" class="spinner spinner-sm absolute hidden" style="left: 50%; top: 50%; transform: translate(-50%, -50%); border-color: rgba(255,255,255,0.3); border-top-color: white;"></div>
                     </button>
                 </form>
@@ -84,5 +96,5 @@
         </main>
     </div>
 
-    </body>
+</body>
 </html>

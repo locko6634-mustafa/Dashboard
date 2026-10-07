@@ -4,12 +4,67 @@
 
 import { isAuthenticated } from '../shared/auth-session.js';
 
-// WhatsApp İletişim Sabiti
+// WhatsApp İletişim Sabiti (Ön Başvuru & Bilgi Alma)
 const WHATSAPP_NUMBER = '905510653051';
-const WHATSAPP_DEFAULT_MSG = encodeURIComponent('Merhaba, salonum için SalonZeka Yapay Zeka Asistanı ve Yönetim Paneli hakkında bilgi almak istiyorum.');
+const WHATSAPP_DEFAULT_MSG = encodeURIComponent('Merhaba, salonum için SalonZeka sistemine ön başvuru yapmak ve detaylı bilgi almak istiyorum.');
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_DEFAULT_MSG}`;
 
-// --- 1. AUTH KONTROLÜ (GİRİŞ YAPMIŞSA PANELE YÖNLENDİR) ---
+// --- 1. PRELOADER & FONT YÜKLENME YÖNETİMİ ---
+function initPreloader() {
+    const preloader = document.getElementById('sz-preloader');
+    if (!preloader) return;
+
+    const fontPromise = document.fonts ? document.fonts.ready : Promise.resolve();
+    const domPromise = new Promise((resolve) => {
+        if (document.readyState === 'complete') {
+            resolve();
+        } else {
+            window.addEventListener('load', resolve, { once: true });
+        }
+    });
+
+    Promise.all([fontPromise, domPromise]).then(() => {
+        setTimeout(() => {
+            preloader.classList.add('is-hidden');
+            // Sayfa açıldığında reveal animasyonlarını tetikle
+            document.querySelectorAll('.sz-hero [data-reveal]').forEach(el => {
+                el.classList.add('is-revealed');
+            });
+        }, 300);
+    });
+
+    // Emniyet zamanlayıcısı (her durumda en geç 1.8 sn sonra aç)
+    setTimeout(() => {
+        if (preloader && !preloader.classList.contains('is-hidden')) {
+            preloader.classList.add('is-hidden');
+            document.querySelectorAll('.sz-hero [data-reveal]').forEach(el => {
+                el.classList.add('is-revealed');
+            });
+        }
+    }, 1800);
+}
+
+// --- 2. SCROLL REVEAL ANİMASYON MOTORU ---
+function initScrollReveal() {
+    const revealElements = document.querySelectorAll('[data-reveal]');
+    if (!revealElements.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-revealed');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -30px 0px'
+    });
+
+    revealElements.forEach(el => observer.observe(el));
+}
+
+// --- 3. AUTH KONTROLÜ (GİRİŞ YAPMIŞSA PANELE YÖNLENDİR) ---
 function checkAuthNav() {
     if (isAuthenticated()) {
         const loginBtn = document.getElementById('navLoginBtn');
@@ -20,7 +75,7 @@ function checkAuthNav() {
     }
 }
 
-// --- 2. HEADER SCROLL ETKİSİ ---
+// --- 4. HEADER SCROLL ETKİSİ ---
 function initHeaderScroll() {
     const header = document.querySelector('.sz-header');
     if (!header) return;
@@ -34,7 +89,7 @@ function initHeaderScroll() {
     }, { passive: true });
 }
 
-// --- 3. CANLI WHATSAPP & TAKVİM SİMÜLASYONU MOTORU ---
+// --- 5. CANLI WHATSAPP & TAKVİM SİMÜLASYONU MOTORU ---
 function initLiveSimulation() {
     const msg1 = document.getElementById('simMsg1'); // Müşteri: Merhaba, yarın cilt bakımı...
     const typing = document.getElementById('simTyping'); // Bot yazıyor...
@@ -110,7 +165,7 @@ function initLiveSimulation() {
             if (calKpi) calKpi.textContent = '8';
         }, 6800);
 
-        // Adım 7: 12 saniye sonra tekrar başa sarar
+        // Adım 7: 13 saniye sonra tekrar başa sarar
         setTimeout(runSimulationStep, 13000);
     }
 
@@ -118,7 +173,7 @@ function initLiveSimulation() {
     runSimulationStep();
 }
 
-// --- 4. TÜM WHATSAPP DÜĞMELERİNİ YÖNLENDİRME ---
+// --- 6. TÜM WHATSAPP DÜĞMELERİNİ YÖNLENDİRME ---
 function setupWhatsAppLinks() {
     const waButtons = document.querySelectorAll('.sz-wa-link');
     waButtons.forEach((btn) => {
@@ -130,6 +185,8 @@ function setupWhatsAppLinks() {
 
 // --- BAŞLATMA ---
 function init() {
+    initPreloader();
+    initScrollReveal();
     checkAuthNav();
     initHeaderScroll();
     initLiveSimulation();
