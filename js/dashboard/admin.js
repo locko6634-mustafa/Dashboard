@@ -437,19 +437,18 @@ window.impersonateTenant = async function(id) {
   try {
     const data = await adminFetch(`/admin/tenants/${id}/impersonate`, { method: 'POST' });
     if (data.success && data.token) {
-      // Normal salon oturumu olarak kaydet (auth-session.js uyumlu)
-      const sessionData = {
+      // Normal salon oturumu olarak kaydet (auth-session.js tam uyumlu)
+      localStorage.setItem('user_token', data.token);
+      localStorage.setItem('tenant_id', data.tenant_id);
+      localStorage.setItem('salon_adi', data.salon_adi || '');
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('auth_session', JSON.stringify({
         token: data.token,
         tenant_id: data.tenant_id,
         salon_adi: data.salon_adi,
         email: data.email,
         login_time: new Date().toISOString(),
-      };
-      
-      localStorage.setItem('auth_session', JSON.stringify(sessionData));
-      localStorage.setItem('salon_adi', data.salon_adi);
-      localStorage.setItem('auth_token', data.token);
-      localStorage.setItem('tenant_id', data.tenant_id);
+      }));
 
       // Yeni sekmede salon dashboard'unu aç
       window.open('dashboard.html', '_blank');
