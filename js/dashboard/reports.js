@@ -125,7 +125,7 @@ class ReportsManager {
 
         try {
             if (DOM.reportTableBody) {
-                DOM.reportTableBody.innerHTML = '<tr><td colspan="6" class="text-center p-32"><div class="empty-state-wrap"><div class="spinner mb-8"></div><p class="font-12 text-muted">Randevu verileri yükleniyor...</p></div></td></tr>';
+                DOM.reportTableBody.innerHTML = '<tr><td colspan="6" class="text-center p-32"><div class="empty-state-wrapper"><div class="spinner mb-8"></div><p class="empty-state-desc font-12 text-muted">Randevu verileri yükleniyor...</p></div></td></tr>';
             }
             
             let allAppointments = [];
@@ -201,7 +201,7 @@ class ReportsManager {
             console.error('Rapor verisi yüklenirken hata oluştu:', error);
             showToast('Rapor verileri yüklenemedi.', 'error');
             if (DOM.reportTableBody) {
-                DOM.reportTableBody.innerHTML = '<tr><td colspan="6" class="text-center p-32"><div class="empty-state-wrap"><p class="font-14 font-bold text-rose mb-4">Veri yüklenirken hata oluştu</p><p class="font-11 text-muted">Lütfen ağ bağlantınızı ve API durumunu kontrol edin.</p></div></td></tr>';
+                DOM.reportTableBody.innerHTML = '<tr><td colspan="6" class="text-center p-32"><div class="empty-state-wrapper"><p class="empty-state-title font-14 font-bold text-rose mb-4">Veri yüklenirken hata oluştu</p><p class="empty-state-desc font-11 text-muted">Lütfen ağ bağlantınızı ve API durumunu kontrol edin.</p></div></td></tr>';
             }
         }
     }
@@ -268,12 +268,14 @@ class ReportsManager {
             DOM.reportTableBody.innerHTML = `
                 <tr>
                     <td colspan="6" class="text-center p-32">
-                        <div class="empty-state-wrap">
-                            <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="text-muted mb-8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                            </svg>
-                            <p class="font-14 font-bold text-main">Randevu Bulunamadı</p>
-                            <p class="font-11 text-muted">Seçili tarih aralığı ve filtrelere uygun kayıt yok.</p>
+                        <div class="empty-state-wrapper">
+                            <div class="empty-state-icon">
+                                <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                </svg>
+                            </div>
+                            <p class="empty-state-title">Randevu Bulunamadı</p>
+                            <p class="empty-state-desc">Seçili tarih aralığı ve filtrelere uygun kayıt yok.</p>
                         </div>
                     </td>
                 </tr>

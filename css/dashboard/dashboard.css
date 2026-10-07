@@ -4,34 +4,34 @@
    ========================================================================== */
 
 /* 1. Temel İskelet, Menü & Yardımcılar */
-@import url('./layout.css');
+@import url('./layout.css?v=20261007-1');
 
 /* 2. Üst Bar, Arama & Navigasyon */
-@import url('./header.css');
+@import url('./header.css?v=20261007-1');
 
 /* 3. Takvim Izgarası, Randevu Kartları & Ajanda */
-@import url('./calendar.css');
+@import url('./calendar.css?v=20261007-1');
 
 /* 4. Aylık Takvim Görünümü */
-@import url('./month-view.css');
+@import url('./month-view.css?v=20261007-1');
 
 /* 5. Modallar & Çekmeceler (Slide-over Drawers) */
-@import url('./modals.css');
+@import url('./modals.css?v=20261007-1');
 
 /* 6. Müşteri CRM & Hasta Detayları */
-@import url('./crm.css');
+@import url('./crm.css?v=20261007-1');
 
 /* 7. Genel Bakış İstatistikleri & Grafikler */
-@import url('./overview.css');
+@import url('./overview.css?v=20261007-1');
 
 /* 8. Raporlar & Analizler */
-@import url('./reports.css');
+@import url('./reports.css?v=20261007-1');
 
 /* 9. Ayarlar & Özelleştirme */
-@import url('./settings.css');
+@import url('./settings.css?v=20261007-1');
 
 /* 10. Tablet & Mobil Responsive Uyarlamaları */
-@import url('./responsive.css');
+@import url('./responsive.css?v=20261007-1');
 
 /* 11. Yazdırma Desteği */
-@import url('./print.css');
+@import url('./print.css?v=20261007-1');

@@ -15,10 +15,10 @@ import { UndoManager } from './undo-manager.js';
 import { Calendar, CalendarNav } from './calendar.js';
 import { DragDrop } from './drag-drop.js';
 import { HoverPopupManager, AppointmentManager, ContextMenu } from './appointment.js';
-import { PatientManager, NotesManager, PatientUI, SearchEngine, PatientCRM } from './patient.js';
+import { PatientManager, NotesManager, PatientUI, SearchEngine, PatientCRM } from './patient.js?v=20261007-1';
 import { Dashboard, ChartTooltip } from './overview.js';
 import { SettingsManager } from './settings.js';
-import { ReportsManager } from './reports.js';
+import { ReportsManager } from './reports.js?v=20261007-1';
 import { Terminology } from '../shared/terminology.js';
 
 class App {

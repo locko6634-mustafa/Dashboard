@@ -177,6 +177,18 @@
     vertical-align: middle;
 }
 
+.crm-table tbody td[colspan] {
+    text-align: center;
+    vertical-align: middle;
+    padding: 24px 16px;
+}
+
+.crm-table .empty-state-wrapper,
+.crm-table .empty-state-wrap {
+    margin: 0 auto;
+    width: 100%;
+}
+
 .crm-client-cell {
     display: flex;
     align-items: center;
