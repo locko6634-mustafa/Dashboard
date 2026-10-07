@@ -249,6 +249,9 @@ function renderTenantsTable(tenants) {
             <button class="admin-action-btn" onclick="toggleTenantStatus('${t.id}', '${t.durum}')" title="Durum Değiştir">
               ${isActive ? 'Dondur' : 'Aktif Et'}
             </button>
+            <button class="admin-action-btn admin-action-danger" onclick="deleteTenant('${t.id}', '${escapeHtml(t.salon_adi)}')" title="İşletmeyi Kalıcı Olarak Sil">
+              Sil
+            </button>
           </div>
         </td>
       </tr>
@@ -665,7 +668,29 @@ window.toggleTenantStatus = async function(id, currentStatus) {
   }
 };
 
-// 8. API KEY KOPYALAMA
+// 8. İŞLETMEYİ TAMAMEN SİLME
+window.deleteTenant = async function(id, salonAdi) {
+  const confirmMsg = `⚠️ DİKKAT!\n\n"${salonAdi}" işletmesini ve bu işletmeye ait TÜM randevuları, müşterileri ve ayarları tamamen silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz!`;
+  if (!confirm(confirmMsg)) return;
+
+  const doubleConfirm = prompt(`Onaylamak için lütfen işletmenin adını tam olarak yazın:\n(${salonAdi})`);
+  if (!doubleConfirm || doubleConfirm.trim().toLowerCase() !== salonAdi.trim().toLowerCase()) {
+    alert('İşletme adı eşleşmediği için silme işlemi iptal edildi.');
+    return;
+  }
+
+  try {
+    const res = await adminFetch(`/admin/tenants/${id}`, {
+      method: 'DELETE',
+    });
+    alert(res.message || 'İşletme başarıyla silindi.');
+    await loadDashboardData();
+  } catch (err) {
+    alert('Silme işlemi başarısız: ' + err.message);
+  }
+};
+
+// 9. API KEY KOPYALAMA
 window.copyApiKey = function(apiKey) {
   navigator.clipboard.writeText(apiKey).then(() => {
     alert('API Key panoya kopyalandı:\n' + apiKey);

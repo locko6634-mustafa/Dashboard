@@ -17,5 +17,7 @@ router.put('/tenants/:id', adminMiddleware, AdminController.updateTenant);
 router.patch('/tenants/:id', adminMiddleware, AdminController.updateTenant);
 router.post('/tenants/:id/api-key', adminMiddleware, AdminController.regenerateApiKey);
 router.post('/tenants/:id/impersonate', adminMiddleware, AdminController.impersonate);
+router.delete('/tenants/:id', adminMiddleware, AdminController.deleteTenant);
+router.post('/tenants/:id/delete', adminMiddleware, AdminController.deleteTenant);
 
 export { router as adminRoutes };

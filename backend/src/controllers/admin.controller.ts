@@ -93,4 +93,14 @@ export class AdminController {
       next(err);
     }
   }
+
+  static async deleteTenant(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id;
+      const result = await AdminService.deleteTenant(id);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
 }

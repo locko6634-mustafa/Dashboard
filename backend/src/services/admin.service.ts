@@ -426,6 +426,35 @@ export class AdminService {
   }
 
   /**
+   * İşletmeyi ve tüm bağlı verilerini kalıcı olarak silme
+   */
+  static async deleteTenant(id: string) {
+    const tenant = await prisma.tenant.findUnique({ where: { id } });
+    if (!tenant) {
+      throw { status: 404, message: 'İşletme bulunamadı' };
+    }
+
+    // Varsa konuşma hafızası kayıtlarını sil
+    try {
+      await prisma.conversationState.deleteMany({
+        where: { tenant_id: id },
+      });
+    } catch (e) {
+      console.warn('Conversation states cleanup note:', e);
+    }
+
+    // Cascade ile ilişkili clients, appointments, hasta_notlari, app_settings otomatik silinir
+    await prisma.tenant.delete({
+      where: { id },
+    });
+
+    return {
+      success: true,
+      message: `"${tenant.salon_adi}" işletmesi ve tüm verileri kalıcı olarak silindi.`,
+    };
+  }
+
+  /**
    * İşletmeye yeni API Key üretme
    */
   static async regenerateApiKey(id: string) {
