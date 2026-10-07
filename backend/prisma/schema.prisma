@@ -10,14 +10,21 @@ datasource db {
 model Tenant {
   id            String         @id @default(uuid()) @db.Uuid
   salon_adi     String         @db.VarChar(255)
-  email         String         @unique @db.VarChar(255)
-  password_hash String         @db.VarChar(255)
-  created_at    DateTime?      @default(now()) @db.Timestamptz(6)
+  email             String         @unique @db.VarChar(255)
+  password_hash     String         @db.VarChar(255)
+  whatsapp_phone    String?        @db.VarChar(50)
+  n8n_webhook_url   String?        @db.VarChar(500)
+  chatwoot_inbox_id String?        @db.VarChar(100)
+  api_key           String?        @unique @db.VarChar(100)
+  durum             String?        @default("Aktif") @db.VarChar(20)
+  plan_tipi         String?        @default("Standart") @db.VarChar(50)
+  plan_bitis_tarihi DateTime?      @db.Timestamptz(6)
+  created_at        DateTime?      @default(now()) @db.Timestamptz(6)
 
-  clients       Client[]
-  appointments  Appointment[]
-  hasta_notlari HastaNotu[]
-  app_settings  AppSetting[]
+  clients           Client[]
+  appointments      Appointment[]
+  hasta_notlari     HastaNotu[]
+  app_settings      AppSetting[]
 
   @@map("tenants")
 }
@@ -99,8 +106,20 @@ model ConversationState {
   current_stage   String?        @db.VarChar(100)
   context_data    Json?          @default("{}")
   retry_count     Int?           @default(0)
+  tenant_id       String?        @db.Uuid
   updated_at      DateTime?      @default(now()) @updatedAt @db.Timestamptz(6)
 
   @@index([phone_number])
+  @@index([tenant_id])
   @@map("conversation_states")
+}
+
+model SuperAdmin {
+  id            String         @id @default(uuid()) @db.Uuid
+  email         String         @unique @db.VarChar(255)
+  password_hash String         @db.VarChar(255)
+  ad_soyad      String         @db.VarChar(255)
+  created_at    DateTime?      @default(now()) @db.Timestamptz(6)
+
+  @@map("super_admins")
 }

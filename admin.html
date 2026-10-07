@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SalonZeka | Süper Admin Yönetim Konsolu</title>
+    <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="14" fill="%23c59b27"/%3E%3Cpath d="M18 20h28l-20 24h20" stroke="%23ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/%3E%3C/svg%3E'>
+    <link rel="stylesheet" href="css/shared/fonts.css">
+    <link rel="stylesheet" href="css/shared/base.css">
+    <link rel="stylesheet" href="css/dashboard/admin.css">
+  </head>
+  <body class="admin-body">
+
+    <!-- ARKA PLAN IŞIK HARELERİ -->
+    <div class="admin-ambient-orbs" aria-hidden="true">
+      <div class="admin-orb admin-orb-gold"></div>
+      <div class="admin-orb admin-orb-emerald"></div>
+    </div>
+
+    <!-- 1. İLK KURULUM SİHİRBAZI (ONBOARDING) -->
+    <section id="adminSetupSection" class="admin-auth-wrapper" style="display: none;">
+      <div class="admin-auth-card">
+        <div class="admin-logo-badge">İlk Sistem Kurulumu</div>
+        <h1 class="admin-auth-title">Süper Admin Hesabı Oluştur</h1>
+        <p class="admin-auth-desc">Platformda henüz bir sistem yöneticisi bulunmuyor. İlk yetkili geliştirici hesabınızı oluşturun.</p>
+
+        <form id="formAdminSetup">
+          <div class="admin-form-group">
+            <label class="admin-label" for="setupName">Adınız Soyadınız</label>
+            <input class="admin-input" type="text" id="setupName" placeholder="Mustafa Ayverdi" required>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-label" for="setupEmail">Yönetici E-posta</label>
+            <input class="admin-input" type="email" id="setupEmail" placeholder="admin@saloni.com" required>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-label" for="setupPassword">Güçlü Şifre</label>
+            <input class="admin-input" type="password" id="setupPassword" placeholder="••••••••••••" minlength="8" required>
+          </div>
+          <button type="submit" class="admin-btn admin-btn-primary" id="btnSubmitSetup">
+            <span>Sistemi Başlat & Hesabı Oluştur</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 2. SÜPER ADMİN GİRİŞ FORMU -->
+    <section id="adminLoginSection" class="admin-auth-wrapper" style="display: none;">
+      <div class="admin-auth-card">
+        <div class="admin-logo-badge">Sistem Yönetimi</div>
+        <h1 class="admin-auth-title">Süper Admin Girişi</h1>
+        <p class="admin-auth-desc">Tüm salonları ve otonom WhatsApp bot entegrasyonlarını yönetmek için oturum açın.</p>
+
+        <form id="formAdminLogin">
+          <div class="admin-form-group">
+            <label class="admin-label" for="loginEmail">Yönetici E-posta</label>
+            <input class="admin-input" type="email" id="loginEmail" placeholder="admin@salonzeka.com" required>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-label" for="loginPassword">Şifre</label>
+            <input class="admin-input" type="password" id="loginPassword" placeholder="••••••••••••" required>
+          </div>
+          <button type="submit" class="admin-btn admin-btn-primary" id="btnSubmitLogin">
+            <span>Yönetim Konsoluna Giriş Yap</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 3. SÜPER ADMİN DASHBOARD KONSOLU -->
+    <section id="adminDashboardSection" class="admin-dashboard-wrapper" style="display: none;">
+      <!-- Üst Bar -->
+      <header class="admin-navbar">
+        <div class="admin-navbar-brand">
+          <div class="admin-brand-icon">SZ</div>
+          <div>
+            <div class="admin-brand-title">SalonZeka <span class="admin-brand-sub">Süper Admin</span></div>
+          </div>
+        </div>
+        <div class="admin-navbar-user">
+          <div class="admin-user-info">
+            <div class="admin-user-name" id="adminHeaderName">Yönetici</div>
+            <div class="admin-user-role" id="adminHeaderEmail">admin@salonzeka.com</div>
+          </div>
+          <button class="admin-action-btn" id="btnAdminLogout" title="Çıkış Yap">
+            Çıkış
+          </button>
+        </div>
+      </header>
+
+      <!-- Ana İçerik -->
+      <main class="admin-main-content">
+        <!-- KPI Özet Sayaçları -->
+        <div class="admin-kpi-grid">
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-label">Toplam İşletme (Tenant)</div>
+            <div class="admin-kpi-value" id="kpiTotalTenants">0</div>
+            <div class="admin-kpi-trend">Sistemdeki tüm kayıtlı salonlar</div>
+          </div>
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-label">Aktif Salonlar</div>
+            <div class="admin-kpi-value" id="kpiActiveTenants" style="color: #34d399;">0</div>
+            <div class="admin-kpi-trend">Hizmet vermeye devam edenler</div>
+          </div>
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-label">Toplam Müşteri (CRM)</div>
+            <div class="admin-kpi-value" id="kpiTotalClients">0</div>
+            <div class="admin-kpi-trend">Tüm salonlar geneli kayıt</div>
+          </div>
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-label">Toplam Randevu Hacmi</div>
+            <div class="admin-kpi-value" id="kpiTotalAppointments">0</div>
+            <div class="admin-kpi-trend" id="kpiRecentAppointments">Son 30 günde: 0 randevu</div>
+          </div>
+        </div>
+
+        <!-- Toolbar (Arama, Filtre, Ekle Butonu) -->
+        <div class="admin-toolbar">
+          <div class="admin-search-wrap">
+            <input type="text" class="admin-search-input" id="inputSearchTenants" placeholder="Salon adı, e-posta veya WhatsApp no ile ara...">
+            <select class="admin-select" id="selectStatusFilter" style="max-width: 140px;">
+              <option value="Tümü">Tüm Durumlar</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Askıda">Askıda</option>
+            </select>
+          </div>
+          <div>
+            <button class="admin-btn admin-btn-primary" id="btnOpenNewTenantModal">
+              + Yeni İşletme Kaydet
+            </button>
+          </div>
+        </div>
+
+        <!-- İşletmeler Tablosu -->
+        <div class="admin-table-card">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>İşletme Adı</th>
+                <th>İletişim & E-posta</th>
+                <th>WhatsApp No</th>
+                <th>API Key</th>
+                <th>Paket / Bitiş</th>
+                <th>Kayıtlar</th>
+                <th>Durum</th>
+                <th style="text-align: right;">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="tenantsTableBody">
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 40px; color: #9ca3af;">İşletmeler yükleniyor...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </section>
+
+    <!-- 4. YENİ İŞLETME EKLE / DÜZENLE MODAL -->
+    <div id="modalTenant" class="admin-modal-overlay hidden">
+      <div class="admin-modal">
+        <div class="admin-modal-header">
+          <h2 class="admin-modal-title" id="modalTenantTitle">Yeni İşletme Kaydet</h2>
+          <button class="admin-modal-close" id="btnCloseTenantModal">&times;</button>
+        </div>
+
+        <form id="formTenantModal">
+          <input type="hidden" id="tenantEditId">
+
+          <div class="admin-grid-2">
+            <div class="admin-form-group">
+              <label class="admin-label" for="tenantSalonAdi">Salon Adı *</label>
+              <input class="admin-input" type="text" id="tenantSalonAdi" placeholder="Örn: İnci Güzellik Merkezi" required>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label" for="tenantEmail">Yönetici E-posta *</label>
+              <input class="admin-input" type="email" id="tenantEmail" placeholder="yonetim@inciguzellik.com" required>
+            </div>
+          </div>
+
+          <div class="admin-grid-2">
+            <div class="admin-form-group">
+              <label class="admin-label" for="tenantPassword" id="lblTenantPassword">Giriş Şifresi *</label>
+              <input class="admin-input" type="password" id="tenantPassword" placeholder="En az 6 karakter">
+              <small style="font-size: 0.72rem; color: #9ca3af;" id="helpPasswordNote">Yeni oluştururken zorunludur.</small>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label" for="tenantWhatsapp">WhatsApp İşletme Numarası</label>
+              <input class="admin-input" type="text" id="tenantWhatsapp" placeholder="Örn: 905321234567">
+            </div>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-label" for="tenantWebhook">n8n Webhook URL (Bildirimler İçin)</label>
+            <input class="admin-input" type="url" id="tenantWebhook" placeholder="https://n8n.domain.com/webhook/salon-bildirim">
+          </div>
+
+          <div class="admin-grid-2">
+            <div class="admin-form-group">
+              <label class="admin-label" for="tenantChatwoot">Chatwoot Gelen Kutusu ID</label>
+              <input class="admin-input" type="text" id="tenantChatwoot" placeholder="Örn: 14 veya inbox_xyz">
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label" for="tenantPlan">Abonelik Paketi</label>
+              <select class="admin-select" id="tenantPlan">
+                <option value="Standart">Standart Plan</option>
+                <option value="Premium">Premium Plan</option>
+                <option value="Enterprise">Enterprise (Özel)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="admin-grid-2">
+            <div class="admin-form-group">
+              <label class="admin-label" for="tenantDurum">Hesap Durumu</label>
+              <select class="admin-select" id="tenantDurum">
+                <option value="Aktif">Aktif</option>
+                <option value="Askıda">Askıda (Dondurulmuş)</option>
+              </select>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label" for="tenantBitisTarihi">Paket Bitiş Tarihi</label>
+              <input class="admin-input" type="date" id="tenantBitisTarihi">
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+            <button type="button" class="admin-btn admin-btn-secondary" id="btnCancelTenantModal">Vazgeç</button>
+            <button type="submit" class="admin-btn admin-btn-primary" id="btnSaveTenant" style="width: auto;">İşletmeyi Kaydet</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Script Bağlantısı -->
+    <script type="module" src="js/dashboard/admin.js"></script>
+  </body>
+</html>

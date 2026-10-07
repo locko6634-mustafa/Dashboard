@@ -6,9 +6,13 @@ import { NotesController } from '../controllers/notes.controller.js';
 import { SettingsController } from '../controllers/settings.controller.js';
 import { StatsController } from '../controllers/stats.controller.js';
 import { ChatbotController } from '../controllers/chatbot.controller.js';
+import { adminRoutes } from './admin.routes.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 
 const router = Router();
+
+// Super Admin APIs
+router.use('/admin', adminRoutes);
 
 // Health
 router.get('/health', (req, res) => {
