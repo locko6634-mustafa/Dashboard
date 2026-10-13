@@ -1,11 +1,35 @@
-const isLocal = typeof window !== 'undefined' && ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+function resolveApiBase() {
+    if (typeof window === 'undefined') {
+        return 'http://localhost:3000/webhook/';
+    }
+    // Geliştirici ortamı için özel override imkanı
+    try {
+        const customApi = window.localStorage ? window.localStorage.getItem('SZ_API_URL') : null;
+        if (customApi && customApi.startsWith('http')) {
+            return customApi.endsWith('/') ? customApi : `${customApi}/`;
+        }
+    } catch {
+        // localStorage erişim kısıtlaması koruması
+    }
+
+    const host = window.location.hostname || '';
+    const isLocal = ['localhost', '127.0.0.1', ''].includes(host);
+
+    if (isLocal) {
+        // Yerelde doğrudan backend portunda (3000) çalışıyorsa
+        if (window.location.port === '3000') {
+            return `${window.location.origin}/webhook/`;
+        }
+        // Yerelde statik sunucu (8000 vb.) üzerinden çalışıyorsa yerel backend'e yönlen
+        return 'http://localhost:3000/webhook/';
+    }
+
+    // Canlı ortam: Sayfanın çalıştığı origin üzerinden göreli bağlan
+    return window.location.origin ? `${window.location.origin}/webhook/` : '/webhook/';
+}
 
 export const CONFIG = {
-    API_BASE: isLocal 
-        ? 'https://randevu.n8n-mustafa.me/webhook/'
-        : ((typeof window !== 'undefined' && window.location.origin && window.location.origin.startsWith('http')) 
-            ? (window.location.origin + '/webhook/') 
-            : 'https://randevu.n8n-mustafa.me/webhook/'),
+    API_BASE: resolveApiBase(),
     REFRESH_RATE: 60000,
     CALENDAR: {
         START_HOUR: 9, END_HOUR: 19, SLOT_MINS: 15, SLOT_PX: 15, MIN_PX: 13, DRAG_THRES: 3, DAYS: ['Pzt', 'Sal',

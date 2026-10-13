@@ -1,4 +1,28 @@
 services:
+  randevu-db:
+    image: postgres:17-alpine
+    container_name: randevu-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-randevu_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-randevu_db_pass_2026_secure}
+      POSTGRES_DB: ${DB_NAME:-randevu_paneli}
+    volumes:
+      - randevu_postgres_data:/var/lib/postgresql/data
+    networks:
+      - randevu_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-randevu_app} -d ${DB_NAME:-randevu_paneli} || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+
   randevu-api:
     build:
       context: .
@@ -6,15 +30,18 @@ services:
     image: randevu-api:latest
     container_name: randevu-api
     restart: always
+    depends_on:
+      randevu-db:
+        condition: service_healthy
     volumes:
       - ..:/app/public:ro
     networks:
       - edge_proxy
-      - vitrinos_internal
+      - randevu_internal
     environment:
       - NODE_ENV=${NODE_ENV:-production}
       - PORT=3000
-      - DATABASE_URL=${DOCKER_DATABASE_URL:-postgresql://vitrinos_app:ef52fa7716e78fddd9ff78a9f2a72a2c38e2a267bd8dcb68e809173a738de12b@vitrinos-postgres-1:5432/randevu_paneli?schema=public}
+      - DATABASE_URL=${DOCKER_DATABASE_URL:-postgresql://${DB_USER:-randevu_app}:${DB_PASSWORD:-randevu_db_pass_2026_secure}@randevu-db:5432/${DB_NAME:-randevu_paneli}?schema=public}
       - JWT_SECRET=${JWT_SECRET:-randevu-paneli-super-secure-jwt-secret-key-2026-production}
       - STATIC_FILES_PATH=/app/public
       - CORS_ORIGIN=${CORS_ORIGIN:-*}
@@ -34,9 +61,18 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+volumes:
+  randevu_postgres_data:
+    name: randevu_postgres_data
 
 networks:
   edge_proxy:
     external: true
-  vitrinos_internal:
-    external: true
+  randevu_internal:
+    name: randevu_internal

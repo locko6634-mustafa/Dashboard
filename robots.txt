@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /api/
+Disallow: /webhook/
+Allow: /
+Allow: /index.html
+Allow: /login.html

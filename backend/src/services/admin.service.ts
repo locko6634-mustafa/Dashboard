@@ -10,6 +10,72 @@ export class AdminService {
    */
   static async ensureSchema() {
     const queries = [
+      `CREATE EXTENSION IF NOT EXISTS "pgcrypto"`,
+      `CREATE TABLE IF NOT EXISTS public.tenants (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        salon_adi VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        whatsapp_phone VARCHAR(50),
+        n8n_webhook_url VARCHAR(500),
+        chatwoot_inbox_id VARCHAR(100),
+        api_key VARCHAR(100) UNIQUE,
+        durum VARCHAR(20) DEFAULT 'Aktif',
+        plan_tipi VARCHAR(50) DEFAULT 'Standart',
+        plan_bitis_tarihi TIMESTAMPTZ(6),
+        created_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP
+      )`,
+      `CREATE TABLE IF NOT EXISTS public.clients (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        ad_soyad VARCHAR(255) NOT NULL,
+        telefon VARCHAR(50) NOT NULL,
+        kronik_rahatsizlik TEXT,
+        paket_adi VARCHAR(255),
+        toplam_seans INT DEFAULT 0,
+        gelinen_seans INT DEFAULT 0,
+        toplam_tutar NUMERIC(12, 2) DEFAULT 0,
+        alinan_odeme NUMERIC(12, 2) DEFAULT 0,
+        created_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+        tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE
+      )`,
+      `CREATE TABLE IF NOT EXISTS public.appointments (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        hasta_id UUID REFERENCES public.clients(id) ON DELETE SET NULL,
+        tarih VARCHAR(20) NOT NULL,
+        baslangic_saati VARCHAR(20) NOT NULL,
+        bitis_saati VARCHAR(20),
+        durum VARCHAR(50) DEFAULT 'Bekliyor',
+        hizmet VARCHAR(100),
+        sure INT DEFAULT 30,
+        created_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+        deleted_at TIMESTAMPTZ(6),
+        tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE
+      )`,
+      `CREATE TABLE IF NOT EXISTS public.hasta_notlari (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        hasta_id UUID REFERENCES public.clients(id) ON DELETE CASCADE,
+        not_metni TEXT NOT NULL,
+        tarih TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+        tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE
+      )`,
+      `CREATE TABLE IF NOT EXISTS public.app_settings (
+        setting_key VARCHAR(100) NOT NULL,
+        tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
+        setting_value JSONB NOT NULL,
+        updated_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (setting_key, tenant_id)
+      )`,
+      `CREATE TABLE IF NOT EXISTS public.conversation_states (
+        conversation_id VARCHAR(255) PRIMARY KEY,
+        phone_number VARCHAR(50) NOT NULL,
+        current_intent VARCHAR(100),
+        current_stage VARCHAR(100),
+        context_data JSONB DEFAULT '{}',
+        retry_count INT DEFAULT 0,
+        tenant_id UUID,
+        updated_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP
+      )`,
       `CREATE TABLE IF NOT EXISTS public.super_admins (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         email VARCHAR(255) UNIQUE NOT NULL,
@@ -25,6 +91,13 @@ export class AdminService {
       `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_tipi VARCHAR(50) DEFAULT 'Standart'`,
       `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_bitis_tarihi TIMESTAMPTZ(6)`,
       `ALTER TABLE public.conversation_states ADD COLUMN IF NOT EXISTS tenant_id UUID`,
+      `CREATE INDEX IF NOT EXISTS idx_clients_tenant ON public.clients(tenant_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_clients_tenant_telefon ON public.clients(tenant_id, telefon)`,
+      `CREATE INDEX IF NOT EXISTS idx_appointments_tenant_tarih ON public.appointments(tenant_id, tarih)`,
+      `CREATE INDEX IF NOT EXISTS idx_appointments_tenant_deleted ON public.appointments(tenant_id, deleted_at)`,
+      `CREATE INDEX IF NOT EXISTS idx_hasta_notlari_tenant_hasta ON public.hasta_notlari(tenant_id, hasta_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_conv_phone ON public.conversation_states(phone_number)`,
+      `CREATE INDEX IF NOT EXISTS idx_conv_tenant ON public.conversation_states(tenant_id)`
     ];
 
     for (const sql of queries) {
@@ -33,6 +106,23 @@ export class AdminService {
       } catch (e) {
         console.warn('SQL execution note:', e);
       }
+    }
+
+    // Ensure default super admin exists if no super admin found
+    try {
+      const superAdminCount = await prisma.superAdmin.count();
+      if (superAdminCount === 0) {
+        await prisma.superAdmin.create({
+          data: {
+            email: 'locko6634@gmail.com',
+            ad_soyad: 'Mustafa Ayverdi',
+            password_hash: '$argon2id$v=19$m=65536,t=3,p=4$lCqpuWWjWNB9SGIwbs6UWg$2Yw9Tf92+oVq2b1yD0d68rNkW26i6vF98/pG5wVHQkQ',
+          },
+        });
+        console.log('[AdminService] Varsayilan super admin hesabi olusturuldu (locko6634@gmail.com)');
+      }
+    } catch (adminErr) {
+      console.warn('[AdminService] Super admin check note:', adminErr);
     }
 
     // Auto-generate api_key for tenants missing one

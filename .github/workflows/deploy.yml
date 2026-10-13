@@ -46,6 +46,9 @@ jobs:
             --exclude '.git/' \
             --exclude '.github/' \
             --exclude 'node_modules/' \
+            --exclude 'backend/node_modules/' \
+            --exclude 'backend/dist/' \
+            --exclude 'backend/.env' \
             ./ "$USER@$HOST:/home/locko-admin/randevu-paneli/"
 
       - name: Restart and verify service
