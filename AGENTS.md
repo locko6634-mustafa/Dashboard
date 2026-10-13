@@ -7,7 +7,8 @@ Bu dosya, Randevu Paneli projesinde çalışmaya başlamadan önce okunması ger
 ## 1. Proje Genel Yapısı
 Randevu Paneli (Appointment Dashboard); randevu takvimi, müşteri yönetimi, seans takipleri, raporlama ve finansal özet analizlerini sunan tek sayfalık modern bir web uygulamasıdır.
 * **Frontend:** HTML5, modüler Vanilla JavaScript (ES Modules: `js/shared/`, `js/home/`, `js/login/`, `js/dashboard/`) ve Geist tipografisine dayalı modüler saf CSS (`css/shared/`, `css/home/`, `css/login/`, `css/dashboard/`).
-* **Backend:** Bağımsız Node.js (TypeScript) + Express REST API servisi (`backend/` dizini), Prisma ORM ve PostgreSQL veritabanı. Docker konteyneri (`randevu-api`) ve Traefik ters ters vekil (reverse proxy) üzerinden çalışır.
+* **Backend:** Bağımsız Node.js (TypeScript) + Express REST API servisi (`backend/` dizini), Prisma ORM ve izole bağımsız PostgreSQL 17 veritabanı (`randevu-db` konteyneri). Docker konteynerleri (`randevu-api` & `randevu-db`), izole `randevu_internal` ağı ve Traefik ters vekil (reverse proxy) üzerinden çalışır.
+* **Veritabanı Yedekleme:** Her gece 03:00'te `/home/locko-admin/scripts/backup-randevu-db.sh` betiği ile otomatik `pg_dump` yedeği alınır, sıkıştırılır ve 7 günden eski yedekler temizlenir (`/home/locko-admin/backups/randevu-paneli/`).
 * **API İletişimi:** Tüm HTTP fetch istekleri `js/shared/api-client.js` ve `js/shared/config.js` içindeki `CONFIG.API_BASE` adresi üzerinden asenkron olarak gerçekleştirilir.
 
 ---
