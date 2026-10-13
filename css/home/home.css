@@ -293,6 +293,57 @@ body.landing-page::before {
 /* ==========================================================================
    HEADER & NAVIGATION
    ========================================================================== */
+.sz-announcement-bar {
+  background: linear-gradient(90deg, #18181b 0%, #27272a 50%, #18181b 100%);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(229, 190, 84, 0.25);
+  font-size: 0.81rem;
+  padding: 8px 0;
+  position: relative;
+  z-index: 1001;
+}
+
+.sz-announcement-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.sz-announcement-tag {
+  background: var(--sz-gold-gradient);
+  color: #18181b;
+  font-weight: 800;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(184, 134, 11, 0.35);
+  text-transform: uppercase;
+}
+
+.sz-announcement-msg {
+  color: #f4f4f5;
+  font-weight: 500;
+}
+
+.sz-announcement-action {
+  color: var(--sz-gold-light);
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.sz-announcement-action:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
 .sz-header {
   position: fixed;
   top: 0;
@@ -445,7 +496,7 @@ body.landing-page::before {
    HERO SECTION
    ========================================================================== */
 .sz-hero {
-  padding-top: 130px;
+  padding-top: 154px;
   padding-bottom: 70px;
   position: relative;
 }
@@ -507,7 +558,26 @@ body.landing-page::before {
   flex-wrap: wrap;
   align-items: center;
   gap: 16px;
-  margin-bottom: 36px;
+  margin-bottom: 16px;
+}
+
+.sz-hero-trial-guarantee {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--sz-emerald-dark);
+  background: var(--sz-emerald-soft);
+  border: 1px solid var(--sz-emerald-border);
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 28px;
+}
+
+.sz-hero-trial-guarantee svg {
+  color: var(--sz-emerald);
+  flex-shrink: 0;
 }
 
 .sz-btn-hero-wa {
@@ -1270,6 +1340,246 @@ body.landing-page::before {
 }
 
 /* ==========================================================================
+   14 GÜNLÜK ÜCRETSİZ DENEME ÖZEL BÖLÜMÜ
+   ========================================================================== */
+.sz-trial-section {
+  padding: 50px 0 80px;
+  position: relative;
+}
+
+.sz-trial-banner {
+  background: linear-gradient(145deg, #ffffff 0%, #fbf9f4 100%);
+  border: 1px solid var(--sz-gold-border);
+  border-radius: var(--sz-radius-xl);
+  padding: 54px 46px;
+  box-shadow: 0 20px 50px -10px rgba(184, 134, 11, 0.12), var(--sz-shadow-md);
+  display: grid;
+  grid-template-columns: 1.28fr 0.92fr;
+  gap: 44px;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.sz-trial-glow {
+  position: absolute;
+  top: -120px;
+  right: -100px;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+  filter: blur(50px);
+}
+
+.sz-trial-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  background: var(--sz-surface-gold);
+  border: 1px solid var(--sz-gold-border);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--sz-gold-dark);
+  margin-bottom: 20px;
+}
+
+.sz-trial-pill-badge {
+  background: var(--sz-gold-gradient);
+  color: #18181b;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+}
+
+.sz-trial-title {
+  font-size: clamp(1.8rem, 3.2vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--sz-ink-primary);
+  margin-bottom: 16px;
+}
+
+.sz-trial-desc {
+  font-size: 1.05rem;
+  color: var(--sz-ink-secondary);
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.sz-trial-perks {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.sz-trial-perk-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.sz-trial-perk-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--sz-emerald-soft);
+  border: 1px solid var(--sz-emerald-border);
+  color: var(--sz-emerald);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sz-trial-perk-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.sz-trial-perk-item strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--sz-ink-primary);
+  margin-bottom: 2px;
+}
+
+.sz-trial-perk-item span {
+  font-size: 0.85rem;
+  color: var(--sz-ink-muted);
+}
+
+.sz-trial-card {
+  background: #ffffff;
+  border: 2px solid var(--sz-gold-border);
+  border-radius: var(--sz-radius-lg);
+  padding: 36px 30px;
+  box-shadow: 0 16px 36px -8px rgba(35, 30, 20, 0.08);
+  text-align: center;
+  position: relative;
+}
+
+.sz-trial-card-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--sz-gold-gradient);
+  color: #18181b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 14px;
+  border-radius: 999px;
+  letter-spacing: 0.08em;
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.35);
+  white-space: nowrap;
+}
+
+.sz-trial-price-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--sz-line);
+}
+
+.sz-trial-duration {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--sz-gold-dark);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sz-trial-price {
+  font-size: 3.4rem;
+  font-weight: 800;
+  color: var(--sz-ink-primary);
+  line-height: 1.05;
+  margin: 6px 0;
+}
+
+.sz-trial-period {
+  font-size: 0.88rem;
+  color: var(--sz-emerald-dark);
+  font-weight: 600;
+}
+
+.sz-trial-card-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sz-trial-card-features li {
+  font-size: 0.9rem;
+  color: var(--sz-ink-secondary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sz-trial-card-features li span {
+  color: var(--sz-emerald);
+  font-weight: 800;
+}
+
+.sz-btn-trial-action {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  border-radius: 999px;
+  background: var(--sz-whatsapp);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.35);
+  transition: all 0.25s ease;
+}
+
+.sz-btn-trial-action:hover {
+  background: var(--sz-whatsapp-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.45);
+}
+
+.sz-btn-trial-action svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.sz-trial-card-hint {
+  margin-top: 14px;
+  font-size: 0.78rem;
+  color: var(--sz-ink-muted);
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .sz-trial-banner {
+    grid-template-columns: 1fr;
+    padding: 36px 22px;
+    gap: 32px;
+  }
+}
+
+/* ==========================================================================
    BÖLÜM 6: BÜYÜK WHATSAPP DÖNÜŞÜM ÇAĞRISI (CTA)
    ========================================================================== */
 .sz-cta-box {
@@ -1532,8 +1842,17 @@ body.landing-page::before {
     grid-template-columns: 1fr;
   }
   
+  .sz-announcement-bar {
+    padding: 6px 0;
+  }
+
+  .sz-announcement-inner {
+    font-size: 0.76rem;
+    gap: 8px;
+  }
+
   .sz-hero {
-    padding-top: 88px;
+    padding-top: 124px;
     padding-bottom: 40px;
   }
 

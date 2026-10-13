@@ -48,7 +48,8 @@ class SettingsManager {
 
         const prefs = CONFIG.UI_PREFERENCES || {};
         if (DOM.setBrandName) DOM.setBrandName.value = prefs.brand_name || CONFIG.BRAND_NAME || '';
-        DOM.setUiTheme.value = prefs.theme || 'light';
+        const localTheme = (typeof localStorage !== 'undefined') ? localStorage.getItem('theme_preference') : null;
+        DOM.setUiTheme.value = localTheme || prefs.theme || 'light';
         DOM.setUiCurrency.value = prefs.currency || CONFIG.DEFAULTS.CURRENCY;
         const accentPreset = prefs.accent_preset || 'emerald';
         if (DOM.accentPresetGroup) {
@@ -229,6 +230,9 @@ class SettingsManager {
         });
 
         if (success) {
+            if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('theme_preference', DOM.setUiTheme.value);
+            }
             Utils.showToast('Ayarlar başarıyla kaydedildi. Değişikliklerin uygulanması için sayfa yenileniyor...', 'success');
             setTimeout(() => location.reload(), CONFIG.TIMERS.SYNC_RELOAD);
         } else {

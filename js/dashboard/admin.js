@@ -131,8 +131,21 @@ function showScreen(screen) {
   }
 }
 
+function hideAdminLoader() {
+  const loader = document.getElementById('admin-loader');
+  if (loader) requestAnimationFrame(() => requestAnimationFrame(() => loader.classList.add('done')));
+}
+
 // 1. BAŞLANGIÇ KONTROLÜ (INIT)
 async function init() {
+  // Admin tema kontrolü (Varsayılan Açık Tema)
+  const savedAdminTheme = localStorage.getItem('admin_theme_preference') || 'light';
+  if (savedAdminTheme === 'dark') {
+    document.body.classList.add('dark-theme');
+  } else {
+    document.body.classList.remove('dark-theme');
+  }
+
   try {
     const statusData = await adminFetch('/admin/setup-status');
     if (statusData.needsSetup) {
@@ -156,6 +169,8 @@ async function init() {
   } catch (err) {
     console.error('Init error:', err);
     showScreen('login');
+  } finally {
+    hideAdminLoader();
   }
 }
 

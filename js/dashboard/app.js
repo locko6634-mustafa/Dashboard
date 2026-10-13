@@ -5,7 +5,7 @@
 import { CONFIG } from '../shared/config.js';
 import { Utils, DateUtils } from '../shared/utils.js';
 import { showToast, showUndoToast } from '../shared/toast.js';
-import { ThemeUtils } from '../shared/theme.js';
+import { ThemeUtils } from '../shared/theme.js?v=20261013-1';
 import { ApiService, apiRequest } from '../shared/api-client.js';
 import { getToken, getTenantId, clearSession, logoutUser } from '../shared/auth-session.js';
 import { Store } from './store.js';
@@ -91,6 +91,7 @@ class App {
             DOM.setUiTheme.addEventListener('change', e => {
                 const isDark = e.target.value === 'dark';
                 document.body.classList.toggle('dark-theme', isDark);
+                localStorage.setItem('theme_preference', isDark ? 'dark' : 'light');
                 const btn = Utils.$('btnThemeToggle');
                 if (btn) btn.innerHTML = isDark ? '<span class="theme-icon"><svg width="14" height="14"><use href="#icon-sun"></use></svg></span>' : '<span class="theme-icon"><svg width="14" height="14"><use href="#icon-moon"></use></svg></span>';
             });
@@ -237,6 +238,7 @@ class App {
 
             Utils.$('btnThemeToggle').onclick = () => {
                 const isDark = document.body.classList.toggle('dark-theme');
+                localStorage.setItem('theme_preference', isDark ? 'dark' : 'light');
                 const setSelect = Utils.$('setUiTheme');
                 if (setSelect) setSelect.value = isDark ? 'dark' : 'light';
                 syncThemeIcon();

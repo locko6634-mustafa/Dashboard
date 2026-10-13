@@ -24,11 +24,22 @@ export class ThemeUtils {
         };
         
         const prefs = CONFIG.UI_PREFERENCES || {};
+        const localTheme = (typeof localStorage !== 'undefined') ? localStorage.getItem('theme_preference') : null;
+        // Varsayılan tema her zaman açık (light) olmalıdır; kullanıcı isterse kendisi değiştirir
+        const currentTheme = localTheme || 'light';
         
-        if (prefs.theme === 'dark') {
+        if (currentTheme === 'dark') {
             document.body.classList.add('dark-theme');
-        } else if (prefs.theme === 'light') {
+        } else {
             document.body.classList.remove('dark-theme');
+        }
+
+        const themeBtn = document.getElementById('btnThemeToggle');
+        if (themeBtn) {
+            const isDark = document.body.classList.contains('dark-theme');
+            themeBtn.innerHTML = isDark 
+                ? '<span class="theme-icon"><svg width="14" height="14"><use href="#icon-sun"></use></svg></span>' 
+                : '<span class="theme-icon"><svg width="14" height="14"><use href="#icon-moon"></use></svg></span>';
         }
         const accentPreset = prefs.accent_preset || 'emerald';
         document.body.classList.remove('accent-emerald', 'accent-cobalt', 'accent-amber', 'accent-rose', 'accent-violet', 'accent-slate');

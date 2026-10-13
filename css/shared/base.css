@@ -5,16 +5,16 @@
     --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-    --bg-deep: #FAFAFA;
+    --bg-deep: #FCFBF8;
     --bg-main: #FFFFFF;
-    --bg-secondary: #F4F4F5;
-    --bg-subtle: #F4F4F5;
-    --bg-hover: #E4E4E7;
-    --bg-card: rgba(255, 255, 255, 0.7);
-    --border: rgba(0, 0, 0, 0.06);
-    --border-subtle: rgba(0, 0, 0, 0.08);
-    --border-strong: rgba(0, 0, 0, 0.16);
-    --border-hover: rgba(0, 0, 0, 0.12);
+    --bg-secondary: #F5F2EC;
+    --bg-subtle: #F5F2EC;
+    --bg-hover: #ECE8E0;
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --border: rgba(226, 215, 195, 0.6);
+    --border-subtle: rgba(226, 215, 195, 0.4);
+    --border-strong: rgba(197, 155, 39, 0.28);
+    --border-hover: rgba(197, 155, 39, 0.4);
     
     --text-main: #18181B;
     --text-muted: #71717A;
@@ -297,4 +297,243 @@ button, input, select, textarea {
 .relative { position: relative; }
 .absolute { position: absolute; }
 .hidden { display: none !important; }
+
+/* ==========================================================================
+   GLOBAL SALONZEKA LUXURY PRELOADER (Next-Gen Luxury Splash Screen)
+   ========================================================================== */
+#page-loader,
+.sz-preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background-color: var(--bg-deep, #FCFBF8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s ease;
+}
+
+#page-loader.done,
+.sz-preloader.done,
+.sz-preloader.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Ambient Işık Hareleri */
+.sz-preloader-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    opacity: 0.35;
+    animation: szGlowFloat 6s ease-in-out infinite alternate;
+}
+
+.sz-glow-gold {
+    width: 340px;
+    height: 340px;
+    background: radial-gradient(circle, rgba(197, 155, 39, 0.45) 0%, transparent 70%);
+    top: 30%;
+    left: 40%;
+    transform: translate(-50%, -50%);
+}
+
+.sz-glow-emerald {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.35) 0%, transparent 70%);
+    bottom: 30%;
+    right: 40%;
+    transform: translate(50%, 50%);
+    animation-delay: -3s;
+}
+
+@keyframes szGlowFloat {
+    0% { transform: translate(-50%, -50%) scale(0.9); }
+    100% { transform: translate(-45%, -45%) scale(1.15); }
+}
+
+/* Kart Kutusu */
+.sz-preloader-card {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+    padding: 38px 46px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(226, 215, 195, 0.6);
+    box-shadow: 0 20px 50px rgba(35, 30, 20, 0.06), 0 0 30px rgba(197, 155, 39, 0.08);
+    animation: szCardPop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark-theme .sz-preloader-card {
+    background: rgba(18, 18, 20, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes szCardPop {
+    from { opacity: 0; transform: translateY(16px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Çift Halkalı Logo */
+.sz-preloader-badge-wrap {
+    position: relative;
+    width: 76px;
+    height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sz-preloader-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #c59b27 0%, #d4af37 50%, #b8860b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1.45rem;
+    letter-spacing: -0.02em;
+    box-shadow: 0 8px 24px rgba(184, 134, 11, 0.35);
+    animation: szLogoPulse 2.2s ease-in-out infinite;
+    z-index: 2;
+}
+
+.sz-preloader-ring {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.sz-ring-outer {
+    inset: 0;
+    border: 2px dashed rgba(197, 155, 39, 0.35);
+    border-top-color: #c59b27;
+    animation: szSpinRing 2.4s linear infinite;
+}
+
+.sz-ring-inner {
+    inset: -6px;
+    border: 1.5px solid transparent;
+    border-right-color: #10b981;
+    border-bottom-color: rgba(16, 185, 129, 0.45);
+    animation: szSpinReverse 1.8s linear infinite;
+}
+
+@keyframes szSpinRing {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes szSpinReverse {
+    to { transform: rotate(-360deg); }
+}
+
+@keyframes szLogoPulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 4px 12px rgba(184, 134, 11, 0.3)); }
+    50% { transform: scale(1.04); filter: drop-shadow(0 6px 18px rgba(184, 134, 11, 0.5)); }
+}
+
+/* Marka Tipografisi */
+.sz-preloader-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.sz-brand-main {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-main, #18181b);
+    letter-spacing: -0.03em;
+    display: inline-flex;
+    align-items: center;
+}
+
+.sz-gold-text {
+    background: linear-gradient(135deg, #c59b27, #b8860b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-left: 2px;
+}
+
+.sz-brand-subtitle {
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted, #71717a);
+}
+
+/* Lüks İlerleme Çubuğu (Shimmer Progress) */
+.sz-progress-track {
+    width: 170px;
+    height: 4px;
+    border-radius: 99px;
+    background: rgba(226, 215, 195, 0.45);
+    overflow: hidden;
+    position: relative;
+    margin-top: 4px;
+}
+
+.dark-theme .sz-progress-track {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.sz-progress-bar {
+    position: absolute;
+    inset: 0;
+    width: 60%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #c59b27 0%, #10b981 100%);
+    animation: szShimmerProgress 1.6s ease-in-out infinite;
+    box-shadow: 0 0 12px rgba(197, 155, 39, 0.5);
+}
+
+@keyframes szShimmerProgress {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(70%); }
+    100% { transform: translateX(200%); }
+}
+
+/* Durum Metni */
+.sz-preloader-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted, #71717a);
+    letter-spacing: 0.02em;
+}
+
+.sz-status-dots span {
+    animation: szDotBlink 1.4s infinite;
+    opacity: 0;
+}
+
+.sz-status-dots span:nth-child(1) { animation-delay: 0s; }
+.sz-status-dots span:nth-child(2) { animation-delay: 0.2s; }
+.sz-status-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes szDotBlink {
+    0%, 20% { opacity: 0; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-2px); }
+    80%, 100% { opacity: 0; transform: translateY(0); }
+}
+
 

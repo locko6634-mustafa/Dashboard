@@ -4,9 +4,9 @@
 
 import { isAuthenticated } from '../shared/auth-session.js';
 
-// WhatsApp İletişim Sabiti (Ön Başvuru & Bilgi Alma)
+// WhatsApp İletişim Sabiti (14 Günlük Ücretsiz Deneme & Bilgi Alma)
 const WHATSAPP_NUMBER = '905510653051';
-const WHATSAPP_DEFAULT_MSG = encodeURIComponent('Merhaba, salonum için SalonZeka sistemine ön başvuru yapmak ve detaylı bilgi almak istiyorum.');
+const WHATSAPP_DEFAULT_MSG = encodeURIComponent('Merhaba, salonum için SalonZeka 14 günlük ücretsiz deneme başlatmak ve detaylı bilgi almak istiyorum.');
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_DEFAULT_MSG}`;
 
 // --- 1. PRELOADER & FONT YÜKLENME YÖNETİMİ ---

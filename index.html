@@ -10,21 +10,37 @@
     <meta property="og:type" content="website">
     <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="14" fill="%23c59b27"/%3E%3Cpath d="M18 20h28l-20 24h20" stroke="%23ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/%3E%3C/svg%3E'>
     <link rel="stylesheet" href="css/shared/fonts.css">
-    <link rel="stylesheet" href="css/shared/base.css">
-    <link rel="stylesheet" href="css/home/home.css?v=2.2">
+    <link rel="stylesheet" href="css/shared/base.css?v=20261013-3">
+    <link rel="stylesheet" href="css/home/home.css?v=2.3">
     <script type="module" src="js/home/home.js"></script>
   </head>
   <body class="landing-page">
 
-    <!-- PRELOADER (FONT VE SAYFA YÜKLENME PERDESİ) -->
+    <!-- PRELOADER (LÜKS SALONZEKA YÜKLEME PERDESİ) -->
     <div id="sz-preloader" class="sz-preloader" aria-label="Yükleniyor">
-      <div class="sz-preloader-inner">
-        <div class="sz-preloader-logo-wrap">
+      <div class="sz-preloader-glow sz-glow-gold"></div>
+      <div class="sz-preloader-glow sz-glow-emerald"></div>
+
+      <div class="sz-preloader-card">
+        <div class="sz-preloader-badge-wrap">
+          <div class="sz-preloader-ring sz-ring-outer"></div>
+          <div class="sz-preloader-ring sz-ring-inner"></div>
           <div class="sz-preloader-logo">SZ</div>
-          <div class="sz-preloader-ring"></div>
         </div>
-        <div class="sz-preloader-text">Salon<span>Zeka</span></div>
-        <div class="sz-preloader-sub">Yükleniyor...</div>
+
+        <div class="sz-preloader-brand">
+          <span class="sz-brand-main">Salon<span class="sz-gold-text">Zeka</span></span>
+          <span class="sz-brand-subtitle">Salon İşletim Sistemi</span>
+        </div>
+
+        <div class="sz-progress-track">
+          <div class="sz-progress-bar"></div>
+        </div>
+
+        <div class="sz-preloader-status">
+          <span class="sz-status-text">Asistan ve panel yükleniyor</span>
+          <span class="sz-status-dots"><span>.</span><span>.</span><span>.</span></span>
+        </div>
       </div>
     </div>
 
@@ -37,6 +53,17 @@
 
     <!-- HEADER / NAVIGATION -->
     <header class="sz-header">
+      <!-- 14 GÜNLÜK ÜCRETSİZ DENEME ÜST BİLGİ ŞERİDİ -->
+      <div class="sz-announcement-bar">
+        <div class="sz-container">
+          <div class="sz-announcement-inner">
+            <span class="sz-announcement-tag">14 Gün Ücretsiz</span>
+            <span class="sz-announcement-msg">Salonunuzda 14 gün boyunca kredi kartsız ve taahhütsüz hemen test edin!</span>
+            <a class="sz-announcement-action sz-wa-link" href="#">Hemen Başlat <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </div>
+
       <div class="sz-container">
         <nav class="sz-nav-shell" aria-label="Ana gezinme menüsü">
           <a class="sz-brand" href="#top">
@@ -52,12 +79,13 @@
             <a href="#panel">Yönetim Paneli</a>
             <a href="#karsilastirma">Neden SalonZeka?</a>
             <a href="#nasil-calisir">Nasıl Başlanır?</a>
+            <a href="#ucretsiz-deneme" style="color:var(--sz-gold-dark); font-weight:700;">14 Gün Deneme</a>
           </div>
 
           <div class="sz-nav-actions">
             <a class="sz-btn sz-btn-whatsapp sz-wa-link sz-btn-shimmer" href="#">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
-              <span>WhatsApp'tan Ön Başvuru Yap</span>
+              <span>14 Gün Ücretsiz Dene</span>
             </a>
             <a class="sz-btn sz-btn-secondary" id="navLoginBtn" href="login.html">Giriş Yap</a>
           </div>
@@ -75,7 +103,7 @@
             <div class="sz-hero-content" data-reveal="left">
               <div class="sz-hero-pill">
                 <span class="sz-hero-pill-dot"></span>
-                <span>Güzellik Merkezleri & Salonlar İçin Akıllı Asistan</span>
+                <span>14 Gün Koşulsuz Ücretsiz Deneme • Kredi Kartı Gerekmez</span>
               </div>
               <h1>
                 Telefon Başında Randevu Aramaya Son: <span class="sz-gold-text">7/24 WhatsApp Yapay Zekası</span> Salonunuzu Yönetsin.
@@ -87,14 +115,23 @@
               <div class="sz-hero-cta-group">
                 <a class="sz-btn-hero-wa sz-wa-link sz-btn-shimmer" href="#">
                   <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
-                  <span>WhatsApp'tan Ön Başvuru Yapın</span>
+                  <span>14 Gün Ücretsiz Deneyin (WhatsApp)</span>
                 </a>
-                <a class="sz-btn sz-btn-secondary" href="#panel">
-                  <span>Paneli İncele</span>
+                <a class="sz-btn sz-btn-secondary" href="#ucretsiz-deneme">
+                  <span>Deneme Detayları</span>
                 </a>
               </div>
 
+              <div class="sz-hero-trial-guarantee">
+                <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor"><path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"/></svg>
+                <span>Kredi kartı gerekmez • Sıfır taahhüt • 14 gün tam sürüm erişim</span>
+              </div>
+
               <div class="sz-hero-trust">
+                <div class="sz-trust-item">
+                  <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  <span>14 Gün Ücretsiz Deneme</span>
+                </div>
                 <div class="sz-trust-item">
                   <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                   <span>Mevcut Numaranıza Bağlanır</span>
@@ -439,7 +476,7 @@
             <span class="sz-section-kicker">Kolay Geçiş</span>
             <h2 class="sz-section-title">3 Adımda Salonunuzu Yapay Zekaya Taşıyın</h2>
             <p class="sz-section-desc">
-              Kurulum, sunucu veya teknik ayarlarla uğraşmanıza gerek yok. Her şeyi ekibimiz 15 günde hazırlar.
+              Kurulum, sunucu veya teknik ayarlarla uğraşmanıza gerek yok. 14 gün boyunca salonunuzda hiçbir ücret ödemeden ve taahhüt vermeden canlıda test edin.
             </p>
           </div>
 
@@ -456,8 +493,93 @@
             </div>
             <div class="sz-step-card" data-reveal data-delay="300">
               <span class="sz-step-num">3</span>
-              <h3>7/24 Randevu Almaya Başlayın</h3>
-              <p>Asistanınız hemen gelen mesajları karşılamaya başlasın; siz sadece gelen müşterilerinize odaklanın.</p>
+              <h3>14 Gün Boyunca Ücretsiz Test Edin</h3>
+              <p>Asistanınız mesajları karşılasın, randevular takvime aksın; salonunuzun verimini 14 gün boyunca sıfır riskle deneyimleyin.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ÖZEL BÖLÜM: 14 GÜNLÜK ÜCRETSİZ DENEME VİTRİNİ -->
+      <section class="sz-trial-section" id="ucretsiz-deneme">
+        <div class="sz-container">
+          <div class="sz-trial-banner" data-reveal="zoom">
+            <div class="sz-trial-glow" aria-hidden="true"></div>
+            
+            <div class="sz-trial-content">
+              <div class="sz-trial-pill">
+                <span class="sz-trial-pill-badge">RİSKSİZ DENEME</span>
+                <span>Kredi Kartı Gerekmez • Anında Başlangıç</span>
+              </div>
+              <h2 class="sz-trial-title">
+                14 Gün Boyunca SalonZeka'yı <span class="sz-gold-text">Ücretsiz Test Edin</span>
+              </h2>
+              <p class="sz-trial-desc">
+                Müşteri kaybına, karışan seans defterlerine ve gece gelen cevapsız WhatsApp mesajlarına son verin. Hiçbir ücret ödemeden ve taahhüt vermeden, SalonZeka'nın işletmenizde yaratacağı farkı bizzat görün.
+              </p>
+
+              <div class="sz-trial-perks">
+                <div class="sz-trial-perk-item">
+                  <div class="sz-trial-perk-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  </div>
+                  <div>
+                    <strong>7/24 WhatsApp AI Asistanı</strong>
+                    <span>Sınırsız gelen mesaj karşılama ve akıllı takvime otomatik randevu kaydı.</span>
+                  </div>
+                </div>
+                <div class="sz-trial-perk-item">
+                  <div class="sz-trial-perk-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  </div>
+                  <div>
+                    <strong>Tüm Yönetim Paneli Özellikleri Açık</strong>
+                    <span>Sürükle-bırak takvim, müşteri CRM, seans takipleri ve anlık ciro/borç analizleri.</span>
+                  </div>
+                </div>
+                <div class="sz-trial-perk-item">
+                  <div class="sz-trial-perk-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  </div>
+                  <div>
+                    <strong>Birebir Ücretsiz Kurulum & Destek</strong>
+                    <span>Uzman ekibimiz mevcut salon numaranızı ve hizmet listenizi aynı gün entegre eder.</span>
+                  </div>
+                </div>
+                <div class="sz-trial-perk-item">
+                  <div class="sz-trial-perk-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  </div>
+                  <div>
+                    <strong>Sıfır Risk & Otomatik Yenilenme Yok</strong>
+                    <span>Kredi kartı gerekmez, deneme süresi sonunda sürpriz fatura çıkmaz.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sz-trial-card">
+              <div class="sz-trial-card-badge">14 GÜNLÜK DENEME</div>
+              <div class="sz-trial-price-wrap">
+                <span class="sz-trial-duration">Ücretsiz Deneme</span>
+                <span class="sz-trial-price">0 ₺</span>
+                <span class="sz-trial-period">14 Gün Boyunca Tam Sürüm</span>
+              </div>
+              
+              <ul class="sz-trial-card-features">
+                <li><span>✓</span> 7/24 WhatsApp Yapay Zekası</li>
+                <li><span>✓</span> Tüm Pro Panel Özellikleri</li>
+                <li><span>✓</span> Kredi Kartı İstenmez</li>
+                <li><span>✓</span> Sıfır Taahhüt & Risksiz</li>
+              </ul>
+
+              <a class="sz-btn-trial-action sz-wa-link sz-btn-shimmer" href="#">
+                <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
+                <span>14 Gün Ücretsiz Başlat</span>
+              </a>
+              <div class="sz-trial-card-hint">
+                ⚡ Kurulum uzman ekibimiz tarafından hızla tamamlanır
+              </div>
             </div>
           </div>
         </div>
@@ -467,19 +589,19 @@
       <section class="sz-section" style="padding-bottom:100px;">
         <div class="sz-container">
           <div class="sz-cta-box" data-reveal="zoom">
-            <div class="sz-cta-kicker">Hemen Ön Başvuru Yapın</div>
-            <h2>Salonunuzda Randevu Kaçırmaya Bugün Son Verin</h2>
+            <div class="sz-cta-kicker">14 Günlük Risksiz Deneme Fırsatı</div>
+            <h2>Salonunuzda Randevu Kaçırmaya 14 Gün Ücretsiz Son Verin</h2>
             <p>
-              Müşterilerinizi kapıda bekletmeyin, gece gelen mesajları kaybetmeyin. SalonZeka'yı işletmenize kurmak ve ön başvuru yapmak için WhatsApp'tan bize hemen yazın.
+              Müşterilerinizi kapıda bekletmeyin, gece gelen mesajları kaybetmeyin. Kredi kartı gerekmez, hiçbir taahhüt yok. 14 gün boyunca SalonZeka'yı işletmenizde ücretsiz deneyin, farkı bizzat görün.
             </p>
             
             <a class="sz-cta-btn-huge sz-wa-link sz-btn-shimmer" href="#">
               <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
-              <span>WhatsApp'tan Hemen Ön Başvuru Yapın</span>
+              <span>14 Günlük Ücretsiz Denemeyi WhatsApp'tan Başlatın</span>
             </a>
 
             <div class="sz-cta-note">
-              Telefon: +90 551 065 30 51 • 15 Gün İçinde Kurulum & Aktivasyon
+              Telefon: +90 551 065 30 51 • 14 Gün Ücretsiz Deneme • Kredi Kartı Gerekmez • Aynı Gün Hızlı Kurulum
             </div>
           </div>
         </div>
@@ -504,16 +626,16 @@
       <div class="sz-mobile-bottom-nav-inner">
         <a href="#asistan" class="sz-bottom-nav-item">Asistan</a>
         <a href="#panel" class="sz-bottom-nav-item">Panel</a>
-        <a href="#karsilastirma" class="sz-bottom-nav-item">Özellikler</a>
-        <a href="#" class="sz-bottom-nav-item sz-wa-link sz-bottom-nav-wa">Ön Başvuru</a>
+        <a href="#ucretsiz-deneme" class="sz-bottom-nav-item" style="color:var(--sz-gold-light); font-weight:700;">14 Gün</a>
+        <a href="#" class="sz-bottom-nav-item sz-wa-link sz-bottom-nav-wa">Ücretsiz Dene</a>
         <a href="login.html" class="sz-bottom-nav-item" id="mobileBottomLoginBtn">Giriş</a>
       </div>
     </nav>
 
     <!-- KAYAN (FLOATING) WHATSAPP CANLI BUTONU -->
-    <a class="sz-floating-wa sz-wa-link sz-btn-shimmer" href="#" aria-label="WhatsApp'tan Ön Başvuru Yapın">
+    <a class="sz-floating-wa sz-wa-link sz-btn-shimmer" href="#" aria-label="WhatsApp'tan 14 Günlük Ücretsiz Denemeyi Başlatın">
       <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
-      <span>WhatsApp'tan Ön Başvuru</span>
+      <span>14 Gün Ücretsiz Dene</span>
     </a>
 
   </body>
