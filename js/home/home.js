@@ -91,6 +91,7 @@ function initHeaderScroll() {
 
 // --- 5. CANLI WHATSAPP & TAKVİM SİMÜLASYONU MOTORU ---
 function initLiveSimulation() {
+    const chatBody = document.querySelector('.sz-wa-chat-body');
     const msg1 = document.getElementById('simMsg1'); // Müşteri: Merhaba, yarın cilt bakımı...
     const typing = document.getElementById('simTyping'); // Bot yazıyor...
     const msg2 = document.getElementById('simMsg2'); // Bot: Merhaba Sevil Hanım! Yarın için 14:00...
@@ -107,6 +108,9 @@ function initLiveSimulation() {
         msg3.classList.remove('is-visible');
         msg4.classList.remove('is-visible');
         typing.classList.remove('is-active');
+        if (chatBody && msg2) {
+            chatBody.insertBefore(typing, msg2);
+        }
         calSlot.classList.remove('has-booking');
         calSlot.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -126,8 +130,11 @@ function initLiveSimulation() {
             msg1.classList.add('is-visible');
         }, 500);
 
-        // Adım 2: Bot yazıyor...
+        // Adım 2: Bot yazıyor... (Müsait saatleri önermek için)
         setTimeout(() => {
+            if (chatBody && msg2) {
+                chatBody.insertBefore(typing, msg2);
+            }
             typing.classList.add('is-active');
         }, 1600);
 
@@ -142,8 +149,11 @@ function initLiveSimulation() {
             msg3.classList.add('is-visible');
         }, 4600);
 
-        // Adım 5: Bot yazıyor... (Onay için)
+        // Adım 5: Bot yazıyor... (Randevu onayı için en altta)
         setTimeout(() => {
+            if (chatBody && msg4) {
+                chatBody.insertBefore(typing, msg4);
+            }
             typing.classList.add('is-active');
         }, 5500);
 
