@@ -72,6 +72,11 @@ function checkAuthNav() {
             loginBtn.textContent = 'Panele Git';
             loginBtn.href = 'dashboard.html';
         }
+        const mobileBottomBtn = document.getElementById('mobileBottomLoginBtn');
+        if (mobileBottomBtn) {
+            mobileBottomBtn.textContent = 'Panele Git';
+            mobileBottomBtn.href = 'dashboard.html';
+        }
     }
 }
 
