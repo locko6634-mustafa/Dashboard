@@ -108,22 +108,6 @@ export class AdminService {
       }
     }
 
-    // Ensure default super admin exists if no super admin found
-    try {
-      const superAdminCount = await prisma.superAdmin.count();
-      if (superAdminCount === 0) {
-        await prisma.superAdmin.create({
-          data: {
-            email: 'locko6634@gmail.com',
-            ad_soyad: 'Mustafa Ayverdi',
-            password_hash: '$argon2id$v=19$m=65536,t=3,p=4$lCqpuWWjWNB9SGIwbs6UWg$2Yw9Tf92+oVq2b1yD0d68rNkW26i6vF98/pG5wVHQkQ',
-          },
-        });
-        console.log('[AdminService] Varsayilan super admin hesabi olusturuldu (locko6634@gmail.com)');
-      }
-    } catch (adminErr) {
-      console.warn('[AdminService] Super admin check note:', adminErr);
-    }
 
     // Auto-generate api_key for tenants missing one
     try {
