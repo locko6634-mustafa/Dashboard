@@ -12,12 +12,13 @@ services:
       - edge_proxy
       - vitrinos_internal
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV:-production}
       - PORT=3000
-      - DATABASE_URL=postgresql://vitrinos_app:ef52fa7716e78fddd9ff78a9f2a72a2c38e2a267bd8dcb68e809173a738de12b@vitrinos-postgres-1:5432/randevu_paneli?schema=public
-      - JWT_SECRET=randevu-paneli-super-secure-jwt-secret-key-2026-production
+      - DATABASE_URL=${DOCKER_DATABASE_URL:-postgresql://vitrinos_app:ef52fa7716e78fddd9ff78a9f2a72a2c38e2a267bd8dcb68e809173a738de12b@vitrinos-postgres-1:5432/randevu_paneli?schema=public}
+      - JWT_SECRET=${JWT_SECRET:-randevu-paneli-super-secure-jwt-secret-key-2026-production}
       - STATIC_FILES_PATH=/app/public
-      - CORS_ORIGIN=*
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - CHATBOT_API_KEY=${CHATBOT_API_KEY:-}
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=edge_proxy"

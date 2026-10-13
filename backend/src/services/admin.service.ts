@@ -34,6 +34,24 @@ export class AdminService {
         console.warn('SQL execution note:', e);
       }
     }
+
+    // Auto-generate api_key for tenants missing one
+    try {
+      const tenantsWithoutKey = await prisma.tenant.findMany({
+        where: {
+          OR: [{ api_key: null }, { api_key: '' }],
+        },
+      });
+      for (const t of tenantsWithoutKey) {
+        const generatedKey = 'sk_live_' + crypto.randomBytes(20).toString('hex');
+        await prisma.tenant.update({
+          where: { id: t.id },
+          data: { api_key: generatedKey },
+        });
+      }
+    } catch (keyErr) {
+      console.warn('Failed to auto-generate tenant API keys:', keyErr);
+    }
   }
 
   /**

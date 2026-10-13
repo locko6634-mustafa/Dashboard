@@ -6,11 +6,15 @@ import { NotesController } from '../controllers/notes.controller.js';
 import { SettingsController } from '../controllers/settings.controller.js';
 import { StatsController } from '../controllers/stats.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { authRateLimiter, generalApiRateLimiter } from '../middlewares/rate-limit.middleware.js';
 
 const router = Router();
 
+// Apply general API rate limiter
+router.use(generalApiRateLimiter);
+
 // 1. Auth
-router.post('/kullanici-girisi', AuthController.login);
+router.post('/kullanici-girisi', authRateLimiter, AuthController.login);
 
 // 2. Overview / Stats
 router.get('/genel-istatistik', authMiddleware, StatsController.getOverview);

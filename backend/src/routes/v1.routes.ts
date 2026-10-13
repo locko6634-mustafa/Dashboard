@@ -8,8 +8,12 @@ import { StatsController } from '../controllers/stats.controller.js';
 import { ChatbotController } from '../controllers/chatbot.controller.js';
 import { adminRoutes } from './admin.routes.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { authRateLimiter, chatbotRateLimiter, generalApiRateLimiter } from '../middlewares/rate-limit.middleware.js';
 
 const router = Router();
+
+// Apply general API rate limiter
+router.use(generalApiRateLimiter);
 
 // Super Admin APIs
 router.use('/admin', adminRoutes);
@@ -20,7 +24,7 @@ router.get('/health', (req, res) => {
 });
 
 // Auth
-router.post('/auth/login', AuthController.login);
+router.post('/auth/login', authRateLimiter, AuthController.login);
 
 // Stats
 router.get('/stats/overview', authMiddleware, StatsController.getOverview);
@@ -55,15 +59,15 @@ router.get('/settings', authMiddleware, SettingsController.getSettings);
 router.post('/settings', authMiddleware, SettingsController.updateSettings);
 
 // Chatbot APIs
-router.get('/chatbot/client-by-phone', ChatbotController.getClientByPhone);
-router.get('/chatbot/appointments', ChatbotController.getAppointments);
-router.get('/chatbot/available-slots', ChatbotController.getAvailableSlots);
-router.post('/chatbot/appointments', ChatbotController.bookAppointment);
-router.post('/chatbot/cancel', ChatbotController.cancelAppointment);
-router.post('/chatbot/reschedule', ChatbotController.rescheduleAppointment);
-router.get('/chatbot/state', ChatbotController.getState);
-router.post('/chatbot/state', ChatbotController.setState);
-router.delete('/chatbot/state', ChatbotController.deleteState);
-router.post('/chatbot/state/delete', ChatbotController.deleteState);
+router.get('/chatbot/client-by-phone', chatbotRateLimiter, ChatbotController.getClientByPhone);
+router.get('/chatbot/appointments', chatbotRateLimiter, ChatbotController.getAppointments);
+router.get('/chatbot/available-slots', chatbotRateLimiter, ChatbotController.getAvailableSlots);
+router.post('/chatbot/appointments', chatbotRateLimiter, ChatbotController.bookAppointment);
+router.post('/chatbot/cancel', chatbotRateLimiter, ChatbotController.cancelAppointment);
+router.post('/chatbot/reschedule', chatbotRateLimiter, ChatbotController.rescheduleAppointment);
+router.get('/chatbot/state', chatbotRateLimiter, ChatbotController.getState);
+router.post('/chatbot/state', chatbotRateLimiter, ChatbotController.setState);
+router.delete('/chatbot/state', chatbotRateLimiter, ChatbotController.deleteState);
+router.post('/chatbot/state/delete', chatbotRateLimiter, ChatbotController.deleteState);
 
 export default router;

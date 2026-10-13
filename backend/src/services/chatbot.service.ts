@@ -4,10 +4,14 @@ import { calculateDefaultDuration, calculateEndTime } from './appointment.servic
 export class ChatbotService {
   static async getClientByPhone(phone: string, tenantId?: string) {
     const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.length < 10) {
+      return null;
+    }
+    const targetDigits = cleaned.slice(-10);
     const client = await prisma.client.findFirst({
       where: {
         ...(tenantId ? { tenant_id: tenantId } : {}),
-        telefon: { contains: cleaned.length >= 10 ? cleaned.slice(-10) : cleaned },
+        telefon: { contains: targetDigits },
       },
     });
     return client;

@@ -10,6 +10,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(8, 'JWT_SECRET must be at least 8 characters').default('randevu-paneli-super-secure-jwt-secret-key-2026'),
   STATIC_FILES_PATH: z.string().optional(),
   CORS_ORIGIN: z.string().default('*'),
+  CHATBOT_API_KEY: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

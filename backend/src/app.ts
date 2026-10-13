@@ -14,25 +14,45 @@ const __dirname = path.dirname(__filename);
 
 export const app = express();
 
-// Security & Headers
+// Trust reverse proxy (Traefik / Nginx) for accurate client IP in rate limiters
+app.set('trust proxy', 1);
+
+// Security & HTTP Headers
 app.use(
   helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
+    frameguard: { action: 'sameorigin' },
   })
 );
 
-// CORS configuration
+// CORS configuration (supports wildcard or comma-separated domain whitelist)
 app.use(
   cors({
-    origin: '*',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      const allowed = ENV.CORS_ORIGIN;
+      if (!allowed || allowed === '*') {
+        return callback(null, true);
+      }
+
+      const allowedOrigins = allowed.split(',').map((o) => o.trim());
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('CORS ilkesi bu kaynağa erişimi engelledi.'));
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-tenant-id'],
+    credentials: true,
   })
 );
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Health checks
 app.get('/health', (req, res) => {
@@ -56,6 +76,40 @@ app.use('/randevu/webhook', webhookRoutes);
 app.use('/randevu/api/v1', v1Routes);
 app.use('/randevu/api', v1Routes);
 
+// Security shield for static file requests:
+// Block access to dotfiles, backend files, source files, env files, config files, git, and scripts.
+const BLOCKED_STATIC_PATTERNS = [
+  /^\/\.git(\/|$)/i,
+  /^\/\.github(\/|$)/i,
+  /^\/\.agents(\/|$)/i,
+  /^\/backend(\/|$)/i,
+  /^\/node_modules(\/|$)/i,
+  /^\/prisma(\/|$)/i,
+  /^\/src(\/|$)/i,
+  /^\/dist(\/|$)/i,
+  /\.env(\..+)?$/i,
+  /\.(ya?ml|json|md|ts|sh|ps1|sql|lock|map)$/i,
+  /dockerfile/i,
+  /docker-compose/i,
+];
+
+const staticSecurityShield = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  try {
+    const reqPath = decodeURI(req.path);
+    const isBlocked = BLOCKED_STATIC_PATTERNS.some((pattern) => pattern.test(reqPath));
+    if (isBlocked) {
+      res.status(404).send('Not Found');
+      return;
+    }
+  } catch {
+    res.status(400).send('Bad Request');
+    return;
+  }
+  next();
+};
+
+app.use(staticSecurityShield);
+
 // Static frontend file serving if configured or located at root
 const frontendCandidates = [
   ENV.STATIC_FILES_PATH,
@@ -68,8 +122,8 @@ const frontendCandidates = [
 
 for (const dir of frontendCandidates) {
   if (fs.existsSync(dir) && fs.existsSync(path.join(dir, 'index.html'))) {
-    app.use(express.static(dir));
-    app.use('/randevu', express.static(dir));
+    app.use(express.static(dir, { dotfiles: 'deny', index: ['index.html'] }));
+    app.use('/randevu', express.static(dir, { dotfiles: 'deny', index: ['index.html'] }));
     break;
   }
 }

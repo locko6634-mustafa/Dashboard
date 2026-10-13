@@ -1,5 +1,37 @@
 import { Request, Response, NextFunction } from 'express';
 import { ChatbotService } from '../services/chatbot.service.js';
+import { prisma } from '../config/prisma.js';
+
+/**
+ * Multi-tenant safe tenant resolution for chatbot requests.
+ * Uses header x-tenant-id, body tenant_id, or query tenant_id.
+ * If not supplied, falls back to the single active tenant only if exactly 1 active tenant exists.
+ */
+async function resolveTenantId(req: Request): Promise<string | null> {
+  const explicit =
+    (req.headers['x-tenant-id'] as string) ||
+    (req.query.tenant_id as string) ||
+    (req.body?.tenant_id as string);
+
+  if (explicit && explicit.trim()) {
+    return explicit.trim();
+  }
+
+  try {
+    const activeTenants = await prisma.tenant.findMany({
+      where: { durum: 'Aktif' },
+      select: { id: true },
+      take: 2,
+    });
+    if (activeTenants.length === 1) {
+      return activeTenants[0].id;
+    }
+  } catch {
+    // DB error fallback
+  }
+
+  return null;
+}
 
 export class ChatbotController {
   static async getClientByPhone(req: Request, res: Response, next: NextFunction) {
@@ -9,7 +41,22 @@ export class ChatbotController {
         res.status(400).json({ success: false, error: 'Telefon numarası zorunludur' });
         return;
       }
-      const tenantId = (req.headers['x-tenant-id'] as string) || (req.query.tenant_id as string);
+
+      const cleaned = phone.replace(/\D/g, '');
+      if (cleaned.length < 10) {
+        res.status(400).json({
+          success: false,
+          error: 'Geçersiz telefon numarası. Lütfen en az 10 haneli telefon numarası giriniz.',
+        });
+        return;
+      }
+
+      const tenantId = await resolveTenantId(req);
+      if (!tenantId) {
+        res.status(400).json({ success: false, error: 'Multi-tenant ortamında tenant_id parametresi zorunludur' });
+        return;
+      }
+
       const client = await ChatbotService.getClientByPhone(phone, tenantId);
       if (!client) {
         res.status(404).json({ success: false, message: 'Müşteri bulunamadı' });
@@ -28,8 +75,23 @@ export class ChatbotController {
         res.status(400).json({ success: false, error: 'Telefon numarası zorunludur' });
         return;
       }
+
+      const cleaned = phone.replace(/\D/g, '');
+      if (cleaned.length < 10) {
+        res.status(400).json({
+          success: false,
+          error: 'Geçersiz telefon numarası. Lütfen en az 10 haneli telefon numarası giriniz.',
+        });
+        return;
+      }
+
+      const tenantId = await resolveTenantId(req);
+      if (!tenantId) {
+        res.status(400).json({ success: false, error: 'Multi-tenant ortamında tenant_id parametresi zorunludur' });
+        return;
+      }
+
       const activeOnly = req.query.active !== 'false';
-      const tenantId = (req.headers['x-tenant-id'] as string) || (req.query.tenant_id as string);
       const result = await ChatbotService.getAppointmentsByPhone(phone, activeOnly, tenantId);
       res.json(result);
     } catch (err) {
@@ -44,8 +106,14 @@ export class ChatbotController {
         res.status(400).json({ success: false, error: 'Tarih zorunludur (YYYY-MM-DD)' });
         return;
       }
+
+      const tenantId = await resolveTenantId(req);
+      if (!tenantId) {
+        res.status(400).json({ success: false, error: 'Multi-tenant ortamında tenant_id parametresi zorunludur' });
+        return;
+      }
+
       const duration = parseInt((req.query.duration as string) || (req.query.sure as string) || '30', 10);
-      const tenantId = (req.headers['x-tenant-id'] as string) || (req.query.tenant_id as string);
       const result = await ChatbotService.getAvailableSlots(date, duration, tenantId);
       res.json(result);
     } catch (err) {
@@ -60,6 +128,22 @@ export class ChatbotController {
         res.status(400).json({ success: false, error: 'Telefon, tarih ve saat zorunludur' });
         return;
       }
+
+      const cleaned = String(telefon).replace(/\D/g, '');
+      if (cleaned.length < 10) {
+        res.status(400).json({
+          success: false,
+          error: 'Geçersiz telefon numarası. Lütfen en az 10 haneli telefon numarası giriniz.',
+        });
+        return;
+      }
+
+      const resolvedTenantId = await resolveTenantId(req);
+      if (!resolvedTenantId) {
+        res.status(400).json({ success: false, error: 'Multi-tenant ortamında tenant_id parametresi zorunludur' });
+        return;
+      }
+
       const result = await ChatbotService.bookAppointment({
         ad_soyad,
         telefon,
@@ -67,7 +151,7 @@ export class ChatbotController {
         saat,
         hizmet,
         sure: sure ? parseInt(sure, 10) : undefined,
-        tenant_id: tenant_id || (req.headers['x-tenant-id'] as string),
+        tenant_id: resolvedTenantId,
       });
       res.json(result);
     } catch (err) {
@@ -80,14 +164,28 @@ export class ChatbotController {
       const { appointment_id, id, telefon, phone, tenant_id } = req.body;
       const aptId = appointment_id || id;
       const ph = telefon || phone;
-      const tenantId = tenant_id || (req.headers['x-tenant-id'] as string);
 
       if (!aptId || !ph) {
         res.status(400).json({ success: false, error: 'Randevu ID ve telefon numarası zorunludur' });
         return;
       }
 
-      const result = await ChatbotService.cancelAppointment(aptId, ph, tenantId);
+      const cleaned = String(ph).replace(/\D/g, '');
+      if (cleaned.length < 10) {
+        res.status(400).json({
+          success: false,
+          error: 'Geçersiz telefon numarası. Lütfen en az 10 haneli telefon numarası giriniz.',
+        });
+        return;
+      }
+
+      const resolvedTenantId = await resolveTenantId(req);
+      if (!resolvedTenantId) {
+        res.status(400).json({ success: false, error: 'Multi-tenant ortamında tenant_id parametresi zorunludur' });
+        return;
+      }
+
+      const result = await ChatbotService.cancelAppointment(aptId, ph, resolvedTenantId);
       res.json(result);
     } catch (err) {
       next(err);
@@ -101,14 +199,30 @@ export class ChatbotController {
       const newDate = tarih || date;
       const newTime = saat || time;
       const ph = telefon || phone;
-      const tenantId = tenant_id || (req.headers['x-tenant-id'] as string);
 
       if (!aptId || !newDate || !newTime) {
         res.status(400).json({ success: false, error: 'Randevu ID, yeni tarih ve yeni saat zorunludur' });
         return;
       }
 
-      const result = await ChatbotService.rescheduleAppointment(aptId, newDate, newTime, ph, tenantId);
+      if (ph) {
+        const cleaned = String(ph).replace(/\D/g, '');
+        if (cleaned.length < 10) {
+          res.status(400).json({
+            success: false,
+            error: 'Geçersiz telefon numarası. Lütfen en az 10 haneli telefon numarası giriniz.',
+          });
+          return;
+        }
+      }
+
+      const resolvedTenantId = await resolveTenantId(req);
+      if (!resolvedTenantId) {
+        res.status(400).json({ success: false, error: 'Multi-tenant ortamında tenant_id parametresi zorunludur' });
+        return;
+      }
+
+      const result = await ChatbotService.rescheduleAppointment(aptId, newDate, newTime, ph, resolvedTenantId);
       res.json(result);
     } catch (err) {
       next(err);

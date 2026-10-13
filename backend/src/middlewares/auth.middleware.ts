@@ -29,45 +29,36 @@ export async function authMiddleware(req: AuthenticatedRequest, res: Response, n
     let tenantId = tenantIdHeader || (req.body?.tenant_id as string) || (req.query?.tenant_id as string);
 
     if (token) {
+      // 1. Try JWT verification (standard for dashboard frontend)
       try {
         const decoded = jwt.verify(token, ENV.JWT_SECRET) as { id: string; email: string; salon_adi: string; tenant_id: string };
         req.tenantId = decoded.tenant_id || decoded.id;
         req.user = decoded;
         return next();
       } catch (jwtErr) {
-        // Fallback for legacy static token if tenantId is provided and valid in DB
-        if (tenantId) {
-          const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
-          if (tenant) {
-            req.tenantId = tenant.id;
-            req.user = { id: tenant.id, email: tenant.email, salon_adi: tenant.salon_adi };
-            return next();
-          }
-        }
-        res.status(401).json({ error: 'API Token geçersiz veya süresi doldu', success: false });
-        return;
+        // Not a valid JWT or expired, check if it's a valid API Key
       }
-    }
 
-    // If no token but tenantId header is present in webhook compatibility mode
-    if (tenantId) {
-      const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
-      if (tenant) {
-        req.tenantId = tenant.id;
-        req.user = { id: tenant.id, email: tenant.email, salon_adi: tenant.salon_adi };
+      // 2. Try API Key verification (for server-to-server or integration access)
+      const tenantByKey = await prisma.tenant.findFirst({
+        where: {
+          api_key: token,
+          durum: 'Aktif',
+          ...(tenantId ? { id: tenantId } : {}),
+        },
+      });
+
+      if (tenantByKey) {
+        req.tenantId = tenantByKey.id;
+        req.user = { id: tenantByKey.id, email: tenantByKey.email, salon_adi: tenantByKey.salon_adi };
         return next();
       }
+
+      res.status(401).json({ error: 'Geçersiz veya süresi dolmuş oturum anahtarı / API token', success: false });
+      return;
     }
 
-    // Default tenant fallback if only 1 tenant exists in DB (high resilience)
-    const singleTenant = await prisma.tenant.findFirst();
-    if (singleTenant) {
-      req.tenantId = singleTenant.id;
-      req.user = { id: singleTenant.id, email: singleTenant.email, salon_adi: singleTenant.salon_adi };
-      return next();
-    }
-
-    res.status(401).json({ error: 'Yetkisiz erişim: Tenant veya oturum tokenı eksik', success: false });
+    res.status(401).json({ error: 'Yetkisiz erişim: Oturum anahtarı (Authorization Bearer / x-api-key) zorunludur', success: false });
     return;
   } catch (err) {
     next(err);

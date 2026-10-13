@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { AdminController } from '../controllers/admin.controller.js';
 import { adminMiddleware } from '../middlewares/admin.middleware.js';
+import { authRateLimiter } from '../middlewares/rate-limit.middleware.js';
 
 const router = Router();
 
 // Onboarding & Auth
 router.get('/setup-status', AdminController.checkSetup);
-router.post('/setup', AdminController.setup);
-router.post('/login', AdminController.login);
+router.post('/setup', authRateLimiter, AdminController.setup);
+router.post('/login', authRateLimiter, AdminController.login);
 
 // Korumalı Süper Admin Rotaları
 router.get('/stats', adminMiddleware, AdminController.getStats);
