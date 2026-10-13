@@ -293,64 +293,13 @@ body.landing-page::before {
 /* ==========================================================================
    HEADER & NAVIGATION
    ========================================================================== */
-.sz-announcement-bar {
-  background: linear-gradient(90deg, #18181b 0%, #27272a 50%, #18181b 100%);
-  color: #ffffff;
-  border-bottom: 1px solid rgba(229, 190, 84, 0.25);
-  font-size: 0.81rem;
-  padding: 8px 0;
-  position: relative;
-  z-index: 1001;
-}
-
-.sz-announcement-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  text-align: center;
-}
-
-.sz-announcement-tag {
-  background: var(--sz-gold-gradient);
-  color: #18181b;
-  font-weight: 800;
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
-  padding: 3px 9px;
-  border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(184, 134, 11, 0.35);
-  text-transform: uppercase;
-}
-
-.sz-announcement-msg {
-  color: #f4f4f5;
-  font-weight: 500;
-}
-
-.sz-announcement-action {
-  color: var(--sz-gold-light);
-  font-weight: 700;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.2s ease;
-}
-
-.sz-announcement-action:hover {
-  color: #ffffff;
-  text-decoration: underline;
-}
-
 .sz-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(252, 251, 248, 0.85);
+  background: rgba(252, 251, 248, 0.92);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--sz-line);
@@ -358,7 +307,7 @@ body.landing-page::before {
 }
 
 .sz-header.is-scrolled {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.96);
   box-shadow: var(--sz-shadow-sm);
 }
 
@@ -366,23 +315,25 @@ body.landing-page::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 76px;
+  height: 64px;
+  gap: 16px;
 }
 
 .sz-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-decoration: none;
   color: var(--sz-ink-primary);
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   letter-spacing: -0.02em;
+  flex-shrink: 0;
 }
 
 .sz-brand-mark {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   background: var(--sz-gold-gradient);
   border-radius: var(--sz-radius-sm);
   display: flex;
@@ -390,8 +341,9 @@ body.landing-page::before {
   justify-content: center;
   color: #ffffff;
   font-weight: 800;
-  font-size: 1.2rem;
-  box-shadow: 0 4px 14px rgba(184, 134, 11, 0.28);
+  font-size: 1.05rem;
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.25);
+  flex-shrink: 0;
 }
 
 .sz-brand-title {
@@ -400,10 +352,11 @@ body.landing-page::before {
 }
 
 .sz-brand-name {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 800;
   line-height: 1.1;
   color: var(--sz-ink-primary);
+  white-space: nowrap;
 }
 
 .sz-brand-name span {
@@ -411,24 +364,27 @@ body.landing-page::before {
 }
 
 .sz-brand-badge {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--sz-emerald-dark);
+  white-space: nowrap;
 }
 
 .sz-nav-links {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 20px;
+  flex-shrink: 1;
 }
 
 .sz-nav-links a {
   text-decoration: none;
   color: var(--sz-ink-secondary);
-  font-size: 0.94rem;
+  font-size: 0.88rem;
   font-weight: 500;
+  white-space: nowrap;
   transition: color 0.2s ease;
 }
 
@@ -436,25 +392,36 @@ body.landing-page::before {
   color: var(--sz-gold-dark);
 }
 
+.sz-nav-highlight {
+  color: var(--sz-gold-dark) !important;
+  font-weight: 700 !important;
+}
+
 .sz-nav-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .sz-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 20px;
+  gap: 7px;
+  padding: 0 16px;
+  height: 38px;
+  box-sizing: border-box;
   border-radius: 999px;
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
   text-decoration: none;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   border: 1px solid transparent;
+  flex-shrink: 0;
 }
 
 .sz-btn-secondary {
@@ -471,13 +438,20 @@ body.landing-page::before {
 .sz-btn-whatsapp {
   background: var(--sz-whatsapp);
   color: #ffffff;
-  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.28);
 }
 
 .sz-btn-whatsapp:hover {
   background: var(--sz-whatsapp-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+  box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
+}
+
+.sz-btn-whatsapp svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  flex-shrink: 0;
 }
 
 .sz-btn-gold {
@@ -496,7 +470,7 @@ body.landing-page::before {
    HERO SECTION
    ========================================================================== */
 .sz-hero {
-  padding-top: 154px;
+  padding-top: 100px;
   padding-bottom: 70px;
   position: relative;
 }
@@ -1792,9 +1766,22 @@ body.landing-page::before {
   }
 }
 
+@media (max-width: 1080px) {
+  .sz-nav-links {
+    gap: 14px;
+  }
+  .sz-nav-links a {
+    font-size: 0.82rem;
+  }
+  .sz-btn {
+    padding: 0 12px;
+    font-size: 0.8rem;
+  }
+}
+
 @media (max-width: 768px) {
   .sz-nav-shell {
-    height: 64px;
+    height: 60px;
   }
 
   .sz-brand-name {
@@ -1806,9 +1793,9 @@ body.landing-page::before {
   }
 
   .sz-brand-mark {
-    width: 36px;
-    height: 36px;
-    font-size: 1rem;
+    width: 34px;
+    height: 34px;
+    font-size: 0.95rem;
   }
 
   .sz-nav-links {
@@ -1824,8 +1811,9 @@ body.landing-page::before {
   }
 
   .sz-nav-actions .sz-btn {
-    padding: 6px 14px;
-    font-size: 0.82rem;
+    padding: 0 14px;
+    height: 34px;
+    font-size: 0.8rem;
     font-weight: 600;
     border-radius: 999px;
   }
@@ -1841,18 +1829,9 @@ body.landing-page::before {
   .sz-wa-features-grid {
     grid-template-columns: 1fr;
   }
-  
-  .sz-announcement-bar {
-    padding: 6px 0;
-  }
-
-  .sz-announcement-inner {
-    font-size: 0.76rem;
-    gap: 8px;
-  }
 
   .sz-hero {
-    padding-top: 124px;
+    padding-top: 84px;
     padding-bottom: 40px;
   }
 

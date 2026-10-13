@@ -11,7 +11,7 @@
     <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="14" fill="%23c59b27"/%3E%3Cpath d="M18 20h28l-20 24h20" stroke="%23ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/%3E%3C/svg%3E'>
     <link rel="stylesheet" href="css/shared/fonts.css">
     <link rel="stylesheet" href="css/shared/base.css?v=20261013-3">
-    <link rel="stylesheet" href="css/home/home.css?v=2.3">
+    <link rel="stylesheet" href="css/home/home.css?v=2.4">
     <script type="module" src="js/home/home.js"></script>
   </head>
   <body class="landing-page">
@@ -53,17 +53,6 @@
 
     <!-- HEADER / NAVIGATION -->
     <header class="sz-header">
-      <!-- 14 GÜNLÜK ÜCRETSİZ DENEME ÜST BİLGİ ŞERİDİ -->
-      <div class="sz-announcement-bar">
-        <div class="sz-container">
-          <div class="sz-announcement-inner">
-            <span class="sz-announcement-tag">14 Gün Ücretsiz</span>
-            <span class="sz-announcement-msg">Salonunuzda 14 gün boyunca kredi kartsız ve taahhütsüz hemen test edin!</span>
-            <a class="sz-announcement-action sz-wa-link" href="#">Hemen Başlat <span aria-hidden="true">→</span></a>
-          </div>
-        </div>
-      </div>
-
       <div class="sz-container">
         <nav class="sz-nav-shell" aria-label="Ana gezinme menüsü">
           <a class="sz-brand" href="#top">
@@ -75,16 +64,16 @@
           </a>
 
           <div class="sz-nav-links">
-            <a href="#asistan">WhatsApp Asistanı</a>
-            <a href="#panel">Yönetim Paneli</a>
-            <a href="#karsilastirma">Neden SalonZeka?</a>
-            <a href="#nasil-calisir">Nasıl Başlanır?</a>
-            <a href="#ucretsiz-deneme" style="color:var(--sz-gold-dark); font-weight:700;">14 Gün Deneme</a>
+            <a href="#asistan">Asistan</a>
+            <a href="#panel">Panel</a>
+            <a href="#karsilastirma">Neden Biz?</a>
+            <a href="#nasil-calisir">Nasıl Çalışır?</a>
+            <a href="#ucretsiz-deneme" class="sz-nav-highlight">14 Gün Deneme</a>
           </div>
 
           <div class="sz-nav-actions">
             <a class="sz-btn sz-btn-whatsapp sz-wa-link sz-btn-shimmer" href="#">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
               <span>14 Gün Ücretsiz Dene</span>
             </a>
             <a class="sz-btn sz-btn-secondary" id="navLoginBtn" href="login.html">Giriş Yap</a>
