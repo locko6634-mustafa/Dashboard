@@ -1,6 +1,6 @@
 // ==========================================================================
 // SALONZEKA - HOME / LANDING PAGE JAVASCRIPT
-// Awwwards-Tier Micro-Interactions, 3D Tilt, Magnetic Engine & Atmospheric FX
+// Awwwards-Tier High-Performance Micro-Interactions & Hardware Accelerated FX
 // ==========================================================================
 
 import { isAuthenticated } from '../shared/auth-session.js';
@@ -25,11 +25,18 @@ function initScrollProgressBar() {
     }
 
     let ticking = false;
+    let cachedScrollHeight = 0;
+
+    function updateMetrics() {
+        cachedScrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    }
+    window.addEventListener('resize', updateMetrics, { passive: true });
+    updateMetrics();
+
     window.addEventListener('scroll', () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
-                const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-                const progress = totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
+                const progress = cachedScrollHeight > 0 ? (window.scrollY / cachedScrollHeight) * 100 : 0;
                 progressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
                 ticking = false;
             });
@@ -59,23 +66,23 @@ function initPreloader() {
         heroReveals.forEach((el, index) => {
             setTimeout(() => {
                 el.classList.add('is-revealed');
-            }, 120 + index * 90);
+            }, 100 + index * 80);
         });
     };
 
     Promise.all([fontPromise, domPromise]).then(() => {
-        setTimeout(triggerHeroReveal, 250);
+        setTimeout(triggerHeroReveal, 200);
     });
 
-    // Emniyet zamanlayıcısı (en geç 1.6 sn)
+    // Emniyet zamanlayıcısı (en geç 1.5 sn)
     setTimeout(() => {
         if (preloader && !preloader.classList.contains('is-hidden')) {
             triggerHeroReveal();
         }
-    }, 1600);
+    }, 1500);
 }
 
-// --- 3. ATMOSFERİK PARÇACIK CANVAS MOTORU (LUXURY AMBIENT PARTICLES) ---
+// --- 3. ATMOSFERİK PARÇACIK CANVAS MOTORU (GPU HIZLANDIRMALI GLOW) ---
 function initAtmosphericCanvas() {
     if (prefersReducedMotion()) return;
 
@@ -92,7 +99,7 @@ function initAtmosphericCanvas() {
         }
     }
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
     let width = 0;
@@ -110,29 +117,28 @@ function initAtmosphericCanvas() {
 
     function initParticles() {
         particles = [];
-        // Masaüstünde 42, mobilde 16 hafif parçacık
-        const count = isTouchDevice() || width < 768 ? 16 : 42;
+        // Masaüstünde 30, mobilde 10 hafif parçacık
+        const count = isTouchDevice() || width < 768 ? 10 : 30;
 
         const colors = [
-            'rgba(212, 175, 55, ',  // Altın
-            'rgba(184, 134, 11, ',  // Derin Altın
-            'rgba(16, 185, 129, ',  // Zümrüt
-            'rgba(229, 190, 84, '   // Parlak Şampanya
+            '212, 175, 55',  // Altın
+            '184, 134, 11',  // Derin Altın
+            '16, 185, 129',  // Zümrüt
+            '229, 190, 84'   // Şampanya
         ];
 
         for (let i = 0; i < count; i++) {
             particles.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
-                baseRadius: Math.random() * 2.2 + 0.8,
+                baseRadius: Math.random() * 2.0 + 0.8,
                 radius: 0,
-                colorPrefix: colors[Math.floor(Math.random() * colors.length)],
+                rgb: colors[Math.floor(Math.random() * colors.length)],
                 alpha: Math.random() * 0.45 + 0.15,
                 pulseSpeed: Math.random() * 0.02 + 0.01,
                 pulseAngle: Math.random() * Math.PI * 2,
-                vx: (Math.random() - 0.5) * 0.35,
-                vy: (Math.random() - 0.5) * 0.35 - 0.15, // Hafif yukarı doğru süzülme
-                depth: Math.random() * 0.8 + 0.2
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3 - 0.12
             });
         }
     }
@@ -143,8 +149,10 @@ function initAtmosphericCanvas() {
         ctx.clearRect(0, 0, width, height);
 
         // Farenin konumunu yumuşat
-        mouse.x += (mouse.targetX - mouse.x) * 0.06;
-        mouse.y += (mouse.targetY - mouse.y) * 0.06;
+        if (mouse.targetX !== -9999) {
+            mouse.x += (mouse.targetX - mouse.x) * 0.08;
+            mouse.y += (mouse.targetY - mouse.y) * 0.08;
+        }
 
         for (let i = 0; i < particles.length; i++) {
             const p = particles[i];
@@ -154,20 +162,23 @@ function initAtmosphericCanvas() {
             p.y += p.vy;
 
             // Fareden kaçış / mikro rüzgar
-            const dx = p.x - mouse.x;
-            const dy = p.y - mouse.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 180) {
-                const force = (1 - dist / 180) * 1.4;
-                p.x += (dx / dist) * force;
-                p.y += (dy / dist) * force;
+            if (mouse.x !== -9999) {
+                const dx = p.x - mouse.x;
+                const dy = p.y - mouse.y;
+                const distSq = dx * dx + dy * dy;
+                if (distSq < 28000) { // ~167px
+                    const dist = Math.sqrt(distSq);
+                    const force = (1 - dist / 167) * 1.2;
+                    p.x += (dx / dist) * force;
+                    p.y += (dy / dist) * force;
+                }
             }
 
             // Ekran sınırlarından döngü
-            if (p.x < -20) p.x = width + 20;
-            if (p.x > width + 20) p.x = -20;
-            if (p.y < -20) p.y = height + 20;
-            if (p.y > height + 20) p.y = -20;
+            if (p.x < -10) p.x = width + 10;
+            if (p.x > width + 10) p.x = -10;
+            if (p.y < -10) p.y = height + 10;
+            if (p.y > height + 10) p.y = -10;
 
             // Nefes alma / nabız
             p.pulseAngle += p.pulseSpeed;
@@ -175,30 +186,41 @@ function initAtmosphericCanvas() {
             p.radius = p.baseRadius * (0.8 + pulse * 0.4);
             const currentAlpha = p.alpha * (0.6 + pulse * 0.5);
 
-            // Çizim (Yumuşak Işıltı)
+            // GPU Hızlandırmalı Donanım Çizimi (shadowBlur yok, çift halka glow)
+            // 1. Dış Yumuşak Parlama Halesi
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius * 2.8, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${p.rgb}, ${currentAlpha * 0.22})`;
+            ctx.fill();
+
+            // 2. İç Parlak Çekirdek
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.fillStyle = `${p.colorPrefix}${currentAlpha})`;
-            ctx.shadowColor = `${p.colorPrefix}0.6)`;
-            ctx.shadowBlur = p.radius * 3.5;
+            ctx.fillStyle = `rgba(${p.rgb}, ${currentAlpha})`;
             ctx.fill();
         }
 
         animationFrameId = requestAnimationFrame(render);
     }
 
-    window.addEventListener('resize', resize, { passive: true });
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(resize, 150);
+    }, { passive: true });
+
     window.addEventListener('mousemove', (e) => {
         mouse.targetX = e.clientX;
         mouse.targetY = e.clientY;
     }, { passive: true });
 
-    // Sekme arka plandayken veya kaybolduğunda render'ı durdur
     document.addEventListener('visibilitychange', () => {
         isVisible = !document.hidden;
         if (isVisible) {
             cancelAnimationFrame(animationFrameId);
             animationFrameId = requestAnimationFrame(render);
+        } else {
+            cancelAnimationFrame(animationFrameId);
         }
     });
 
@@ -219,7 +241,7 @@ function initScrollReveal() {
             const children = container.querySelectorAll('[data-reveal]');
             children.forEach((child, idx) => {
                 if (!child.hasAttribute('data-delay')) {
-                    child.setAttribute('data-delay', (idx * 80 + 60).toString());
+                    child.setAttribute('data-delay', (idx * 75 + 50).toString());
                 }
             });
         }
@@ -237,14 +259,14 @@ function initScrollReveal() {
             }
         });
     }, {
-        threshold: 0.12,
-        rootMargin: '0px 0px -40px 0px'
+        threshold: 0.1,
+        rootMargin: '0px 0px -30px 0px'
     });
 
     revealElements.forEach(el => observer.observe(el));
 }
 
-// --- 5. 3D TILT & DİNAMİK SPOTLIGHT IŞILTISI MOTORU ---
+// --- 5. 3D TILT & DİNAMİK SPOTLIGHT IŞILTISI MOTORU (OPTIMIZE) ---
 function init3DTiltAndSpotlight() {
     if (isTouchDevice() || prefersReducedMotion()) return;
 
@@ -276,53 +298,49 @@ function init3DTiltAndSpotlight() {
         }
 
         let bounds = null;
-        let isHovered = false;
         let rafId = null;
-        let mouseX = 0;
-        let mouseY = 0;
 
         function updateBounds() {
             bounds = card.getBoundingClientRect();
         }
 
-        function onMouseEnter(e) {
-            isHovered = true;
+        function onMouseEnter() {
             updateBounds();
             card.style.setProperty('--spotlight-opacity', '1');
-            card.style.transition = 'transform 0.12s ease-out, box-shadow 0.3s ease';
+            card.style.transition = 'transform 0.1s ease-out, box-shadow 0.25s ease';
         }
 
         function onMouseMove(e) {
             if (!bounds) updateBounds();
-            mouseX = e.clientX - bounds.left;
-            mouseY = e.clientY - bounds.top;
+            const mouseX = e.clientX - bounds.left;
+            const mouseY = e.clientY - bounds.top;
 
             if (!rafId) {
                 rafId = requestAnimationFrame(() => {
                     card.style.setProperty('--spotlight-x', `${mouseX}px`);
                     card.style.setProperty('--spotlight-y', `${mouseY}px`);
 
-                    // 3D Tilt Hesaplama (-7 ile +7 derece arası)
+                    // 3D Tilt Hesaplama (-6 ile +6 derece)
                     const centerX = bounds.width / 2;
                     const centerY = bounds.height / 2;
-                    const rotateX = ((mouseY - centerY) / centerY) * -6.5;
-                    const rotateY = ((mouseX - centerX) / centerX) * 6.5;
+                    const rotateX = ((mouseY - centerY) / centerY) * -5.5;
+                    const rotateY = ((mouseX - centerX) / centerX) * 5.5;
 
-                    card.style.transform = `perspective(1200px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.015, 1.015, 1.015)`;
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(1)}deg) rotateY(${rotateY.toFixed(1)}deg) scale3d(1.012, 1.012, 1.012)`;
                     rafId = null;
                 });
             }
         }
 
         function onMouseLeave() {
-            isHovered = false;
             if (rafId) {
                 cancelAnimationFrame(rafId);
                 rafId = null;
             }
+            bounds = null;
             card.style.setProperty('--spotlight-opacity', '0');
-            card.style.transition = 'transform 0.65s var(--sz-ease-spring), box-shadow 0.5s ease';
-            card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+            card.style.transition = 'transform 0.5s var(--sz-ease-spring), box-shadow 0.4s ease';
+            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
         }
 
         card.addEventListener('mouseenter', onMouseEnter, { passive: true });
@@ -360,7 +378,7 @@ function initMagneticButtons() {
             ripple.style.top = `${y - size / 2}px`;
 
             btn.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 750);
+            setTimeout(() => ripple.remove(), 700);
         });
 
         // Masaüstünde Manyetik Çekim
@@ -371,17 +389,16 @@ function initMagneticButtons() {
                 const rect = btn.getBoundingClientRect();
                 const centerX = rect.left + rect.width / 2;
                 const centerY = rect.top + rect.height / 2;
-                const deltaX = (e.clientX - centerX) * 0.32;
-                const deltaY = (e.clientY - centerY) * 0.32;
+                const deltaX = (e.clientX - centerX) * 0.28;
+                const deltaY = (e.clientY - centerY) * 0.28;
 
                 if (!rafId) {
                     rafId = requestAnimationFrame(() => {
                         btn.style.transform = `translate3d(${deltaX.toFixed(1)}px, ${deltaY.toFixed(1)}px, 0)`;
 
-                        // Buton içindeki metin ve svg'ye ters katman derinliği
                         const innerElements = btn.querySelectorAll('span, svg');
                         innerElements.forEach(el => {
-                            el.style.transform = `translate3d(${(deltaX * 0.38).toFixed(1)}px, ${(deltaY * 0.38).toFixed(1)}px, 0)`;
+                            el.style.transform = `translate3d(${(deltaX * 0.32).toFixed(1)}px, ${(deltaY * 0.32).toFixed(1)}px, 0)`;
                         });
                         rafId = null;
                     });
@@ -393,25 +410,25 @@ function initMagneticButtons() {
                     cancelAnimationFrame(rafId);
                     rafId = null;
                 }
-                btn.style.transition = 'transform 0.5s var(--sz-ease-spring)';
+                btn.style.transition = 'transform 0.4s var(--sz-ease-spring)';
                 btn.style.transform = 'translate3d(0, 0, 0)';
 
                 const innerElements = btn.querySelectorAll('span, svg');
                 innerElements.forEach(el => {
-                    el.style.transition = 'transform 0.45s var(--sz-ease-spring)';
+                    el.style.transition = 'transform 0.4s var(--sz-ease-spring)';
                     el.style.transform = 'translate3d(0, 0, 0)';
                 });
 
                 setTimeout(() => {
                     btn.style.transition = '';
                     innerElements.forEach(el => el.style.transition = '');
-                }, 500);
+                }, 400);
             }, { passive: true });
         }
     });
 }
 
-// --- 7. HERO ÇOK KATMANLI PARALAKS DERİNLİĞİ ---
+// --- 7. HERO ÇOK KATMANLI PARALAKS DERİNLİĞİ (UYKU MODU DESTEKLİ) ---
 function initHeroParallax() {
     if (isTouchDevice() || prefersReducedMotion()) return;
 
@@ -427,26 +444,37 @@ function initHeroParallax() {
     let currentX = 0;
     let currentY = 0;
     let rafId = null;
+    let isHoveringHero = false;
 
     function renderParallax() {
         currentX += (targetX - currentX) * 0.08;
         currentY += (targetY - currentY) * 0.08;
 
-        // Metin sol bloğu (Ters yönde hafif süzülme)
-        heroContent.style.transform = `translate3d(${(-currentX * 12).toFixed(1)}px, ${(-currentY * 12).toFixed(1)}px, 0)`;
+        // Metin sol bloğu (Ters yönde süzülme)
+        heroContent.style.transform = `translate3d(${(-currentX * 10).toFixed(1)}px, ${(-currentY * 10).toFixed(1)}px, 0)`;
 
         // Simülasyon paneli (Derinlikli yönde süzülme + mikro açı)
-        heroSim.style.transform = `translate3d(${(currentX * 16).toFixed(1)}px, ${(currentY * 16).toFixed(1)}px, 0) rotateY(${(currentX * 3.5).toFixed(1)}deg) rotateX(${(-currentY * 3.5).toFixed(1)}deg)`;
+        heroSim.style.transform = `translate3d(${(currentX * 14).toFixed(1)}px, ${(currentY * 14).toFixed(1)}px, 0) rotateY(${(currentX * 3.0).toFixed(1)}deg) rotateX(${(-currentY * 3.0).toFixed(1)}deg)`;
 
         // Arka plan ışık orbları (Geniş açı paralaksı)
         if (orbs.length) {
-            orbs[0].style.transform = `translate3d(${(currentX * 35).toFixed(1)}px, ${(currentY * 35).toFixed(1)}px, 0)`;
-            if (orbs[1]) orbs[1].style.transform = `translate3d(${(-currentX * 28).toFixed(1)}px, ${(-currentY * 28).toFixed(1)}px, 0)`;
-            if (orbs[2]) orbs[2].style.transform = `translate3d(${(currentX * 22).toFixed(1)}px, ${(currentY * 22).toFixed(1)}px, 0)`;
+            orbs[0].style.transform = `translate3d(${(currentX * 30).toFixed(1)}px, ${(currentY * 30).toFixed(1)}px, 0)`;
+            if (orbs[1]) orbs[1].style.transform = `translate3d(${(-currentX * 24).toFixed(1)}px, ${(-currentY * 24).toFixed(1)}px, 0)`;
+            if (orbs[2]) orbs[2].style.transform = `translate3d(${(currentX * 18).toFixed(1)}px, ${(currentY * 18).toFixed(1)}px, 0)`;
         }
 
-        rafId = requestAnimationFrame(renderParallax);
+        // AKILLI UYKU KONTROLÜ: Fare ayrıldıktan sonra merkeze oturunca döngüyü DURDUR!
+        if (isHoveringHero || Math.abs(targetX - currentX) > 0.001 || Math.abs(targetY - currentY) > 0.001) {
+            rafId = requestAnimationFrame(renderParallax);
+        } else {
+            rafId = null;
+        }
     }
+
+    hero.addEventListener('mouseenter', () => {
+        isHoveringHero = true;
+        if (!rafId) rafId = requestAnimationFrame(renderParallax);
+    }, { passive: true });
 
     hero.addEventListener('mousemove', (e) => {
         const rect = hero.getBoundingClientRect();
@@ -461,8 +489,10 @@ function initHeroParallax() {
     }, { passive: true });
 
     hero.addEventListener('mouseleave', () => {
+        isHoveringHero = false;
         targetX = 0;
         targetY = 0;
+        // renderParallax merkeze dönene kadar bir süre daha çalışıp otomatik kapanacak
     }, { passive: true });
 }
 
@@ -474,8 +504,8 @@ function initMicroInteractions() {
         item.addEventListener('mouseenter', () => {
             const icon = item.querySelector('svg, .sz-trial-perk-icon');
             if (icon) {
-                icon.style.transition = 'transform 0.4s var(--sz-ease-bounce), color 0.3s ease';
-                icon.style.transform = 'scale(1.24) rotate(8deg)';
+                icon.style.transition = 'transform 0.35s var(--sz-ease-bounce)';
+                icon.style.transform = 'scale(1.22) rotate(6deg)';
             }
         });
         item.addEventListener('mouseleave', () => {
@@ -490,9 +520,9 @@ function initMicroInteractions() {
     const circleProgress = document.querySelector('.sz-circle-progress');
     if (circleProgress) {
         circleProgress.addEventListener('mouseenter', () => {
-            circleProgress.style.transition = 'transform 0.5s var(--sz-ease-bounce), box-shadow 0.5s ease';
-            circleProgress.style.transform = 'scale(1.1) rotate(12deg)';
-            circleProgress.style.boxShadow = '0 0 25px rgba(184, 134, 11, 0.4)';
+            circleProgress.style.transition = 'transform 0.45s var(--sz-ease-bounce), box-shadow 0.45s ease';
+            circleProgress.style.transform = 'scale(1.08) rotate(10deg)';
+            circleProgress.style.boxShadow = '0 0 20px rgba(184, 134, 11, 0.35)';
         });
         circleProgress.addEventListener('mouseleave', () => {
             circleProgress.style.transform = 'scale(1) rotate(0deg)';
@@ -506,9 +536,9 @@ function initMicroInteractions() {
         stat.addEventListener('mouseenter', () => {
             const strong = stat.querySelector('strong');
             if (strong) {
-                strong.style.transition = 'transform 0.3s var(--sz-ease-bounce), text-shadow 0.3s ease';
-                strong.style.transform = 'scale(1.08)';
-                strong.style.textShadow = '0 0 12px rgba(184, 134, 11, 0.3)';
+                strong.style.transition = 'transform 0.25s var(--sz-ease-bounce), text-shadow 0.25s ease';
+                strong.style.transform = 'scale(1.06)';
+                strong.style.textShadow = '0 0 10px rgba(184, 134, 11, 0.25)';
             }
         });
         stat.addEventListener('mouseleave', () => {

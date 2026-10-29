@@ -158,7 +158,7 @@
 .sz-ambient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(12px);
   opacity: 0.6;
   will-change: transform;
 }
@@ -228,44 +228,38 @@
 }
 
 /* ==========================================================================
-   SCROLL REVEAL ANİMASYON MOTORU (AWWWARDS TIER CHOREOGRAPHY)
+   SCROLL REVEAL ANİMASYON MOTORU (AWWWARDS TIER CHOREOGRAPHY - GPU ACCELERATED)
    ========================================================================== */
 [data-reveal] {
   opacity: 0;
-  transform: translateY(38px) scale(0.97) rotateX(4deg);
-  filter: blur(8px);
+  transform: translateY(30px) scale(0.97);
   transition:
-    opacity 0.85s var(--sz-ease-spring),
-    transform 0.85s var(--sz-ease-spring),
-    filter 0.85s var(--sz-ease-spring);
-  will-change: opacity, transform, filter;
+    opacity 0.75s var(--sz-ease-spring),
+    transform 0.75s var(--sz-ease-spring);
+  will-change: opacity, transform;
   transform-origin: center bottom;
 }
 
 [data-reveal="zoom"] {
   opacity: 0;
-  transform: scale(0.92) translateY(30px);
-  filter: blur(10px);
+  transform: scale(0.93) translateY(22px);
 }
 
 [data-reveal="left"] {
   opacity: 0;
-  transform: translateX(-40px) scale(0.98) rotateY(-4deg);
-  filter: blur(8px);
+  transform: translateX(-32px) scale(0.98);
   transform-origin: left center;
 }
 
 [data-reveal="right"] {
   opacity: 0;
-  transform: translateX(40px) scale(0.98) rotateY(4deg);
-  filter: blur(8px);
+  transform: translateX(32px) scale(0.98);
   transform-origin: right center;
 }
 
 [data-reveal].is-revealed {
   opacity: 1 !important;
-  transform: translate3d(0, 0, 0) scale(1) rotateX(0) rotateY(0) !important;
-  filter: blur(0px) !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
 }
 
 [data-delay="50"] { transition-delay: 0.05s; }
@@ -477,8 +471,8 @@ body.landing-page::before {
   right: 0;
   z-index: 1000;
   background: rgba(252, 251, 248, 0.92);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--sz-line);
   transition: all 0.3s ease;
 }
@@ -785,8 +779,8 @@ body.landing-page::before {
    ========================================================================== */
 .sz-sim-wrapper {
   background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  backdrop-filter: blur(12px) saturate(190%);
+  -webkit-backdrop-filter: blur(12px) saturate(190%);
   border: 1px solid rgba(226, 215, 195, 0.7);
   border-radius: var(--sz-radius-xl);
   padding: 22px;
@@ -818,7 +812,7 @@ body.landing-page::before {
   background: radial-gradient(circle, rgba(184, 134, 11, 0.18) 0%, rgba(16, 185, 129, 0.08) 50%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
-  filter: blur(20px);
+  filter: blur(12px);
   animation: orbMorph 10s ease-in-out infinite alternate;
 }
 
@@ -1175,8 +1169,8 @@ body.landing-page::before {
 
 .sz-vs-bad {
   background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
   border: 1px solid rgba(239, 68, 68, 0.22);
   box-shadow: 0 14px 34px -4px rgba(239, 68, 68, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
 }
@@ -1189,8 +1183,8 @@ body.landing-page::before {
 
 .sz-vs-good {
   background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  backdrop-filter: blur(12px) saturate(190%);
+  -webkit-backdrop-filter: blur(12px) saturate(190%);
   border: 2px solid var(--sz-gold);
   box-shadow: 0 20px 48px -6px rgba(184, 134, 11, 0.14), 0 0 0 1px rgba(255, 255, 255, 0.9) inset, 0 0 35px rgba(184, 134, 11, 0.1);
 }
@@ -1291,8 +1285,8 @@ body.landing-page::before {
 
 .sz-feature-card {
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
   border: 1px solid var(--sz-line);
   border-radius: var(--sz-radius-lg);
   padding: 30px 26px;
@@ -1384,8 +1378,8 @@ body.landing-page::before {
 
 .sz-bento-card {
   background: rgba(255, 255, 255, 0.86);
-  backdrop-filter: blur(22px) saturate(180%);
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
   border: 1px solid var(--sz-line);
   border-radius: var(--sz-radius-lg);
   padding: 34px;
@@ -1529,8 +1523,8 @@ body.landing-page::before {
 
 .sz-step-card {
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
   border: 1px solid var(--sz-line);
   border-radius: var(--sz-radius-lg);
   padding: 38px 30px;
@@ -1593,8 +1587,8 @@ body.landing-page::before {
 
 .sz-trial-banner {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(251, 247, 238, 0.9) 100%);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  backdrop-filter: blur(12px) saturate(190%);
+  -webkit-backdrop-filter: blur(12px) saturate(190%);
   border: 1px solid var(--sz-gold-border);
   border-radius: var(--sz-radius-xl);
   padding: 56px 48px;
@@ -1609,8 +1603,8 @@ body.landing-page::before {
 
 .sz-trial-card {
   background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
   border: 2px solid var(--sz-gold-border);
   border-radius: var(--sz-radius-lg);
   padding: 38px 32px;
@@ -1635,7 +1629,7 @@ body.landing-page::before {
   height: 450px;
   background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, transparent 70%);
   pointer-events: none;
-  filter: blur(50px);
+  filter: blur(12px);
 }
 
 .sz-trial-pill {
@@ -2181,8 +2175,8 @@ body.landing-page::before {
     justify-content: space-around;
     padding: 5px 6px;
     background: rgba(24, 40, 29, 0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 9999px;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
