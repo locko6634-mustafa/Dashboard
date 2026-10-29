@@ -6,46 +6,53 @@
   --sz-canvas: #fcfbf8;
   --sz-canvas-subtle: #f5f2ec;
   --sz-surface: #ffffff;
-  --sz-surface-glass: rgba(255, 255, 255, 0.88);
+  --sz-surface-glass: rgba(255, 255, 255, 0.82);
+  --sz-surface-glass-heavy: rgba(255, 255, 255, 0.92);
   --sz-surface-gold: #fbf7ee;
   --sz-surface-emerald: #f0fdf4;
-  
+
   --sz-ink-primary: #18181b;
   --sz-ink-secondary: #52525b;
   --sz-ink-muted: #71717a;
   --sz-ink-light: #a1a1aa;
-  
+
   --sz-gold: #b8860b;
   --sz-gold-dark: #8c6504;
   --sz-gold-light: #e5be54;
   --sz-gold-soft: rgba(184, 134, 11, 0.08);
   --sz-gold-border: rgba(197, 155, 39, 0.28);
-  --sz-gold-glow: 0 0 24px rgba(184, 134, 11, 0.16);
+  --sz-gold-glow: 0 0 28px rgba(184, 134, 11, 0.22);
   --sz-gold-gradient: linear-gradient(135deg, #c59b27 0%, #d4af37 50%, #b8860b 100%);
-  
+  --sz-gold-gradient-shine: linear-gradient(120deg, #c59b27 0%, #e5be54 30%, #ffffff 50%, #e5be54 70%, #b8860b 100%);
+
   --sz-emerald: #10b981;
   --sz-emerald-dark: #059669;
   --sz-emerald-soft: #ecfdf5;
   --sz-emerald-border: rgba(16, 185, 129, 0.24);
-  --sz-emerald-glow: 0 0 24px rgba(16, 185, 129, 0.18);
-  
+  --sz-emerald-glow: 0 0 28px rgba(16, 185, 129, 0.24);
+
   --sz-whatsapp: #25d366;
   --sz-whatsapp-hover: #20bd5a;
-  
-  --sz-line: rgba(226, 215, 195, 0.55);
-  --sz-line-strong: rgba(197, 155, 39, 0.35);
-  
+
+  --sz-line: rgba(226, 215, 195, 0.6);
+  --sz-line-strong: rgba(197, 155, 39, 0.4);
+
   --sz-shadow-xs: 0 1px 3px rgba(35, 30, 20, 0.04);
   --sz-shadow-sm: 0 4px 12px rgba(35, 30, 20, 0.05);
-  --sz-shadow-md: 0 12px 32px -4px rgba(35, 30, 20, 0.07), 0 4px 12px rgba(35, 30, 20, 0.03);
-  --sz-shadow-lg: 0 24px 60px -12px rgba(35, 30, 20, 0.1), 0 8px 24px rgba(35, 30, 20, 0.04);
-  --sz-shadow-hover: 0 20px 48px -8px rgba(184, 134, 11, 0.15);
-  
+  --sz-shadow-md: 0 14px 34px -4px rgba(35, 30, 20, 0.07), 0 4px 12px rgba(35, 30, 20, 0.03);
+  --sz-shadow-lg: 0 24px 60px -12px rgba(35, 30, 20, 0.09), 0 8px 24px rgba(35, 30, 20, 0.04);
+  --sz-shadow-glass: 0 20px 45px -10px rgba(35, 30, 20, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  --sz-shadow-hover: 0 24px 50px -8px rgba(184, 134, 11, 0.18), 0 0 24px rgba(184, 134, 11, 0.1);
+  --sz-shadow-hover-emerald: 0 24px 50px -8px rgba(16, 185, 129, 0.2), 0 0 24px rgba(16, 185, 129, 0.12);
+
   --sz-radius-sm: 10px;
   --sz-radius-md: 16px;
   --sz-radius-lg: 24px;
   --sz-radius-xl: 32px;
   --sz-container: 1200px;
+
+  --sz-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --sz-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ==========================================================================
@@ -196,44 +203,187 @@
 }
 
 /* ==========================================================================
-   SCROLL REVEAL ANIMASYON MOTORU
+   SCROLL PROGRESS BAR & ATMOSPHERIC PARTICLES
+   ========================================================================== */
+.sz-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--sz-gold) 0%, var(--sz-gold-light) 45%, var(--sz-emerald) 85%, #ffffff 100%);
+  z-index: 1000000;
+  pointer-events: none;
+  box-shadow: 0 0 12px rgba(229, 190, 84, 0.8), 0 0 4px rgba(16, 185, 129, 0.6);
+  transition: width 0.08s linear;
+}
+
+#sz-ambient-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ==========================================================================
+   SCROLL REVEAL ANİMASYON MOTORU (AWWWARDS TIER CHOREOGRAPHY)
    ========================================================================== */
 [data-reveal] {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
+  transform: translateY(38px) scale(0.97) rotateX(4deg);
+  filter: blur(8px);
+  transition:
+    opacity 0.85s var(--sz-ease-spring),
+    transform 0.85s var(--sz-ease-spring),
+    filter 0.85s var(--sz-ease-spring);
+  will-change: opacity, transform, filter;
+  transform-origin: center bottom;
 }
 
 [data-reveal="zoom"] {
   opacity: 0;
-  transform: scale(0.94) translateY(20px);
+  transform: scale(0.92) translateY(30px);
+  filter: blur(10px);
 }
 
 [data-reveal="left"] {
   opacity: 0;
-  transform: translateX(-32px);
+  transform: translateX(-40px) scale(0.98) rotateY(-4deg);
+  filter: blur(8px);
+  transform-origin: left center;
 }
 
 [data-reveal="right"] {
   opacity: 0;
-  transform: translateX(32px);
+  transform: translateX(40px) scale(0.98) rotateY(4deg);
+  filter: blur(8px);
+  transform-origin: right center;
 }
 
 [data-reveal].is-revealed {
   opacity: 1 !important;
-  transform: translate(0) scale(1) !important;
+  transform: translate3d(0, 0, 0) scale(1) rotateX(0) rotateY(0) !important;
+  filter: blur(0px) !important;
 }
 
+[data-delay="50"] { transition-delay: 0.05s; }
 [data-delay="100"] { transition-delay: 0.1s; }
+[data-delay="150"] { transition-delay: 0.15s; }
 [data-delay="200"] { transition-delay: 0.2s; }
+[data-delay="250"] { transition-delay: 0.25s; }
 [data-delay="300"] { transition-delay: 0.3s; }
+[data-delay="350"] { transition-delay: 0.35s; }
 [data-delay="400"] { transition-delay: 0.4s; }
 
-/* Buton Shimmer (Parıltı) */
+/* ==========================================================================
+   3D TILT, SPOTLIGHT & LUMINOUS BORDER MOTORU
+   ========================================================================== */
+.sz-spotlight-card {
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  perspective: 1200px;
+  will-change: transform;
+  transition: transform 0.5s var(--sz-ease-spring), box-shadow 0.5s var(--sz-ease-spring);
+}
+
+.sz-spotlight-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 10;
+  opacity: var(--spotlight-opacity, 0);
+  background: radial-gradient(
+    500px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+    rgba(212, 175, 55, 0.14) 0%,
+    rgba(16, 185, 129, 0.05) 40%,
+    transparent 70%
+  );
+  transition: opacity 0.3s ease;
+  mix-blend-mode: multiply;
+}
+
+.sz-spotlight-border {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 11;
+  padding: 1.5px;
+  opacity: var(--spotlight-opacity, 0);
+  background: radial-gradient(
+    400px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+    rgba(212, 175, 55, 0.8) 0%,
+    rgba(16, 185, 129, 0.5) 45%,
+    transparent 70%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition: opacity 0.3s ease;
+}
+
+/* ==========================================================================
+   MAGNETIC BUTTONS, LIQUID SHEEN & ORGANIC RIPPLE
+   ========================================================================== */
+.sz-btn-magnetic {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  transform-style: preserve-3d;
+  transition: transform 0.35s var(--sz-ease-spring), box-shadow 0.35s var(--sz-ease-spring);
+}
+
+.sz-btn-magnetic > * {
+  pointer-events: none;
+  will-change: transform;
+  transition: transform 0.25s var(--sz-ease-spring);
+}
+
+.sz-ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: scale(0);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 70%);
+  animation: szRippleKeyframe 0.7s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+  z-index: 5;
+}
+
+@keyframes szRippleKeyframe {
+  0% { transform: scale(0); opacity: 0.8; }
+  100% { transform: scale(3.5); opacity: 0; }
+}
+
+/* Buton Shimmer & Liquid Sheen */
 .sz-btn-shimmer {
   position: relative;
   overflow: hidden;
+}
+
+.sz-btn-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: -100%;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 65%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.sz-btn-shimmer:hover::before {
+  transform: translateX(100%);
 }
 
 .sz-btn-shimmer::after {
@@ -246,16 +396,43 @@
   background: linear-gradient(
     60deg,
     transparent 30%,
-    rgba(255, 255, 255, 0.22) 50%,
+    rgba(255, 255, 255, 0.24) 50%,
     transparent 70%
   );
   transform: rotate(25deg) translateY(-120%);
-  animation: btnShimmer 4.5s infinite;
+  animation: btnShimmer 5s infinite;
+  pointer-events: none;
 }
 
 @keyframes btnShimmer {
   0% { transform: rotate(25deg) translateY(-120%); }
-  22%, 100% { transform: rotate(25deg) translateY(120%); }
+  25%, 100% { transform: rotate(25deg) translateY(120%); }
+}
+
+/* ==========================================================================
+   TIPOGRAFİK SIVI ALTIN IŞIMA (LIQUID GOLD FLOW)
+   ========================================================================== */
+.sz-gold-text {
+  background: linear-gradient(
+    120deg,
+    #b8860b 0%,
+    #e5be54 22%,
+    #ffffff 48%,
+    #e5be54 74%,
+    #b8860b 100%
+  );
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: liquidGoldSweep 6s ease-in-out infinite;
+  display: inline-block;
+  will-change: background-position;
+}
+
+@keyframes liquidGoldSweep {
+  0% { background-position: 100% 0; }
+  50% { background-position: 0% 0; }
+  100% { background-position: 100% 0; }
 }
 
 /* Base Body Override for Landing */
@@ -278,7 +455,7 @@ body.landing-page::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: 
+  background:
     radial-gradient(circle at 10% 15%, rgba(197, 155, 39, 0.05) 0%, transparent 35%),
     radial-gradient(circle at 90% 25%, rgba(16, 185, 129, 0.06) 0%, transparent 40%),
     radial-gradient(circle at 50% 80%, rgba(197, 155, 39, 0.04) 0%, transparent 45%),
@@ -607,25 +784,42 @@ body.landing-page::before {
    CANLI SIMÜLASYON (WHATSAPP + TAKVİM ÇİFT PANEL)
    ========================================================================== */
 .sz-sim-wrapper {
-  background: var(--sz-surface);
-  border: 1px solid var(--sz-line);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(226, 215, 195, 0.7);
   border-radius: var(--sz-radius-xl);
-  padding: 20px;
-  box-shadow: var(--sz-shadow-lg);
+  padding: 22px;
+  box-shadow:
+    0 24px 60px -15px rgba(35, 30, 20, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+    0 0 35px rgba(184, 134, 11, 0.08);
   position: relative;
   overflow: hidden;
+  transform-style: preserve-3d;
+  perspective: 1200px;
+  transition: transform 0.45s var(--sz-ease-spring), box-shadow 0.45s var(--sz-ease-spring);
+}
+
+.sz-sim-wrapper:hover {
+  box-shadow:
+    0 32px 80px -15px rgba(184, 134, 11, 0.18),
+    0 0 0 1px rgba(197, 155, 39, 0.4) inset,
+    0 0 45px rgba(16, 185, 129, 0.12);
 }
 
 .sz-sim-wrapper::before {
   content: "";
   position: absolute;
-  top: -50px;
-  right: -50px;
-  width: 180px;
-  height: 180px;
-  background: radial-gradient(circle, rgba(184, 134, 11, 0.12) 0%, transparent 70%);
+  top: -60px;
+  right: -60px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(184, 134, 11, 0.18) 0%, rgba(16, 185, 129, 0.08) 50%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
+  filter: blur(20px);
+  animation: orbMorph 10s ease-in-out infinite alternate;
 }
 
 .sz-sim-topbar {
@@ -741,15 +935,22 @@ body.landing-page::before {
   border-radius: 12px;
   line-height: 1.4;
   position: relative;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
   opacity: 0;
-  transform: translateY(8px);
-  transition: all 0.4s ease;
+  transform: translateY(12px) scale(0.92);
+  transition: all 0.4s var(--sz-ease-spring);
 }
 
 .sz-wa-msg.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
+  animation: waMsgSpring 0.5s var(--sz-ease-bounce) forwards;
+}
+
+@keyframes waMsgSpring {
+  0% { opacity: 0; transform: translateY(12px) scale(0.92); }
+  65% { transform: translateY(-2px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .sz-wa-msg-in {
@@ -866,15 +1067,16 @@ body.landing-page::before {
 }
 
 .sz-cal-slot.has-booking {
-  background: var(--sz-emerald-soft);
-  border: 1px solid var(--sz-emerald);
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
-  animation: bookingPop 0.5s ease;
+  background: var(--sz-emerald-soft) !important;
+  border: 1px solid var(--sz-emerald) !important;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+  animation: slotConfirmGlow 1.2s var(--sz-ease-spring) forwards;
 }
 
-@keyframes bookingPop {
-  0% { transform: scale(0.96); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+@keyframes slotConfirmGlow {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  50% { transform: scale(1.03); box-shadow: 0 0 0 16px rgba(16, 185, 129, 0); }
+  100% { transform: scale(1); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.25); }
 }
 
 .sz-cal-slot.has-booking .sz-slot-client {
@@ -965,19 +1167,38 @@ body.landing-page::before {
   border-radius: var(--sz-radius-lg);
   padding: 36px 32px;
   position: relative;
-  transition: all 0.3s ease;
+  transition: transform 0.45s var(--sz-ease-spring), box-shadow 0.45s var(--sz-ease-spring), border-color 0.45s ease;
+  transform-style: preserve-3d;
+  perspective: 1200px;
+  overflow: hidden;
 }
 
 .sz-vs-bad {
-  background: #ffffff;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  box-shadow: var(--sz-shadow-sm);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  box-shadow: 0 14px 34px -4px rgba(239, 68, 68, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+.sz-vs-bad:hover {
+  transform: translateY(-4px);
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 20px 48px -8px rgba(239, 68, 68, 0.12), 0 0 24px rgba(239, 68, 68, 0.08);
 }
 
 .sz-vs-good {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
   border: 2px solid var(--sz-gold);
-  box-shadow: var(--sz-shadow-md), 0 0 30px rgba(184, 134, 11, 0.08);
+  box-shadow: 0 20px 48px -6px rgba(184, 134, 11, 0.14), 0 0 0 1px rgba(255, 255, 255, 0.9) inset, 0 0 35px rgba(184, 134, 11, 0.1);
+}
+
+.sz-vs-good:hover {
+  transform: translateY(-6px);
+  border-color: var(--sz-gold-light);
+  box-shadow: 0 28px 60px -8px rgba(184, 134, 11, 0.24), 0 0 0 1px rgba(255, 255, 255, 1) inset, 0 0 45px rgba(16, 185, 129, 0.15);
 }
 
 .sz-vs-badge {
@@ -1069,36 +1290,49 @@ body.landing-page::before {
 }
 
 .sz-feature-card {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--sz-line);
   border-radius: var(--sz-radius-lg);
-  padding: 28px 24px;
-  box-shadow: var(--sz-shadow-xs);
+  padding: 30px 26px;
+  box-shadow: 0 12px 28px -6px rgba(35, 30, 20, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.45s var(--sz-ease-spring), box-shadow 0.45s var(--sz-ease-spring), border-color 0.45s ease;
   position: relative;
   overflow: hidden;
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 
 .sz-feature-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
   border-color: var(--sz-gold-border);
-  box-shadow: var(--sz-shadow-hover);
+  box-shadow: 0 24px 50px -8px rgba(184, 134, 11, 0.18), 0 0 0 1px rgba(255, 255, 255, 1) inset, 0 0 24px rgba(184, 134, 11, 0.1);
 }
 
 .sz-feature-icon-box {
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   border-radius: var(--sz-radius-md);
   background: var(--sz-surface-gold);
   border: 1px solid var(--sz-gold-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
-  margin-bottom: 20px;
+  font-size: 1.5rem;
+  margin-bottom: 22px;
   color: var(--sz-gold-dark);
+  box-shadow: 0 4px 14px rgba(184, 134, 11, 0.12);
+  transition: transform 0.4s var(--sz-ease-spring), box-shadow 0.4s ease;
+  transform-style: preserve-3d;
+}
+
+.sz-feature-card:hover .sz-feature-icon-box {
+  transform: scale(1.12) rotate(6deg) translateZ(20px);
+  box-shadow: 0 8px 24px rgba(184, 134, 11, 0.28);
+  border-color: var(--sz-gold);
 }
 
 .sz-feature-card h3 {
@@ -1149,20 +1383,34 @@ body.landing-page::before {
 }
 
 .sz-bento-card {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
   border: 1px solid var(--sz-line);
   border-radius: var(--sz-radius-lg);
-  padding: 32px;
-  box-shadow: var(--sz-shadow-sm);
+  padding: 34px;
+  box-shadow: 0 14px 34px -4px rgba(35, 30, 20, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: all 0.3s ease;
+  transition: transform 0.45s var(--sz-ease-spring), box-shadow 0.45s var(--sz-ease-spring), border-color 0.45s ease;
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  perspective: 1200px;
 }
 
 .sz-bento-card:hover {
+  transform: translateY(-6px);
   border-color: var(--sz-gold-border);
-  box-shadow: var(--sz-shadow-md);
+  box-shadow: 0 24px 55px -10px rgba(184, 134, 11, 0.16), 0 0 0 1px rgba(255, 255, 255, 1) inset, 0 0 30px rgba(184, 134, 11, 0.08);
+}
+
+.sz-bento-card:hover .sz-preview-calendar,
+.sz-bento-card:hover .sz-preview-session,
+.sz-bento-card:hover .sz-finance-preview {
+  transform: translateZ(24px);
+  transition: transform 0.45s var(--sz-ease-spring);
 }
 
 .sz-bento-head h3 {
@@ -1280,23 +1528,45 @@ body.landing-page::before {
 }
 
 .sz-step-card {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--sz-line);
   border-radius: var(--sz-radius-lg);
-  padding: 36px 28px;
-  box-shadow: var(--sz-shadow-xs);
+  padding: 38px 30px;
+  box-shadow: 0 12px 30px -6px rgba(35, 30, 20, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.85) inset;
   position: relative;
   display: flex;
   flex-direction: column;
+  transition: transform 0.45s var(--sz-ease-spring), box-shadow 0.45s var(--sz-ease-spring), border-color 0.45s ease;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  overflow: hidden;
+}
+
+.sz-step-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--sz-gold-border);
+  box-shadow: 0 24px 50px -8px rgba(184, 134, 11, 0.18), 0 0 24px rgba(184, 134, 11, 0.1);
 }
 
 .sz-step-num {
-  font-size: 2.8rem;
+  font-size: 3rem;
   font-weight: 900;
-  color: var(--sz-gold-light);
+  color: var(--sz-gold);
   line-height: 1;
-  margin-bottom: 16px;
-  opacity: 0.6;
+  margin-bottom: 18px;
+  opacity: 0.75;
+  transition: transform 0.4s var(--sz-ease-spring), opacity 0.4s ease;
+  transform-style: preserve-3d;
+  display: inline-block;
+  width: fit-content;
+}
+
+.sz-step-card:hover .sz-step-num {
+  transform: scale(1.15) translateZ(24px);
+  opacity: 1;
+  text-shadow: 0 0 24px rgba(212, 175, 55, 0.5);
 }
 
 .sz-step-card h3 {
@@ -1322,17 +1592,39 @@ body.landing-page::before {
 }
 
 .sz-trial-banner {
-  background: linear-gradient(145deg, #ffffff 0%, #fbf9f4 100%);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(251, 247, 238, 0.9) 100%);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
   border: 1px solid var(--sz-gold-border);
   border-radius: var(--sz-radius-xl);
-  padding: 54px 46px;
-  box-shadow: 0 20px 50px -10px rgba(184, 134, 11, 0.12), var(--sz-shadow-md);
+  padding: 56px 48px;
+  box-shadow: 0 24px 60px -12px rgba(184, 134, 11, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   display: grid;
   grid-template-columns: 1.28fr 0.92fr;
   gap: 44px;
   align-items: center;
   position: relative;
   overflow: hidden;
+}
+
+.sz-trial-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 2px solid var(--sz-gold-border);
+  border-radius: var(--sz-radius-lg);
+  padding: 38px 32px;
+  box-shadow: 0 20px 45px -10px rgba(35, 30, 20, 0.1), 0 0 0 1px rgba(255, 255, 255, 1) inset;
+  text-align: center;
+  position: relative;
+  transition: transform 0.45s var(--sz-ease-spring), box-shadow 0.45s var(--sz-ease-spring);
+  transform-style: preserve-3d;
+}
+
+.sz-trial-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--sz-gold);
+  box-shadow: 0 28px 60px -10px rgba(184, 134, 11, 0.22), 0 0 30px rgba(184, 134, 11, 0.12);
 }
 
 .sz-trial-glow {
@@ -1427,16 +1719,6 @@ body.landing-page::before {
 .sz-trial-perk-item span {
   font-size: 0.85rem;
   color: var(--sz-ink-muted);
-}
-
-.sz-trial-card {
-  background: #ffffff;
-  border: 2px solid var(--sz-gold-border);
-  border-radius: var(--sz-radius-lg);
-  padding: 36px 30px;
-  box-shadow: 0 16px 36px -8px rgba(35, 30, 20, 0.08);
-  text-align: center;
-  position: relative;
 }
 
 .sz-trial-card-badge {
@@ -1557,38 +1839,48 @@ body.landing-page::before {
    BÖLÜM 6: BÜYÜK WHATSAPP DÖNÜŞÜM ÇAĞRISI (CTA)
    ========================================================================== */
 .sz-cta-box {
-  background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+  background: linear-gradient(135deg, #18181b 0%, #1f2420 50%, #27272a 100%);
+  border: 1px solid rgba(197, 155, 39, 0.35);
   border-radius: var(--sz-radius-xl);
-  padding: 64px 40px;
+  padding: 68px 44px;
   text-align: center;
   color: #ffffff;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--sz-shadow-lg);
+  box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.35), 0 0 40px rgba(184, 134, 11, 0.12);
+  transition: transform 0.45s var(--sz-ease-spring), box-shadow 0.45s var(--sz-ease-spring);
+}
+
+.sz-cta-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 36px 90px -15px rgba(0, 0, 0, 0.45), 0 0 50px rgba(16, 185, 129, 0.18);
+  border-color: rgba(197, 155, 39, 0.55);
 }
 
 .sz-cta-box::before {
   content: "";
   position: absolute;
-  top: -80px;
-  right: -80px;
-  width: 260px;
-  height: 260px;
-  background: radial-gradient(circle, rgba(184, 134, 11, 0.3) 0%, transparent 70%);
+  top: -100px;
+  right: -100px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(184, 134, 11, 0.35) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
+  animation: orbMorph 8s ease-in-out infinite alternate;
 }
 
 .sz-cta-box::after {
   content: "";
   position: absolute;
-  bottom: -80px;
-  left: -80px;
-  width: 260px;
-  height: 260px;
-  background: radial-gradient(circle, rgba(37, 211, 102, 0.25) 0%, transparent 70%);
+  bottom: -100px;
+  left: -100px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(37, 211, 102, 0.3) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
+  animation: orbMorph 9s ease-in-out infinite alternate-reverse;
 }
 
 .sz-cta-kicker {
@@ -1750,15 +2042,15 @@ body.landing-page::before {
     grid-template-columns: 1fr;
     gap: 40px;
   }
-  
+
   .sz-sim-split {
     grid-template-columns: 1fr;
   }
-  
+
   .sz-wa-features-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .sz-bento-col-8,
   .sz-bento-col-4,
   .sz-bento-col-6 {
@@ -1817,15 +2109,15 @@ body.landing-page::before {
     font-weight: 600;
     border-radius: 999px;
   }
-  
+
   .sz-vs-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .sz-steps-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .sz-wa-features-grid {
     grid-template-columns: 1fr;
   }
@@ -1838,16 +2130,16 @@ body.landing-page::before {
   .sz-hero h1 {
     font-size: 2.1rem;
   }
-  
+
   .sz-hero-cta-group {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .sz-btn-hero-wa {
     justify-content: center;
   }
-  
+
   body.landing-page {
     padding-bottom: 76px;
   }
@@ -1938,7 +2230,7 @@ body.landing-page::before {
   .sz-floating-wa span {
     display: none;
   }
-  
+
   .sz-floating-wa {
     bottom: calc(76px + env(safe-area-inset-bottom, 0px));
     right: 16px;
