@@ -206,13 +206,13 @@
    SCROLL PROGRESS BAR & ATMOSPHERIC PARTICLES
    ========================================================================== */
 .sz-scroll-progress {
-  position: fixed;
-  top: 0;
+  position: absolute;
+  bottom: -1px;
   left: 0;
   width: 0%;
   height: 3px;
   background: linear-gradient(90deg, var(--sz-gold) 0%, var(--sz-gold-light) 45%, var(--sz-emerald) 85%, #ffffff 100%);
-  z-index: 1000000;
+  z-index: 1001;
   pointer-events: none;
   box-shadow: 0 0 12px rgba(229, 190, 84, 0.8), 0 0 4px rgba(16, 185, 129, 0.6);
   transition: width 0.08s linear;

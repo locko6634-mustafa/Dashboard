@@ -17,11 +17,18 @@ const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: r
 // --- 1. LÜKS SCROLL PROGRESS BAR ---
 function initScrollProgressBar() {
     let progressBar = document.querySelector('.sz-scroll-progress');
+    const header = document.querySelector('.sz-header');
     if (!progressBar) {
         progressBar = document.createElement('div');
         progressBar.className = 'sz-scroll-progress';
         progressBar.setAttribute('aria-hidden', 'true');
-        document.body.prepend(progressBar);
+        if (header) {
+            header.appendChild(progressBar);
+        } else {
+            document.body.prepend(progressBar);
+        }
+    } else if (header && progressBar.parentElement !== header) {
+        header.appendChild(progressBar);
     }
 
     let ticking = false;
