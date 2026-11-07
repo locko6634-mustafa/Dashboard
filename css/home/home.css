@@ -1611,6 +1611,7 @@ body.landing-page::before {
   box-shadow: 0 20px 45px -10px rgba(35, 30, 20, 0.1), 0 0 0 1px rgba(255, 255, 255, 1) inset;
   text-align: center;
   position: relative;
+  overflow: visible !important;
   transition: transform 0.45s var(--sz-ease-spring), box-shadow 0.45s var(--sz-ease-spring);
   transform-style: preserve-3d;
 }
@@ -1729,6 +1730,7 @@ body.landing-page::before {
   letter-spacing: 0.08em;
   box-shadow: 0 4px 12px rgba(184, 134, 11, 0.35);
   white-space: nowrap;
+  z-index: 20;
 }
 
 .sz-trial-price-wrap {
