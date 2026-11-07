@@ -1448,65 +1448,11 @@ html[data-lander-theme="pearl"] .sz-cal-slot {
 /* ==========================================================================
    BÖLÜM 2: ESKİ YÖNTEMLER VS. SALONZEKA (DUAL REALITY MATRIX)
    ========================================================================== */
-.sz-reality-switcher {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 24px;
-  padding: 5px;
-  border-radius: 999px;
-  background: var(--sz-surface-glass);
-  border: 1px solid var(--sz-line);
-  backdrop-filter: blur(16px);
-}
-
-.sz-reality-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 16px;
-  border-radius: 999px;
-  border: none;
-  background: transparent;
-  color: var(--sz-ink-secondary);
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s var(--sz-ease-spring);
-}
-
-.sz-reality-btn.is-active {
-  background: var(--sz-surface-gold);
-  color: var(--sz-ink-primary);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
-}
-
-.sz-reality-indicator {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-.sz-ind-bad { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
-.sz-ind-good { background: var(--sz-emerald); box-shadow: 0 0 8px var(--sz-emerald); }
-
 .sz-vs-grid {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   gap: 24px;
   align-items: stretch;
-}
-
-.sz-vs-grid[data-focus-mode="bad"] .sz-vs-good {
-  opacity: 0.38;
-  filter: grayscale(0.5);
-  transform: scale(0.96);
-}
-
-.sz-vs-grid[data-focus-mode="good"] .sz-vs-bad {
-  opacity: 0.38;
-  filter: grayscale(0.5);
-  transform: scale(0.96);
 }
 
 .sz-vs-axis {
@@ -2313,11 +2259,29 @@ html[data-lander-theme="pearl"] .sz-crm-dossier {
   padding: 52px;
   box-shadow: var(--sz-shadow-lg), 0 0 70px rgba(212, 175, 55, 0.12);
   display: grid;
-  grid-template-columns: 1.28fr 0.92fr;
-  gap: 44px;
+  grid-template-columns: 1.3fr 0.9fr;
+  gap: 48px;
   align-items: center;
   position: relative;
   overflow: hidden;
+}
+
+.sz-trial-glow {
+  position: absolute;
+  top: -120px;
+  right: -120px;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.22) 0%, rgba(16, 185, 129, 0.12) 45%, transparent 70%);
+  filter: blur(45px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sz-trial-content {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
 }
 
 .sz-trial-pill {
@@ -2424,11 +2388,13 @@ html[data-lander-theme="pearl"] .sz-trial-perk-item {
   background: linear-gradient(160deg, rgba(22, 26, 39, 0.95) 0%, rgba(11, 13, 20, 0.98) 100%);
   border: 2px solid var(--sz-gold);
   border-radius: var(--sz-radius-lg);
-  padding: 36px 30px;
+  padding: 38px 32px;
   box-shadow: 0 28px 65px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(212, 175, 55, 0.22);
   text-align: center;
   position: relative;
+  z-index: 2;
   color: #f8f7f4;
+  min-width: 0;
 }
 
 .sz-trial-card-badge {
@@ -2446,8 +2412,12 @@ html[data-lander-theme="pearl"] .sz-trial-perk-item {
 }
 
 .sz-trial-price-wrap {
-  margin: 8px 0 18px;
-  padding-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 20px;
+  padding-bottom: 20px;
   border-bottom: 1px dashed rgba(255, 255, 255, 0.14);
 }
 
@@ -2456,27 +2426,29 @@ html[data-lander-theme="pearl"] .sz-trial-perk-item {
   font-weight: 700;
   color: #b4b8c5;
   display: block;
-  margin-bottom: 4px;
 }
 
 .sz-trial-price {
+  display: block;
   font-family: var(--font-display);
-  font-size: 3.4rem;
+  font-size: 3.6rem;
   font-weight: 900;
-  line-height: 1;
+  line-height: 1.05;
   color: #ffffff;
   letter-spacing: -0.04em;
 }
 
 .sz-trial-period {
-  display: inline-block;
-  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
   font-size: 0.8rem;
   font-weight: 700;
   color: #34d399;
   background: rgba(16, 185, 129, 0.15);
   border: 1px solid rgba(52, 211, 153, 0.3);
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 999px;
 }
 
@@ -2869,12 +2841,6 @@ html[data-lander-theme="pearl"] .sz-footer {
   .sz-trial-banner,
   .sz-cta-box {
     padding: 24px 18px;
-  }
-
-  .sz-reality-switcher {
-    flex-wrap: wrap;
-    justify-content: center;
-    border-radius: 18px;
   }
 
   .sz-cta-btn-huge {

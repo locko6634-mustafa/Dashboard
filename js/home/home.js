@@ -304,8 +304,7 @@ function init3DTiltAndSpotlight() {
         .sz-vs-card,
         .sz-step-card,
         .sz-trial-card,
-        .sz-sim-wrapper,
-        .sz-trial-perk-item
+        .sz-sim-wrapper
     `);
 
     targetCards.forEach((card) => {
@@ -623,24 +622,7 @@ function initLiveSimulation() {
 
 // --- 10. BÖLÜMLERE ÖZEL SÜRPRİZ MİKRO-ETKİLEŞİMLER ---
 function initSectionSurpriseInteractions() {
-    // A. Karşılaştırma Bölümü: Gerçeklik Odak Anahtarı ve Senkronize Satır Vurgusu
-    const vsGrid = document.getElementById('szVsGrid');
-    const realityBtns = document.querySelectorAll('.sz-reality-btn');
-    realityBtns.forEach((btn) => {
-        btn.addEventListener('click', () => {
-            realityBtns.forEach((b) => b.classList.remove('is-active'));
-            btn.classList.add('is-active');
-            const mode = btn.getAttribute('data-reality-focus') || 'all';
-            if (vsGrid) {
-                if (mode === 'all') {
-                    vsGrid.removeAttribute('data-focus-mode');
-                } else {
-                    vsGrid.setAttribute('data-focus-mode', mode);
-                }
-            }
-        });
-    });
-
+    // A. Karşılaştırma Bölümü: Senkronize Satır Vurgusu
     const pairItems = document.querySelectorAll('.sz-vs-item[data-pair-index]');
     pairItems.forEach((item) => {
         const pairIdx = item.getAttribute('data-pair-index');
