@@ -81,6 +81,9 @@ export const DOM = {
     // Raporlar Sekmesi
     get viewReports() { return Utils.$('viewReports'); },
     get tabReports() { return Utils.$('tabReports'); },
+    get viewWhatsappAI() { return Utils.$('viewWhatsappAI'); },
+    get tabWhatsappAI() { return Utils.$('tabWhatsappAI'); },
+    get addStaff() { return Utils.$('addStaff'); },
     get reportTableBody() { return Utils.$('reportTableBody'); },
     get reportDateStart() { return Utils.$('reportDateStart'); },
     get reportDateEnd() { return Utils.$('reportDateEnd'); },

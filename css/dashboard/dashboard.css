@@ -35,3 +35,6 @@
 
 /* 11. Yazdırma Desteği */
 @import url('./print.css?v=20261013-1');
+
+/* 12. SalonZeka UI/UX Yenileme Modülü */
+@import url('./salonzeka-ui.css?v=20261114-1');

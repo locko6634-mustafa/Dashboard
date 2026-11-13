@@ -49,6 +49,9 @@ export class Store {
         reportData: [],
         reportFiltered: [],
         reportDateRange: { start: null, end: null },
+        kpiRange: '7G',
+        staffColumns: ['Uzm. Elif Yılmaz', 'Uzm. Caner Demir', 'Koltuk 3 / Genel'],
+        whatsappAi: { conversations: [], activeId: null },
     };
 }
 

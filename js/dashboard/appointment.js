@@ -143,18 +143,54 @@ class AppointmentManager {
         Utils.$('addSearchInput').classList.add('hidden'); Utils.$('addSearchResults').classList.add('hidden');
     };
 
-    static openAddModal = (dateStr, timeStr) => { 
+    static isWalkInMode = false;
+
+    static populateStaffSelect = (selectedStaff = '') => {
+        const select = Utils.$('addStaff');
+        if (!select) return;
+        const staffList = Calendar.getStaffColumns(Object.values(Store.state.appointments || {}));
+        const frag = document.createDocumentFragment();
+        staffList.forEach(staff => {
+            const opt = Utils.el('option', { value: staff }, staff);
+            if (selectedStaff && staff === selectedStaff) opt.selected = true;
+            frag.appendChild(opt);
+        });
+        select.replaceChildren(frag);
+    };
+
+    static openAddModal = (dateStr, timeStr, staffName = '', isWalkIn = false) => {
         const todayStr = DateUtils.getTodayLocalISO();
-        const viewDate = dateStr || Store.state.currentViewDate || todayStr;
+        const viewDate = (typeof dateStr === 'string' && dateStr) ? dateStr : (Store.state.currentViewDate || todayStr);
+        AppointmentManager.isWalkInMode = Boolean(isWalkIn);
+
         Utils.$('addDate').min = todayStr;
         Utils.$('addDate').value = viewDate < todayStr ? todayStr : viewDate; 
-        Utils.$('addTime').value = timeStr || (CONFIG.CALENDAR.START_HOUR.toString().padStart(2, '0') + ':00');
+        Utils.$('addTime').value = (typeof timeStr === 'string' && timeStr) ? timeStr : (CONFIG.CALENDAR.START_HOUR.toString().padStart(2, '0') + ':00');
+        AppointmentManager.populateStaffSelect(typeof staffName === 'string' ? staffName : '');
+
+        const titleEl = Utils.$('addAptModalTitle');
+        const badgeEl = Utils.$('walkInBadge');
+        if (titleEl) titleEl.textContent = isWalkIn ? 'Hızlı Walk-in Giriş' : 'Yeni Randevu';
+        if (badgeEl) badgeEl.classList.toggle('hidden', !isWalkIn);
         
         DOM.addAptModal.classList.remove('hidden'); 
         AppointmentManager.clearSelectedPatient(); 
         AppointmentManager.switchAddTab(true); 
         Utils.$('addName').value = ''; 
         Utils.$('addPhone').value = '';
+    };
+
+    static openWalkInModal = () => {
+        const now = new Date();
+        const todayStr = DateUtils.getTodayLocalISO();
+        let mins = Math.ceil(now.getMinutes() / 15) * 15;
+        let hours = now.getHours();
+        if (mins >= 60) {
+            mins = 0;
+            hours = (hours + 1) % 24;
+        }
+        const timeStr = String(hours).padStart(2, '0') + ':' + String(mins).padStart(2, '0');
+        AppointmentManager.openAddModal(todayStr, timeStr, '', true);
     };
 
     static openAddModalWithPatient = (id, name, phone) => {
@@ -175,12 +211,15 @@ class AppointmentManager {
         const hizmet = Utils.$('addService').value;
         const tarih = Utils.$('addDate').value;
         const saat = Utils.$('addTime').value;
+        const uzman = Utils.$('addStaff') ? Utils.$('addStaff').value : '';
         const todayStr = DateUtils.getTodayLocalISO();
 
         if(!tarih || !saat) return Utils.showToast(CONFIG.UI.MSG_REQUIRED_FIELDS, "warning");
         if (tarih < todayStr) return Utils.showToast(CONFIG.UI.MSG_PAST_DATE_NOT_ALLOWED, "warning");
         
         let payload = { hizmet, tarih, saat, durum: CONFIG.STATUS.WAITING, is_new: Store.state.isNewPatientMode };
+        if (uzman) payload.uzman = uzman;
+        if (AppointmentManager.isWalkInMode) payload.is_walkin = true;
         if (Store.state.isNewPatientMode) {
             payload.ad_soyad = Utils.$('addName').value.trim();
             payload.telefon = Utils.$('addPhone').value.trim();
@@ -254,7 +293,7 @@ class AppointmentManager {
                 card.style.height = heightPx + 'px';
                 card.dataset.duration = durationVal;
                 const durationClass = durationVal <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : (durationVal === 45 ? ' medium-apt' : '');
-                card.className = 'apt-card ' + Utils.getSafeStatusClass(statusVal) + durationClass;
+                card.className = 'apt-card ' + Calendar.getAppointmentStatusClass(statusVal) + durationClass;
                 Calendar.updateCardActions(card, Store.state.activeAptId, statusVal);
                 const tSpan = card.querySelector('.apt-time'); if(tSpan) tSpan.textContent = Utils.getTimeRangeText(tVal, durationVal);
                 const targetZone = document.querySelector('.drop-zone[data-date="' + dVal + '"][data-time="' + tVal + '"]');
@@ -375,7 +414,10 @@ class ContextMenu {
             ContextMenu.hide();
         };
         if (Utils.$('ctxStatusWait')) Utils.$('ctxStatusWait').onclick = () => { ContextMenu.changeStatus(CONFIG.STATUS.WAITING); };
+        if (Utils.$('ctxStatusWaConfirmed')) Utils.$('ctxStatusWaConfirmed').onclick = () => { ContextMenu.changeStatus('WhatsApp Teyitli'); };
+        if (Utils.$('ctxStatusReminder')) Utils.$('ctxStatusReminder').onclick = () => { ContextMenu.changeStatus('Hatırlatma Gönderildi'); };
         if (Utils.$('ctxStatusComp')) Utils.$('ctxStatusComp').onclick = () => { ContextMenu.changeStatus(CONFIG.STATUS.COMPLETED); };
+        if (Utils.$('ctxStatusBlocked')) Utils.$('ctxStatusBlocked').onclick = () => { ContextMenu.changeStatus('Bloke / Mola'); };
         if (Utils.$('ctxStatusCanc')) Utils.$('ctxStatusCanc').onclick = () => { ContextMenu.changeStatus(CONFIG.STATUS.CANCELED); };
         if (Utils.$('ctxDelete')) Utils.$('ctxDelete').onclick = () => { 
             Store.state.activeAptId = ContextMenu.activeAppId; 
@@ -430,7 +472,7 @@ class ContextMenu {
         if (success) {
             app.durum = newStatus;
             const durationClass = duration <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : (duration === 45 ? ' medium-apt' : '');
-            card.className = 'apt-card ' + Utils.getSafeStatusClass(newStatus) + durationClass;
+            card.className = 'apt-card ' + Calendar.getAppointmentStatusClass(newStatus) + durationClass;
             Calendar.updateCardActions(card, id, newStatus);
             Dashboard.updateDashboardStats();
             Utils.showToast('Durum güncellendi.', 'success');

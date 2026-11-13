@@ -67,12 +67,35 @@ class Calendar {
         return col;
     };
 
+    static getAppointmentStatusClass = (durum) => {
+        const d = (durum || '').trim();
+        if (d === 'WhatsApp Teyitli') return 'status-wa-confirmed';
+        if (d === 'Hatırlatma Gönderildi') return 'status-reminder-sent';
+        if (d === 'Bloke / Mola') return 'status-blocked';
+        return Utils.getSafeStatusClass(d);
+    };
+
+    static getStaffColumns = (apps) => {
+        const baseCols = Array.isArray(Store.state.staffColumns) && Store.state.staffColumns.length > 0
+            ? [...Store.state.staffColumns]
+            : ['Uzm. Elif Yılmaz', 'Uzm. Caner Demir', 'Koltuk 3 / Genel'];
+        const seen = new Set(baseCols);
+        (apps || []).forEach(app => {
+            const staff = (app.uzman || app.personel || app.staff_name || '').trim();
+            if (staff && !seen.has(staff)) {
+                seen.add(staff);
+                baseCols.push(staff);
+            }
+        });
+        return baseCols;
+    };
+
     static createAppointmentCard = (app) => {
         const duration = app.sure || Utils.getServiceDuration(app.hizmet);
         const slotsCount = duration / CONFIG.CALENDAR.SLOT_MINS;
         const heightStr = `calc(${slotsCount * 100}% - 2px)`;
         const durationClass = duration <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : (duration === 45 ? ' medium-apt' : '');
-        const statusClass = Utils.getSafeStatusClass(app.durum);
+        const statusClass = Calendar.getAppointmentStatusClass(app.durum);
 
         let seansText = '';
         if (app.toplam_seans > 0 && duration > 30) {
@@ -118,12 +141,43 @@ class Calendar {
         if (actions) actions.remove();
     };
 
-    static renderCalendarShell = (weekData, selectedStr) => {
+    static renderCalendarShell = (weekData, selectedStr, viewMode = 'week', staffCols = []) => {
         const grid = document.querySelector('.calendar-grid');
         if (!grid) return;
         
         const fragment = document.createDocumentFragment();
         fragment.appendChild(Calendar.generateTimeColumn(CONFIG.CALENDAR.START_HOUR, CONFIG.CALENDAR.END_HOUR));
+
+        if (viewMode === 'day' && staffCols.length > 0) {
+            grid.style.setProperty('--staff-count', String(staffCols.length));
+            staffCols.forEach(staffName => {
+                const col = Utils.el('div', { className: 'day-col focus-day staff-col', 'data-staff': staffName },
+                    Utils.el('div', { className: 'day-col-header staff-col-header' },
+                        Utils.el('div', { className: 'day-number-label' },
+                            Utils.el('span', { className: 'staff-badge-dot' }),
+                            staffName
+                        ),
+                        Utils.el('div', { className: 'staff-role-sub' }, 'Uzman / Koltuk')
+                    )
+                );
+
+                for (let h = CONFIG.CALENDAR.START_HOUR; h <= CONFIG.CALENDAR.END_HOUR; h++) {
+                    for (let m = 0; m < 60; m += CONFIG.CALENDAR.SLOT_MINS) {
+                        const timeStr = h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0');
+                        col.appendChild(Utils.el('div', {
+                            className: 'drop-zone' + (m === 0 ? ' hour-top' : ''),
+                            'data-date': selectedStr,
+                            'data-time': timeStr,
+                            'data-staff': staffName
+                        }));
+                    }
+                }
+                fragment.appendChild(col);
+            });
+            grid.replaceChildren(fragment);
+            return;
+        }
+        grid.style.removeProperty('--staff-count');
         
         weekData.forEach(dObj => {
             const jsDay = new Date(dObj.iso).getDay();
@@ -296,8 +350,11 @@ class Calendar {
 
         const selectedStr = Store.state.currentViewDate;
         const viewMode = Store.state.calendarViewMode || 'week';
+        const staffCols = viewMode === 'day' ? Calendar.getStaffColumns(apps) : [];
         
-        grid.className = 'calendar-grid' + (viewMode === 'day' ? ' day-view-mode' : '') + (viewMode === 'month' ? ' month-view-mode' : '');
+        grid.className = 'calendar-grid'
+            + (viewMode === 'day' ? ' day-view-mode multi-staff-mode' : '')
+            + (viewMode === 'month' ? ' month-view-mode' : '');
         
         if (viewMode === 'month') {
             Calendar.renderMonthCalendar(grid, filteredApps, selectedStr);
@@ -305,13 +362,13 @@ class Calendar {
         }
 
         const currentWeek = Calendar.getDetailedDatesOfWeek(selectedStr);
-        const weekKey = currentWeek[0].iso + '_' + selectedStr + '_' + viewMode;
+        const weekKey = currentWeek[0].iso + '_' + selectedStr + '_' + viewMode + '_' + staffCols.join('|');
 
         if (Store.state.renderedWeekKey !== weekKey) {
             const dataToRender = viewMode === 'day' 
                 ? currentWeek.filter(d => d.iso === selectedStr) 
                 : currentWeek;
-            Calendar.renderCalendarShell(dataToRender, selectedStr);
+            Calendar.renderCalendarShell(dataToRender, selectedStr, viewMode, staffCols);
             Store.state.renderedWeekKey = weekKey;
             const subtitle = document.querySelector('.header-brand .subtitle');
             if (subtitle) {
@@ -335,8 +392,15 @@ class Calendar {
         zones.forEach(z => z.replaceChildren());
 
         let cardIndex = 0;
-        filteredApps.forEach(app => {
-            const zone = grid.querySelector('.drop-zone[data-date="' + app.tarih + '"][data-time="' + app.saat + '"]');
+        filteredApps.forEach((app, idx) => {
+            let zone = null;
+            if (viewMode === 'day' && staffCols.length > 0) {
+                const assignedStaff = (app.uzman || app.personel || app.staff_name || '').trim() || staffCols[idx % staffCols.length];
+                zone = grid.querySelector('.drop-zone[data-date="' + app.tarih + '"][data-time="' + app.saat + '"][data-staff="' + assignedStaff + '"]')
+                    || grid.querySelector('.drop-zone[data-date="' + app.tarih + '"][data-time="' + app.saat + '"]');
+            } else {
+                zone = grid.querySelector('.drop-zone[data-date="' + app.tarih + '"][data-time="' + app.saat + '"]');
+            }
             if (zone) {
                 const card = Calendar.createAppointmentCard(app);
                 card.style.animation = 'slideUpFadeIn 0.4s ease-out ' + (cardIndex * 0.05) + 's both';
@@ -606,7 +670,7 @@ class CalendarNav {
                                 const duration = newApp.sure || Utils.getServiceDuration(newApp.hizmet);
                                 const heightPx = Math.max((duration / CONFIG.CALENDAR.SLOT_MINS) * CONFIG.CALENDAR.SLOT_PX - 2, CONFIG.CALENDAR.MIN_PX);
                                 const durationClass = duration <= CONFIG.SERVICES.DEFAULT_MINS ? ' short-apt' : (duration === 45 ? ' medium-apt' : '');
-                                cardEl.className = 'apt-card ' + Utils.getSafeStatusClass(newApp.durum) + durationClass + (isDrag ? ' is-dragging' : '');
+                                cardEl.className = 'apt-card ' + Calendar.getAppointmentStatusClass(newApp.durum) + durationClass + (isDrag ? ' is-dragging' : '');
                                 cardEl.style.height = heightPx + 'px';
                                 cardEl.dataset.duration = duration;
                                 

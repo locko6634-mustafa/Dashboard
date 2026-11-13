@@ -20,6 +20,9 @@ import { Dashboard, ChartTooltip } from './overview.js';
 import { SettingsManager } from './settings.js';
 import { ReportsManager } from './reports.js?v=20261007-1';
 import { Terminology } from '../shared/terminology.js';
+import { KpiBar } from './kpi-bar.js';
+import { CommandPalette } from './command-palette.js';
+import { WhatsappAiInbox } from './whatsapp-ai.js';
 
 class App {
     static initEventListeners() {
@@ -132,6 +135,10 @@ class App {
             Dashboard.switchMainTab('overview');
             if (window.innerWidth <= 768) closeMobileNav();
         };
+        if (Utils.$('tabWhatsappAI')) Utils.$('tabWhatsappAI').onclick = () => {
+            Dashboard.switchMainTab('whatsapp-ai');
+            if (window.innerWidth <= 768) closeMobileNav();
+        };
         if (Utils.$('tabSettings')) Utils.$('tabSettings').onclick = () => {
             Dashboard.switchMainTab('settings');
             if (window.innerWidth <= 768) closeMobileNav();
@@ -146,7 +153,8 @@ class App {
             document.body.dataset.printTitle = (DOM.setBrandName?.value || 'Randevu Paneli') + ' — ' + (titles[Store.state.activeMainTab] || 'Randevu Paneli');
             window.print();
         };
-        if (Utils.$('btnAddApt')) Utils.$('btnAddApt').onclick = AppointmentManager.openAddModal;
+        if (Utils.$('btnAddApt')) Utils.$('btnAddApt').onclick = () => AppointmentManager.openAddModal();
+        if (Utils.$('btnWalkIn')) Utils.$('btnWalkIn').onclick = AppointmentManager.openWalkInModal;
         if (DOM.btnSaveSettings) DOM.btnSaveSettings.onclick = SettingsManager.saveSettings;
         if (DOM.btnAddServiceSetting) {
             DOM.btnAddServiceSetting.onclick = () => SettingsManager.addService(DOM.newServiceName.value, DOM.newServiceDuration.value);
@@ -343,11 +351,12 @@ class App {
                 if (dropZone && !e.target.closest('.apt-card') && !e.target.closest('.apt-card-actions')) {
                     const dateStr = dropZone.dataset.date;
                     const timeStr = dropZone.dataset.time;
+                    const staffName = dropZone.dataset.staff || '';
                     
                     if (DateUtils.getAppFakeUTCUnix(dateStr, timeStr) < DateUtils.getIstanbulUnix()) {
                         Utils.showToast(CONFIG.UI.MSG_PAST_DATE_NOT_ALLOWED, 'warning');
                     } else {
-                        AppointmentManager.openAddModal(dateStr, timeStr);
+                        AppointmentManager.openAddModal(dateStr, timeStr, staffName);
                     }
                 }
             });
@@ -451,6 +460,10 @@ class App {
             App.initEventListeners();
             App.initSearchEngines();
             Calendar.initCalendarFilters();
+            KpiBar.init();
+            CommandPalette.init();
+            WhatsappAiInbox.loadState();
+            WhatsappAiInbox.updateBadges();
             PatientCRM.initEventListeners();
             DragDrop.init();
             ContextMenu.init();

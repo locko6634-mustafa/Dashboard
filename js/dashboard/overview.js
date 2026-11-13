@@ -13,6 +13,7 @@ import { DOM } from './dom.js';
 import { UndoManager } from './undo-manager.js';
 
 import { PatientUI, PatientManager, PatientCRM } from './patient.js';
+import { KpiBar } from './kpi-bar.js';
 
 class Dashboard {
     static renderDailyAgenda = () => {
@@ -73,12 +74,14 @@ class Dashboard {
         if (DOM.tabCalendar) DOM.tabCalendar.classList.toggle('active', tabName === 'calendar');
         if (DOM.tabPatients) DOM.tabPatients.classList.toggle('active', tabName === 'patients');
         if (DOM.tabOverview) DOM.tabOverview.classList.toggle('active', tabName === 'overview');
+        if (DOM.tabWhatsappAI) DOM.tabWhatsappAI.classList.toggle('active', tabName === 'whatsapp-ai');
         if (DOM.tabSettings) DOM.tabSettings.classList.toggle('active', tabName === 'settings');
         if (DOM.tabReports) DOM.tabReports.classList.toggle('active', tabName === 'reports');
         
         if (DOM.viewCalendar) DOM.viewCalendar.classList.add('hidden');
         if (DOM.viewPatients) DOM.viewPatients.classList.add('hidden');
         if (DOM.viewOverview) DOM.viewOverview.classList.add('hidden');
+        if (DOM.viewWhatsappAI) DOM.viewWhatsappAI.classList.add('hidden');
         if (DOM.viewSettings) DOM.viewSettings.classList.add('hidden');
         if (DOM.viewReports) DOM.viewReports.classList.add('hidden');
 
@@ -96,6 +99,10 @@ class Dashboard {
         } else if (tabName === 'overview') {
             if (DOM.viewOverview) DOM.viewOverview.classList.remove('hidden');
             if (!Store.state.overviewData) await Dashboard.loadOverviewData();
+        } else if (tabName === 'whatsapp-ai') {
+            if (DOM.viewWhatsappAI) DOM.viewWhatsappAI.classList.remove('hidden');
+            const { WhatsappAiInbox } = await import('./whatsapp-ai.js');
+            await WhatsappAiInbox.init();
         } else if (tabName === 'settings') {
             if (DOM.viewSettings) DOM.viewSettings.classList.remove('hidden');
         } else if (tabName === 'reports') {
@@ -389,6 +396,7 @@ class Dashboard {
         if (sidebarRecordBadge) sidebarRecordBadge.textContent = apps.length + ' ' + CONFIG.UI.LABEL_RECORD;
 
         Dashboard.renderDailyAgenda();
+        KpiBar.render();
     }
 }
 

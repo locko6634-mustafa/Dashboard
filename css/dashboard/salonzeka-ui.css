@@ -1,0 +1,1086 @@
+/* ==========================================================================
+   SALONZEKA UI/UX YENİLEME MODÜLÜ
+   - Üst KPI Metrik Kartları + 7G/30G/12A Filtre Hapları
+   - Çoklu Uzman Sütunlu Günlük Takvim & Pastel Durum Kodları
+   - + Randevusuz (Walk-in) Butonu
+   - 2 Panelli WhatsApp AI İzleme & Devralma Kutusu
+   - Ctrl+K / Cmd+K Hızlı Arama Komut Paleti
+   ========================================================================== */
+
+/* 1. + Randevusuz (Walk-in) Butonu & Header İyileştirmeleri */
+.btn-walkin {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(197, 155, 39, 0.35);
+    background: linear-gradient(135deg, rgba(197, 155, 39, 0.14), rgba(197, 155, 39, 0.05));
+    color: var(--text-main);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.btn-walkin svg {
+    color: #c59b27;
+    flex-shrink: 0;
+}
+
+.btn-walkin:hover {
+    transform: translateY(-1px);
+    border-color: #c59b27;
+    box-shadow: 0 6px 16px rgba(197, 155, 39, 0.16);
+}
+
+.dark-theme .btn-walkin {
+    background: linear-gradient(135deg, rgba(197, 155, 39, 0.22), rgba(197, 155, 39, 0.08));
+    color: #f8fafc;
+}
+
+.walkin-modal-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(197, 155, 39, 0.16);
+    color: #9a7412;
+    border: 1px solid rgba(197, 155, 39, 0.35);
+}
+
+.dark-theme .walkin-modal-badge {
+    color: #f4d371;
+}
+
+button.search-badge {
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+button.search-badge:hover {
+    color: var(--text-main);
+    border-color: var(--accent);
+}
+
+/* 2. Üst KPI Metrik Kartları & 7G | 30G | 12A Zaman Filtresi */
+.sz-kpi-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.sz-kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.sz-kpi-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.sz-kpi-title {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-main);
+}
+
+.sz-kpi-sub {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.sz-kpi-range-pills {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px;
+    border-radius: 999px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+}
+
+.sz-range-pill {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.sz-range-pill:hover {
+    color: var(--text-main);
+}
+
+.sz-range-pill.active {
+    background: #10B981;
+    color: #ffffff;
+}
+
+.sz-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.sz-kpi-card {
+    padding: 13px 15px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sz-kpi-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow);
+}
+
+.sz-kpi-card-interactive {
+    cursor: pointer;
+}
+
+.sz-kpi-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.sz-kpi-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sz-trend-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.sz-trend-badge.is-up {
+    background: rgba(16, 185, 129, 0.14);
+    color: #059669;
+}
+
+.dark-theme .sz-trend-badge.is-up {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+.sz-trend-badge.is-down {
+    background: rgba(244, 63, 94, 0.14);
+    color: #e11d48;
+}
+
+.dark-theme .sz-trend-badge.is-down {
+    background: rgba(244, 63, 94, 0.2);
+    color: #fb7185;
+}
+
+.sz-kpi-value-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.sz-kpi-value {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+
+.sz-kpi-meta {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* 3. Çoklu Uzman Sütunlu Günlük Takvim & Pastel Durum Kodları */
+.calendar-grid.day-view-mode.multi-staff-mode {
+    grid-template-columns: 50px repeat(var(--staff-count, 3), minmax(175px, 1fr));
+}
+
+.staff-col-header {
+    gap: 2px;
+}
+
+.staff-badge-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10B981;
+    margin-right: 5px;
+}
+
+.staff-role-sub {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* Durum Filtre Çip Noktaları */
+.chip-dot.dot-waiting { background: #818CF8; }
+.chip-dot.dot-wa-confirmed { background: #10B981; }
+.chip-dot.dot-reminder-sent { background: #F59E0B; }
+.chip-dot.dot-completed { background: #34D399; }
+.chip-dot.dot-blocked { background: #94A3B8; }
+.chip-dot.dot-canceled { background: #F43F5E; }
+
+.status-dot.dot-wa-confirmed { background: #10B981; }
+.status-dot.dot-reminder-sent { background: #F59E0B; }
+.status-dot.dot-blocked { background: #94A3B8; }
+
+/* Pastel Durum Kartları */
+.apt-card.status-waiting {
+    background: linear-gradient(135deg, #EEF2FF, #E0E7FF) !important;
+    border-left: 3px solid #6366F1 !important;
+    color: #1E1B4B !important;
+}
+.dark-theme .apt-card.status-waiting {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.24), rgba(129, 140, 248, 0.14)) !important;
+    color: #E0E7FF !important;
+}
+
+.apt-card.status-wa-confirmed {
+    background: linear-gradient(135deg, #ECFDF5, #D1FAE5) !important;
+    border-left: 3px solid #10B981 !important;
+    color: #064E3B !important;
+}
+.dark-theme .apt-card.status-wa-confirmed {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.26), rgba(37, 211, 102, 0.14)) !important;
+    color: #D1FAE5 !important;
+}
+
+.apt-card.status-reminder-sent {
+    background: linear-gradient(135deg, #FFFBEB, #FEF3C7) !important;
+    border-left: 3px solid #F59E0B !important;
+    color: #78350F !important;
+}
+.dark-theme .apt-card.status-reminder-sent {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.24), rgba(251, 191, 36, 0.12)) !important;
+    color: #FEF3C7 !important;
+}
+
+.apt-card.status-completed {
+    background: linear-gradient(135deg, #F0FDF4, #DCFCE7) !important;
+    border-left: 3px solid #34D399 !important;
+    color: #14532D !important;
+}
+.dark-theme .apt-card.status-completed {
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.22), rgba(16, 185, 129, 0.12)) !important;
+    color: #DCFCE7 !important;
+}
+
+.apt-card.status-blocked {
+    background: repeating-linear-gradient(
+        -45deg,
+        rgba(148, 163, 184, 0.16),
+        rgba(148, 163, 184, 0.16) 6px,
+        rgba(226, 232, 240, 0.35) 6px,
+        rgba(226, 232, 240, 0.35) 12px
+    ) !important;
+    border-left: 3px solid #64748B !important;
+    color: #334155 !important;
+}
+.dark-theme .apt-card.status-blocked {
+    background: repeating-linear-gradient(
+        -45deg,
+        rgba(148, 163, 184, 0.16),
+        rgba(148, 163, 184, 0.16) 6px,
+        rgba(30, 41, 59, 0.45) 6px,
+        rgba(30, 41, 59, 0.45) 12px
+    ) !important;
+    color: #CBD5E1 !important;
+}
+
+.apt-staff-pill {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 700;
+    background: rgba(15, 23, 42, 0.08);
+    color: inherit;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dark-theme .apt-staff-pill {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* 4. 2 Panelli WhatsApp AI İzleme & Devralma Kutusu */
+.menu-badge {
+    margin-left: auto;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    background: #25D366;
+    color: #ffffff;
+}
+
+.wa-inbox-shell {
+    display: grid;
+    grid-template-columns: 330px minmax(0, 1fr);
+    height: calc(100vh - 48px);
+    min-height: 520px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.wa-conv-pane {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--bg-secondary);
+}
+
+.wa-pane-header {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.wa-pane-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.wa-pane-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.wa-ai-pill {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(37, 211, 102, 0.16);
+    color: #059669;
+}
+
+.dark-theme .wa-ai-pill {
+    color: #34d399;
+}
+
+.wa-search-box {
+    position: relative;
+}
+
+.wa-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.wa-search-input {
+    width: 100%;
+    padding: 8px 10px 8px 32px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 12px;
+}
+
+.wa-filter-tabs {
+    display: flex;
+    gap: 6px;
+}
+
+.wa-filter-tab {
+    flex: 1;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.wa-filter-tab.active {
+    background: #10B981;
+    border-color: #10B981;
+    color: #ffffff;
+}
+
+.wa-conv-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.wa-conv-item {
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: var(--bg-card);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: left;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.wa-conv-item:hover {
+    border-color: var(--border-hover);
+}
+
+.wa-conv-item.active {
+    border-color: #10B981;
+    background: rgba(16, 185, 129, 0.09);
+}
+
+.wa-conv-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.wa-conv-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.wa-conv-time {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.wa-conv-preview {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wa-conv-tags {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.wa-state-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+}
+
+.wa-state-tag.is-ai {
+    background: rgba(16, 185, 129, 0.14);
+    color: #059669;
+}
+
+.wa-state-tag.is-manual {
+    background: rgba(197, 155, 39, 0.18);
+    color: #9a7412;
+}
+
+.dark-theme .wa-state-tag.is-ai { color: #34d399; }
+.dark-theme .wa-state-tag.is-manual { color: #f4d371; }
+
+.wa-chat-pane {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    background: var(--bg-main);
+}
+
+.wa-chat-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.wa-chat-peer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.wa-mobile-back {
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-main);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.wa-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #25D366, #10B981);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.wa-peer-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.wa-peer-phone {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.wa-takeover-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.wa-mode-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.wa-mode-badge.is-ai {
+    background: rgba(16, 185, 129, 0.14);
+    color: #059669;
+}
+
+.wa-mode-badge.is-manual {
+    background: rgba(197, 155, 39, 0.18);
+    color: #9a7412;
+}
+
+.dark-theme .wa-mode-badge.is-ai { color: #34d399; }
+.dark-theme .wa-mode-badge.is-manual { color: #f4d371; }
+
+.wa-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+}
+
+.wa-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.wa-switch-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #10B981;
+    border-radius: 999px;
+    transition: background-color 0.2s ease;
+}
+
+.wa-switch-slider::before {
+    content: "";
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+}
+
+.wa-switch input:checked + .wa-switch-slider {
+    background: #c59b27;
+}
+
+.wa-switch input:checked + .wa-switch-slider::before {
+    transform: translateX(18px);
+}
+
+.wa-takeover-btn {
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-main);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+}
+
+.wa-takeover-btn.is-manual {
+    border-color: #c59b27;
+    background: rgba(197, 155, 39, 0.15);
+}
+
+.wa-message-stream {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.wa-msg-row {
+    display: flex;
+    flex-direction: column;
+    max-width: 76%;
+    gap: 4px;
+}
+
+.wa-msg-row.is-incoming {
+    align-self: flex-start;
+}
+
+.wa-msg-row.is-outgoing {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.wa-msg-bubble {
+    padding: 10px 13px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.45;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-main);
+}
+
+.wa-msg-row.is-outgoing.is-ai .wa-msg-bubble {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.wa-msg-row.is-outgoing.is-manual .wa-msg-bubble {
+    background: rgba(197, 155, 39, 0.14);
+    border-color: rgba(197, 155, 39, 0.35);
+}
+
+.wa-msg-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.wa-ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 800;
+    background: rgba(37, 211, 102, 0.18);
+    color: #059669;
+}
+
+.dark-theme .wa-ai-badge {
+    color: #34d399;
+}
+
+.wa-manual-badge {
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 800;
+    background: rgba(197, 155, 39, 0.2);
+    color: #9a7412;
+}
+
+.dark-theme .wa-manual-badge {
+    color: #f4d371;
+}
+
+.wa-reply-bar {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-card);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.wa-reply-input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--bg-main);
+    color: var(--text-main);
+    font-size: 13px;
+}
+
+.wa-send-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: #25D366;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* 5. Ctrl+K / Cmd+K Hızlı Arama Komut Paleti */
+.cmd-palette-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.58);
+    backdrop-filter: blur(6px);
+    z-index: 3200;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 64px 16px 24px;
+}
+
+.cmd-palette-dialog {
+    width: 100%;
+    max-width: 760px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.cmd-palette-search-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.cmd-palette-icon {
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.cmd-palette-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text-main);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.cmd-esc-badge {
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cmd-palette-body {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    min-height: 300px;
+    max-height: 440px;
+}
+
+.cmd-palette-list {
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cmd-result-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+
+.cmd-result-item:hover,
+.cmd-result-item.is-selected {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.35);
+}
+
+.cmd-result-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.cmd-result-phone {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.cmd-palette-preview {
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cmd-preview-card {
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+}
+
+.cmd-preview-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.cmd-preview-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.cmd-session-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.cmd-stat-box {
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+}
+
+.cmd-stat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.cmd-stat-val {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-top: 2px;
+}
+
+.cmd-recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cmd-recent-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    font-size: 11px;
+}
+
+.cmd-open-btn {
+    margin-top: auto;
+    width: 100%;
+    padding: 9px 12px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: #10B981;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.cmd-palette-footer {
+    padding: 8px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-secondary);
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.cmd-palette-footer kbd {
+    padding: 1px 5px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* 6. Responsive (Tablet & 375px Mobil - Yatay Taşma Yok) */
+@media (max-width: 1024px) {
+    .sz-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .wa-inbox-shell {
+        grid-template-columns: 260px minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .sz-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+    .btn-walkin {
+        width: 100%;
+        justify-content: center;
+    }
+    .calendar-wrapper {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+    .calendar-grid.day-view-mode.multi-staff-mode {
+        min-width: 580px;
+    }
+    .wa-inbox-shell {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 480px;
+    }
+    .wa-inbox-shell.mobile-chat-open .wa-conv-pane {
+        display: none;
+    }
+    .wa-inbox-shell:not(.mobile-chat-open) .wa-chat-pane {
+        display: none;
+    }
+    .wa-mobile-back {
+        display: inline-flex !important;
+    }
+    .cmd-palette-body {
+        grid-template-columns: 1fr;
+        max-height: 70vh;
+    }
+    .cmd-palette-list {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        max-height: 200px;
+    }
+}
+
+/* 7. Erişilebilirlik: Azaltılmış Hareket */
+@media (prefers-reduced-motion: reduce) {
+    .sz-kpi-card,
+    .btn-walkin,
+    .wa-switch-slider,
+    .wa-switch-slider::before,
+    .wa-conv-item {
+        transition: none !important;
+    }
+    .sz-kpi-card:hover,
+    .btn-walkin:hover {
+        transform: none !important;
+    }
+}

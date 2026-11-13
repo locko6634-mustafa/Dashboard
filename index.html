@@ -3,60 +3,26 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SalonZeka | Salonunuz İçin 7/24 WhatsApp Yapay Zeka Asistanı ve Akıllı Yönetim Paneli</title>
-    <meta name="description" content="SalonZeka; güzellik merkezleri ve salonlar için 7/24 WhatsApp'tan müşteri kaçırmayan yapay zeka asistanı, sürükle-bırak takvim ve otomatik seans yönetim sistemidir.">
-    <meta property="og:title" content="SalonZeka | Salonunuz İçin 7/24 WhatsApp Yapay Zeka Asistanı ve Akıllı Yönetim Paneli">
-    <meta property="og:description" content="Müşterileriniz dilediği saatte WhatsApp'tan yazsın, yapay zeka randevuları takviminize otomatik kaydetsin. Sıfır çakışma, sıfır kaçan müşteri.">
+    <title>SalonZeka | 7/24 WhatsApp AI Randevu Asistanı ve Salon Yönetim Paneli</title>
+    <meta name="description" content="Randevu kaçırmayı %75 azaltın. Müşterileriniz WhatsApp'tan yazsın, yapay zeka takviminizi kontrol edip saniyeler içinde randevuyu oluştursun.">
+    <meta property="og:title" content="SalonZeka | 7/24 WhatsApp AI Randevu Asistanı">
+    <meta property="og:description" content="Müşterileriniz WhatsApp'tan yazsın, yapay zeka takviminizi kontrol edip saniyeler içinde randevuyu oluştursun. Telefon trafiğinden kurtulun.">
     <meta property="og:type" content="website">
     <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="14" fill="%23c59b27"/%3E%3Cpath d="M18 20h28l-20 24h20" stroke="%23ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/%3E%3C/svg%3E'>
     <link rel="stylesheet" href="css/shared/fonts.css">
     <link rel="stylesheet" href="css/shared/base.css?v=20261108">
-    <link rel="stylesheet" href="css/home/home.css?v=20261108">
+    <link rel="stylesheet" href="css/home/home.css?v=20261114">
     <script type="module" src="js/home/home.js"></script>
   </head>
   <body class="landing-page">
 
-    <!-- PRELOADER (SİNEMATİK AÇILIŞ PERDESİ) -->
-    <div id="sz-preloader" class="sz-preloader" aria-label="Yükleniyor">
-      <div class="sz-preloader-glow sz-glow-gold"></div>
-      <div class="sz-preloader-glow sz-glow-emerald"></div>
-
-      <div class="sz-preloader-card">
-        <div class="sz-preloader-badge-wrap">
-          <div class="sz-preloader-ring sz-ring-outer"></div>
-          <div class="sz-preloader-ring sz-ring-inner"></div>
-          <div class="sz-preloader-logo">SZ</div>
-        </div>
-
-        <div class="sz-preloader-brand">
-          <span class="sz-brand-main">Salon<span class="sz-gold-text">Zeka</span></span>
-          <span class="sz-brand-subtitle">Salon İşletim Sistemi</span>
-        </div>
-
-        <div class="sz-progress-track">
-          <div class="sz-progress-bar" id="szPreloaderBar"></div>
-        </div>
-
-        <div class="sz-preloader-status">
-          <span class="sz-status-text">Asistan ve panel yükleniyor</span>
-          <span class="sz-status-dots"><span>.</span><span>.</span><span>.</span></span>
-          <span class="sz-preloader-counter" id="szPreloaderCount">100%</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ATMOSFERİK KATMANLAR: MİMARİ IZGARA, AURORA KÜRELERİ VE CANVAS -->
+    <!-- SADELEŞTİRİLMİŞ MİMARİ ARKA PLAN -->
     <div class="sz-cosmic-backdrop" aria-hidden="true">
       <div class="sz-architectural-grid"></div>
-      <div class="sz-ambient-orbs">
-        <div class="sz-ambient-orb sz-orb-gold"></div>
-        <div class="sz-ambient-orb sz-orb-emerald"></div>
-        <div class="sz-ambient-orb sz-orb-warm"></div>
-      </div>
-      <div class="sz-grain-layer"></div>
+      <div class="sz-backdrop-glow"></div>
     </div>
 
-    <!-- MİMARİ YÜZEN KAPSÜL HEADER / NAVIGATION -->
+    <!-- YÜZEN KAPSÜL HEADER -->
     <header class="sz-header">
       <div class="sz-scroll-progress" aria-hidden="true"></div>
       <div class="sz-container">
@@ -64,30 +30,29 @@
           <a class="sz-brand" href="#top">
             <div class="sz-brand-mark" aria-hidden="true">
               <span>SZ</span>
-              <i class="sz-brand-mark-ring"></i>
             </div>
             <div class="sz-brand-title">
               <span class="sz-brand-name">Salon<span>Zeka</span></span>
-              <span class="sz-brand-badge">Salon İşletim Sistemi</span>
+              <span class="sz-brand-badge">WhatsApp AI &amp; Takvim</span>
             </div>
           </a>
 
           <div class="sz-nav-links" id="szNavLinks">
             <span class="sz-nav-active-pill" id="szNavPill" aria-hidden="true"></span>
-            <a href="#asistan" data-nav-target="asistan">Asistan</a>
+            <a href="#kontrol" data-nav-target="kontrol">Kontrol</a>
+            <a href="#sektorler" data-nav-target="sektorler">Sektörler</a>
             <a href="#panel" data-nav-target="panel">Panel</a>
-            <a href="#karsilastirma" data-nav-target="karsilastirma">Neden Biz?</a>
-            <a href="#nasil-calisir" data-nav-target="nasil-calisir">Nasıl Çalışır?</a>
-            <a href="#ucretsiz-deneme" data-nav-target="ucretsiz-deneme" class="sz-nav-highlight">14 Gün Deneme</a>
+            <a href="#fiyatlandirma" data-nav-target="fiyatlandirma">Fiyatlandırma</a>
+            <a href="#sss" data-nav-target="sss">SSS</a>
           </div>
 
           <div class="sz-nav-actions">
-            <button type="button" class="sz-theme-toggle" id="szThemeToggle" aria-label="Görünüm temasını değiştir" title="Gece / Gündüz Lüks Atmosfer">
+            <button type="button" class="sz-theme-toggle" id="szThemeToggle" aria-label="Görünüm temasını değiştir" title="Gece / Gündüz Tema">
               <svg class="sz-icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
               <svg class="sz-icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
             </button>
-            <a class="sz-btn sz-btn-whatsapp sz-wa-link sz-btn-shimmer" href="#">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
+            <a class="sz-btn sz-btn-whatsapp sz-wa-link" href="#">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
               <span>14 Gün Ücretsiz Dene</span>
             </a>
             <a class="sz-btn sz-btn-secondary" id="navLoginBtn" href="login.html">Giriş Yap</a>
@@ -98,203 +63,190 @@
 
     <main id="main">
       <!-- ====================================================================
-           BÖLÜM 1: HERO SAHNESİ (3D PARALAKS & NÖRAL SENKRONİZASYON TİYATROSU)
+           BÖLÜM 1: İKİ KANALLI SPLIT HERO (WHATSAPP + ANLIK TAKVİM SENKRONİZASYONU)
            ==================================================================== -->
       <section class="sz-hero" id="top">
-        <div class="sz-hero-aura" aria-hidden="true"></div>
         <div class="sz-container">
           <div class="sz-hero-stage">
 
-            <!-- Sol Mimari Sütun: Editoryal Tipografi ve Aksiyon Kümesi -->
-            <div class="sz-hero-content" data-reveal="left">
+            <!-- Sol Sütun -->
+            <div class="sz-hero-content">
               <div class="sz-hero-pill">
-                <span class="sz-hero-pill-dot"></span>
-                <span>14 Gün Koşulsuz Ücretsiz Deneme • Kredi Kartı Gerekmez</span>
+                <span class="sz-hero-pill-dot" aria-hidden="true"></span>
+                <span>14 Gün Ücretsiz Deneme • Kredi Kartı Gerekmez</span>
               </div>
 
               <h1 class="sz-hero-headline">
-                Telefon Başında Randevu Aramaya Son:
-                <span class="sz-gold-text">7/24 WhatsApp Yapay Zekası</span>
-                Salonunuzu Yönetsin.
+                Randevu Kaçırmayı %75 Azaltın —
+                <span class="sz-gold-text">7/24 WhatsApp AI Asistanı</span>
               </h1>
 
               <p class="sz-hero-lead">
-                Müşterileriniz gece gündüz dilediği saatte WhatsApp'tan yazsın; yapay zeka takviminizdeki boş saatleri saniyeler içinde hesaplayıp randevuyu otomatik işlesin. Sıfır çakışma, sıfır kaçan müşteri.
+                Müşterileriniz WhatsApp'tan yazsın, yapay zeka takviminizi kontrol edip saniyeler içinde randevuyu oluştursun. Telefon trafiğinden kurtulun.
               </p>
 
               <div class="sz-hero-cta-group">
-                <a class="sz-btn-hero-wa sz-wa-link sz-btn-shimmer" href="#">
-                  <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
-                  <span>14 Gün Ücretsiz Deneyin (WhatsApp)</span>
+                <a class="sz-btn-hero-wa sz-wa-link" href="#">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
+                  <span>WhatsApp Asistanı Canlı Dene</span>
                 </a>
-                <a class="sz-btn sz-btn-secondary sz-btn-hero-alt" href="#ucretsiz-deneme">
-                  <span>Deneme Detayları</span>
-                  <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 10h10M11 6l4 4-4 4"/></svg>
+                <a class="sz-btn sz-btn-secondary sz-btn-hero-alt" href="#fiyatlandirma">
+                  <span>14 Gün Ücretsiz Başla</span>
+                  <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 10h10M11 6l4 4-4 4"/></svg>
                 </a>
-              </div>
-
-              <div class="sz-hero-trial-guarantee">
-                <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor"><path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"/></svg>
-                <span>Kredi kartı gerekmez • Sıfır taahhüt • 14 gün tam sürüm erişim</span>
               </div>
 
               <div class="sz-hero-trust">
                 <div class="sz-trust-item">
-                  <span class="sz-trust-check">
-                    <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                  </span>
-                  <span>14 Gün Ücretsiz Deneme</span>
-                </div>
-                <div class="sz-trust-item">
-                  <span class="sz-trust-check">
-                    <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                  </span>
+                  <span class="sz-trust-check" aria-hidden="true">✓</span>
                   <span>Mevcut Numaranıza Bağlanır</span>
                 </div>
                 <div class="sz-trust-item">
-                  <span class="sz-trust-check">
-                    <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                  </span>
-                  <span>7/24 Kesintisiz Hizmet</span>
+                  <span class="sz-trust-check" aria-hidden="true">✓</span>
+                  <span>Sıfır Çakışma Garantisi</span>
                 </div>
                 <div class="sz-trust-item">
-                  <span class="sz-trust-check">
-                    <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                  </span>
-                  <span>Sıfır Çakışma Garantisi</span>
+                  <span class="sz-trust-check" aria-hidden="true">✓</span>
+                  <span>7/24 Otomatik Yanıt</span>
+                </div>
+                <div class="sz-trust-item">
+                  <span class="sz-trust-check" aria-hidden="true">✓</span>
+                  <span>Tek Tıkla Manuel Devralma</span>
                 </div>
               </div>
             </div>
 
-            <!-- Sağ Mimari Sütun: NÖRAL ÇİFT ÇEKİRDEKLİ CANLI SİMÜLASYON SAHNESİ -->
-            <div class="sz-sim-stage" data-reveal="right">
+            <!-- Sağ Sütun: İnteraktif Ürün Simülasyonu -->
+            <div class="sz-sim-stage">
               <div class="sz-sim-wrapper" id="szHeroSimCard">
-                <!-- Üst Telemetri Barı -->
                 <div class="sz-sim-topbar">
                   <div class="sz-sim-status-badge">
-                    <span class="sz-sim-pulse-dot"></span>
-                    <span>Canlı Sistem Simülasyonu</span>
+                    <span class="sz-sim-pulse-dot" aria-hidden="true"></span>
+                    <span>İnteraktif Ürün Demosu</span>
                   </div>
                   <div class="sz-sim-topbar-right">
-                    <span class="sz-sim-title">WhatsApp AI ↔ Akıllı Takvim</span>
-                    <button type="button" class="sz-sim-replay-btn" id="simReplayBtn" title="Simülasyonu Yeniden Oynat" aria-label="Simülasyonu Yeniden Oynat">
-                      <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h5M16 10a6 6 0 1 1-1.76-4.24"/></svg>
+                    <span class="sz-sim-title">WhatsApp AI ↔ Takvim</span>
+                    <button type="button" class="sz-sim-replay-btn" id="simReplayBtn" title="Simülasyonu Tekrar Başlat" aria-label="Simülasyonu Tekrar Başlat">
+                      <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4v5h5M16 10a6 6 0 1 1-1.76-4.24"/></svg>
+                      <span>Tekrar Başlat</span>
                     </button>
                   </div>
                 </div>
 
-                <!-- Canlı AI İşlem Hattı Adım Göstergesi -->
                 <div class="sz-sim-pipeline" aria-hidden="true">
                   <div class="sz-pipeline-step is-active" data-sim-phase="1">
                     <span class="sz-pipeline-dot"></span>
-                    <span>1. Mesaj Algılandı</span>
+                    <span>1. Talep Alındı</span>
                   </div>
                   <div class="sz-pipeline-step" data-sim-phase="2">
                     <span class="sz-pipeline-dot"></span>
-                    <span>2. Boş Saat Tarandı</span>
+                    <span>2. Takvim Tarandı</span>
                   </div>
                   <div class="sz-pipeline-step" data-sim-phase="3">
                     <span class="sz-pipeline-dot"></span>
-                    <span>3. Takvime İşlendi</span>
+                    <span>3. Saat Kilitlendi</span>
                   </div>
                 </div>
 
                 <div class="sz-sim-split">
-                  <!-- 1. Canlı WhatsApp Ekranı -->
+                  <!-- WhatsApp Sohbet -->
                   <div class="sz-wa-mockup">
                     <div class="sz-wa-header">
-                      <div class="sz-wa-avatar">SZ</div>
+                      <div class="sz-wa-avatar" aria-hidden="true">SZ</div>
                       <div class="sz-wa-info">
                         <h4>SalonZeka Asistanı</h4>
-                        <span>çevrimiçi • 7/24 randevu asistanı</span>
+                        <span>çevrimiçi • anlık takvim senkronizasyonu</span>
                       </div>
                     </div>
 
-                    <div class="sz-wa-chat-body">
+                    <div class="sz-wa-chat-body" id="simChatBody">
                       <!-- Mesaj 1: Müşteri -->
                       <div class="sz-wa-msg sz-wa-msg-in" id="simMsg1">
-                        <span>Merhaba, yarın cilt bakımı için uygun saatiniz var mı?</span>
+                        <span>Yarın 14:00'e cilt bakımı için randevu alabilir miyim?</span>
                         <span class="sz-wa-msg-time">13:42</span>
                       </div>
 
-                      <!-- Bot Yazıyor Göstergesi -->
-                      <div class="sz-wa-typing" id="simTyping">
+                      <!-- Bot Yazıyor -->
+                      <div class="sz-wa-typing" id="simTyping" aria-hidden="true">
                         <span class="sz-typing-dot"></span>
                         <span class="sz-typing-dot"></span>
                         <span class="sz-typing-dot"></span>
                       </div>
 
-                      <!-- Mesaj 2: Bot -->
+                      <!-- Mesaj 2: Bot + Tıklanabilir Saat Seçenekleri -->
                       <div class="sz-wa-msg sz-wa-msg-out" id="simMsg2">
-                        <span>Merhaba Sevil Hanım! Yarın için <strong>14:00</strong> ve <strong>16:30</strong> saatlerimiz müsait. Hangisini ayıralım? ✨</span>
+                        <span>14:00 dolu, 14:30 ve 16:00 müsait. Hangisini ayırayım?</span>
+                        <div class="sz-sim-choices" id="simChoices">
+                          <button type="button" class="sz-sim-choice-btn" data-slot-choice="14:30">14:30</button>
+                          <button type="button" class="sz-sim-choice-btn" data-slot-choice="16:00">16:00</button>
+                        </div>
                         <span class="sz-wa-msg-time">13:42</span>
                       </div>
 
-                      <!-- Mesaj 3: Müşteri -->
+                      <!-- Mesaj 3: Müşteri Seçimi -->
                       <div class="sz-wa-msg sz-wa-msg-in" id="simMsg3">
-                        <span>14:00 olsun lütfen.</span>
+                        <span id="simMsg3Text">14:30 olsun lütfen.</span>
                         <span class="sz-wa-msg-time">13:43</span>
                       </div>
 
-                      <!-- Mesaj 4: Bot Onay Şablonu -->
+                      <!-- Mesaj 4: Bot Onay -->
                       <div class="sz-wa-msg sz-wa-msg-out sz-wa-msg-confirm" id="simMsg4">
-                        <span>🎉 <strong>Randevunuz Oluşturuldu!</strong><br>
-                        Sayın Sevil K., yarın saat <strong>14:00</strong>'te Cilt Bakımı işleminiz için merkezimize bekliyoruz. Takvime işlendi!</span>
+                        <span id="simMsg4Text">Randevunuz onaylandı! Yarın saat 14:30 Cilt Bakımı takvime kilitlendi.</span>
                         <span class="sz-wa-msg-time">13:43</span>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Nöral Köprü İletim Hattı (SVG Veri Akışı) -->
+                  <!-- Senkronizasyon Köprüsü -->
                   <div class="sz-neural-bridge" id="simNeuralBridge" aria-hidden="true">
                     <div class="sz-neural-line">
                       <span class="sz-neural-packet"></span>
                     </div>
-                    <div class="sz-neural-core" title="AI Senkronizasyon Çekirdeği">AI</div>
+                    <div class="sz-neural-core">AI</div>
                   </div>
 
-                  <!-- 2. Canlı Takvim Önizlemesi -->
+                  <!-- Mini Takvim -->
                   <div class="sz-cal-mockup">
                     <div class="sz-cal-header">
-                      <span class="sz-cal-header-title">Günün Takvimi</span>
-                      <span class="sz-cal-tag">Canlı Senkronize</span>
+                      <span class="sz-cal-header-title">Yarın • Takvim</span>
+                      <span class="sz-cal-tag">Canlı</span>
                     </div>
 
                     <div class="sz-cal-slot">
                       <div class="sz-cal-slot-top">
-                        <span class="sz-cal-time">11:00 - 12:00</span>
+                        <span class="sz-cal-time">14:00 - 14:30</span>
                         <span class="sz-cal-status sz-status-booked">Dolu</span>
                       </div>
                       <div class="sz-cal-client">Dilek Y.</div>
-                      <div class="sz-cal-meta">Lazer Epilasyon • Seans 5/8</div>
+                      <div class="sz-cal-meta">Lazer Epilasyon</div>
                     </div>
 
-                    <!-- Dinamik Güncellenen Slot -->
-                    <div class="sz-cal-slot sz-cal-slot-dynamic" id="simCalSlot">
+                    <div class="sz-cal-slot sz-cal-slot-dynamic" id="simCalSlot1430">
                       <div class="sz-cal-slot-top">
-                        <span class="sz-cal-time sz-cal-time-gold">14:00 - 15:00</span>
-                        <span class="sz-cal-status sz-status-open">Müsait</span>
+                        <span class="sz-cal-time sz-cal-time-gold">14:30 - 15:30</span>
+                        <span class="sz-cal-status sz-status-open" id="simCalStatus1430">Müsait</span>
                       </div>
-                      <span class="sz-cal-empty-label">Boş Randevu Aralığı</span>
+                      <div class="sz-cal-client" id="simCalClient1430">Boş Randevu Aralığı</div>
+                      <div class="sz-cal-meta" id="simCalMeta1430">Seçim bekleniyor</div>
                     </div>
 
-                    <div class="sz-cal-slot">
+                    <div class="sz-cal-slot sz-cal-slot-dynamic" id="simCalSlot1600">
                       <div class="sz-cal-slot-top">
-                        <span class="sz-cal-time">16:30 - 17:30</span>
-                        <span class="sz-cal-status sz-status-booked">Dolu</span>
+                        <span class="sz-cal-time sz-cal-time-gold">16:00 - 17:00</span>
+                        <span class="sz-cal-status sz-status-open" id="simCalStatus1600">Müsait</span>
                       </div>
-                      <div class="sz-cal-client">Zeynep A.</div>
-                      <div class="sz-cal-meta">Bölgesel İncelme • Seans 2/6</div>
+                      <div class="sz-cal-client" id="simCalClient1600">Boş Randevu Aralığı</div>
+                      <div class="sz-cal-meta" id="simCalMeta1600">Seçim bekleniyor</div>
                     </div>
 
                     <div class="sz-cal-kpi-row">
                       <div class="sz-mini-kpi">
-                        <span>Bugünkü Randevular</span>
+                        <span>Günlük Randevu</span>
                         <strong id="simCalKpiCount">7</strong>
                       </div>
                       <div class="sz-mini-kpi">
-                        <span>Doluluk Oranı</span>
-                        <strong id="simCalOccupancy">%88</strong>
+                        <span>Doluluk</span>
+                        <strong id="simCalOccupancy">%84</strong>
                       </div>
                     </div>
                   </div>
@@ -306,348 +258,278 @@
         </div>
       </section>
 
-      <!-- KİNETİK KAYAN TİPOGRAFİ ŞERİDİ (AMBIENT MARQUEE) -->
-      <div class="sz-kinetic-ribbon" aria-hidden="true">
-        <div class="sz-kinetic-track">
-          <div class="sz-kinetic-group">
-            <span>7/24 WHATSAPP YAPAY ZEKA ASİSTANI</span>
-            <i>✦</i>
-            <span>SIFIR ÇAKIŞMA GARANTİSİ</span>
-            <i>✦</i>
-            <span>SÜRÜKLE-BIRAK AKILLI TAKVİM</span>
-            <i>✦</i>
-            <span>OTOMATİK SEANS & PAKET TAKİBİ</span>
-            <i>✦</i>
-            <span>ANLIK KASA VE ALACAK KONTROLÜ</span>
-            <i>✦</i>
-            <span>14 GÜN KOŞULSUZ ÜCRETSİZ DENEME</span>
-            <i>✦</i>
-          </div>
-          <div class="sz-kinetic-group" aria-hidden="true">
-            <span>7/24 WHATSAPP YAPAY ZEKA ASİSTANI</span>
-            <i>✦</i>
-            <span>SIFIR ÇAKIŞMA GARANTİSİ</span>
-            <i>✦</i>
-            <span>SÜRÜKLE-BIRAK AKILLI TAKVİM</span>
-            <i>✦</i>
-            <span>OTOMATİK SEANS & PAKET TAKİBİ</span>
-            <i>✦</i>
-            <span>ANLIK KASA VE ALACAK KONTROLÜ</span>
-            <i>✦</i>
-            <span>14 GÜN KOŞULSUZ ÜCRETSİZ DENEME</span>
-            <i>✦</i>
-          </div>
-        </div>
-      </div>
-
       <!-- ====================================================================
-           BÖLÜM 2: ESKİ YÖNTEMLER VS. SALONZEKA (KARŞILAŞTIRMA MATRİSİ)
+           BÖLÜM 2: "KONTROL TAMAMEN SİZDE" GÜVEN BLOĞU
            ==================================================================== -->
-      <section class="sz-section sz-section-compare" id="karsilastirma">
+      <section class="sz-section sz-section-control" id="kontrol">
         <div class="sz-container">
           <div class="sz-section-header" data-reveal>
-            <span class="sz-section-kicker">Neden SalonZeka?</span>
-            <h2 class="sz-section-title">Defterler ve Kaçan Mesajlar Artık Mazide Kaldı</h2>
+            <span class="sz-section-kicker">Güven &amp; Kontrol</span>
+            <h2 class="sz-section-title">Kontrol Tamamen Sizde</h2>
             <p class="sz-section-desc">
-              Geleneksel salon yönetiminin stresini geride bırakın. İşinizi yapay zeka hızına ve konforuna taşıyın.
+              Yapay zeka yalnızca sizin belirlediğiniz sınırlar içinde çalışır. Takviminizde sürpriz kararlar veya hatalı kayıtlar oluşmaz.
             </p>
           </div>
 
-          <div class="sz-vs-grid" id="szVsGrid">
-            <!-- Eski Yöntem -->
-            <div class="sz-vs-card sz-vs-bad" data-reveal="left" data-delay="100">
-              <div class="sz-vs-card-top">
-                <span class="sz-vs-badge">❌ Klasik Salon Yönetimi</span>
-                <span class="sz-vs-stress-meter">Yüksek Operasyonel Yük</span>
-              </div>
-              <h3>Gün Boyu Süren Randevu Stresi</h3>
-              <ul class="sz-vs-list">
-                <li class="sz-vs-item" data-pair-index="1">
-                  <span class="sz-vs-icon">✕</span>
-                  <div>
-                    <strong>Kaçan Gece Mesajları:</strong> Akşam 21:00'den sonra gelen WhatsApp randevu talepleri yanıtsız kalır ve müşteri başka salona gider.
-                  </div>
-                </li>
-                <li class="sz-vs-item" data-pair-index="2">
-                  <span class="sz-vs-icon">✕</span>
-                  <div>
-                    <strong>Karışan Seans Defterleri:</strong> Danışanın kaçıncı seansta olduğu, kaç seansının kaldığı defter sayfalarında kaybolur.
-                  </div>
-                </li>
-                <li class="sz-vs-item" data-pair-index="3">
-                  <span class="sz-vs-icon">✕</span>
-                  <div>
-                    <strong>Çift Randevu Çakışması:</strong> Yoğun saatlerde aynı uzmana iki müşteri yazılır, salon kapısında gerginlik yaşanır.
-                  </div>
-                </li>
-                <li class="sz-vs-item" data-pair-index="4">
-                  <span class="sz-vs-icon">✕</span>
-                  <div>
-                    <strong>Unutulan Alacaklar ve Kasa:</strong> Kimin ne kadar borcu kaldığı net takip edilemez, ay sonunda ciro açıkları oluşur.
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-            <!-- Merkez Dönüşüm Omurgası -->
-            <div class="sz-vs-axis" aria-hidden="true">
-              <div class="sz-vs-axis-line"></div>
-              <div class="sz-vs-axis-orb">VS</div>
-            </div>
-
-            <!-- SalonZeka -->
-            <div class="sz-vs-card sz-vs-good" data-reveal="right" data-delay="200">
-              <div class="sz-vs-card-top">
-                <span class="sz-vs-badge">✨ SalonZeka İle Yeni Dönem</span>
-                <span class="sz-vs-efficiency-meter">7/24 Tam Otomasyon</span>
-              </div>
-              <h3>7/24 Kusursuz ve Otomatik Büyüme</h3>
-              <ul class="sz-vs-list">
-                <li class="sz-vs-item" data-pair-index="1">
-                  <span class="sz-vs-icon">✓</span>
-                  <div>
-                    <strong>7/24 Anında WhatsApp Yanıtı:</strong> Gece saat 02:00'de bile yazan danışanınıza yapay zeka saniyeler içinde randevu oluşturur.
-                  </div>
-                </li>
-                <li class="sz-vs-item" data-pair-index="2">
-                  <span class="sz-vs-icon">✓</span>
-                  <div>
-                    <strong>Otomatik Seans Takibi:</strong> Randevu tamamlandığında seans sayısı otomatik düşer; hem siz hem danışan kalan seansı net bilir.
-                  </div>
-                </li>
-                <li class="sz-vs-item" data-pair-index="3">
-                  <span class="sz-vs-icon">✓</span>
-                  <div>
-                    <strong>Sıfır Çakışma Garantisi:</strong> İşlem sürelerini ve takvim boşluklarını 15 dakikalık hassasiyetle kontrol ederek mükemmel saatler önerir.
-                  </div>
-                </li>
-                <li class="sz-vs-item" data-pair-index="4">
-                  <span class="sz-vs-icon">✓</span>
-                  <div>
-                    <strong>Net Kasa ve Bakiye Kontrolü:</strong> Alınan ödemeler, bekleyen danışan bakiyeleri ve salon cirosu tek ekranda anlık raporlanır.
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           BÖLÜM 3: 7/24 WHATSAPP YAPAY ZEKA ASİSTANI (NÖRAL MODÜLLER)
-           ==================================================================== -->
-      <section class="sz-section sz-section-assistant" id="asistan">
-        <div class="sz-container">
-          <div class="sz-section-header" data-reveal>
-            <span class="sz-section-kicker">Akıllı WhatsApp Asistanı</span>
-            <h2 class="sz-section-title">WhatsApp'ınız Artık En Çalışkan Resepsiyonistiniz</h2>
-            <p class="sz-section-desc">
-              Müşterilerinizin en çok kullandığı platformda, hiçbir personelin yetişemeyeceği hız ve nezaketle hizmet verin.
-            </p>
-          </div>
-
-          <div class="sz-wa-features-grid">
-            <!-- Kart 1 -->
-            <article class="sz-feature-card" data-reveal data-delay="100">
-              <div class="sz-feature-card-head">
-                <div class="sz-feature-icon-box">⏱️</div>
-                <span class="sz-feature-index">MODÜL 01</span>
-              </div>
-              <h3>Akıllı Müsaitlik Motoru</h3>
-              <p>Müşterinin seçtiği hizmetin süresini ve çalışma saatlerinizi analiz eder. 15 dakikalık periyotlarla tam uygun saat alternatifleri sunar.</p>
-              <!-- Mikro Görsel Simülasyon: 15dk Periyot Tarayıcı -->
-              <div class="sz-feature-micro" aria-hidden="true">
-                <span class="sz-micro-slot is-busy">13:30</span>
-                <span class="sz-micro-slot is-free">14:00 ✓</span>
-                <span class="sz-micro-slot is-free">16:30 ✓</span>
-              </div>
-              <div class="sz-feature-footer">
-                <span class="sz-feature-pill">Çakışmayı Sıfırlar</span>
-              </div>
+          <div class="sz-control-grid">
+            <article class="sz-control-card" data-reveal data-delay="80">
+              <div class="sz-control-badge">01 • ÇAKIŞMA ENGELİ</div>
+              <h3>%100 Çakışma Koruması</h3>
+              <p>Dolu saate asla ikinci randevu yazmaz. İşlem sürelerini ve uzman müsaitliğini anlık doğrulayarak yalnızca gerçek boşlukları sunar.</p>
             </article>
 
-            <!-- Kart 2 -->
-            <article class="sz-feature-card" data-reveal data-delay="200">
-              <div class="sz-feature-card-head">
-                <div class="sz-feature-icon-box">🔄</div>
-                <span class="sz-feature-index">MODÜL 02</span>
-              </div>
-              <h3>Kolay Erteleme ve İptal</h3>
-              <p>Müşteri "Randevumu yarına alalım" dediğinde yapay zeka yeni saatleri sunar ve takvimi anında günceller. Telefon trafiğiniz sona erer.</p>
-              <!-- Mikro Görsel Simülasyon: Otomatik Transfer -->
-              <div class="sz-feature-micro" aria-hidden="true">
-                <span class="sz-micro-shift-old">Bugün 15:00</span>
-                <span class="sz-micro-shift-arrow">➔</span>
-                <span class="sz-micro-shift-new">Yarın 14:00</span>
-              </div>
-              <div class="sz-feature-footer">
-                <span class="sz-feature-pill">Tek Mesajla Çözüm</span>
-              </div>
+            <article class="sz-control-card" data-reveal data-delay="160">
+              <div class="sz-control-badge">02 • ESNEK KURALLAR</div>
+              <h3>Sizin Kurallarınız</h3>
+              <p>Yalnızca belirlediğiniz çalışma saatleri ve hizmet sürelerine göre saat önerir. Molalarınız, tatil günleriniz ve özel bloklarınız korunur.</p>
             </article>
 
-            <!-- Kart 3 -->
-            <article class="sz-feature-card" data-reveal data-delay="300">
-              <div class="sz-feature-card-head">
-                <div class="sz-feature-icon-box">💬</div>
-                <span class="sz-feature-index">MODÜL 03</span>
-              </div>
-              <h3>Fiyat ve SSS Yanıtlayıcı</h3>
-              <p>Hizmet detayları, fiyatlar, adres veya uygulama öncesi dikkat edilecek hususları salonunuzun kurumsal nezaketiyle 7/24 yanıtlar.</p>
-              <!-- Mikro Görsel Simülasyon: Anlık Yanıt Hızı -->
-              <div class="sz-feature-micro" aria-hidden="true">
-                <span class="sz-micro-faq-tag">Fiyat &amp; Konum</span>
-                <span class="sz-micro-faq-speed">⚡ 0.8 sn yanıt</span>
-              </div>
-              <div class="sz-feature-footer">
-                <span class="sz-feature-pill">7/24 Danışma</span>
-              </div>
-            </article>
-
-            <!-- Kart 4 -->
-            <article class="sz-feature-card" data-reveal data-delay="400">
-              <div class="sz-feature-card-head">
-                <div class="sz-feature-icon-box">👩‍💼</div>
-                <span class="sz-feature-index">MODÜL 04</span>
-              </div>
-              <h3>Akıllı Personele Devir</h3>
-              <p>Müşteri özel bir talepte bulunduğunda veya şikayet bildirdiğinde asistan görüşmeyi anında salon yetkilinize devreder ve dahili uyarı verir.</p>
-              <!-- Mikro Görsel Simülasyon: Canlı Bildirim -->
-              <div class="sz-feature-micro" aria-hidden="true">
-                <span class="sz-micro-handoff-dot"></span>
-                <span class="sz-micro-handoff-text">Yetkiliye Canlı Bildirim Aktif</span>
-              </div>
-              <div class="sz-feature-footer">
-                <span class="sz-feature-pill">Kesintisiz Güven</span>
-              </div>
+            <article class="sz-control-card" data-reveal data-delay="240">
+              <div class="sz-control-badge">03 • ANLIK MÜDAHALE</div>
+              <h3>Tek Tıkla Devralma</h3>
+              <p>İstediğiniz an yapay zekayı durdurup sohbeti manuel yönetirsiniz. Özel taleplerde veya VIP görüşmelerde kontrol saniyeler içinde sizdedir.</p>
             </article>
           </div>
         </div>
       </section>
 
       <!-- ====================================================================
-           BÖLÜM 4: SALON YÖNETİM PANELİ (İNTERAKTİF KOMUTA BENTO MİMARİSİ)
+           BÖLÜM 3: SEKTÖR SEKMELERİ
+           ==================================================================== -->
+      <section class="sz-section sz-section-sectors" id="sektorler">
+        <div class="sz-container">
+          <div class="sz-section-header" data-reveal>
+            <span class="sz-section-kicker">Sektöre Özel Akışlar</span>
+            <h2 class="sz-section-title">İşletmenizin Diline Uyum Sağlar</h2>
+            <p class="sz-section-desc">
+              Hizmet süreleriniz, seans yapınız ve müşteri sorularınız sektörünüze göre özelleştirilir.
+            </p>
+          </div>
+
+          <div class="sz-sector-tabs-wrap" data-reveal>
+            <div class="sz-sector-tablist" role="tablist" aria-label="Sektör senaryoları">
+              <button type="button" class="sz-sector-tab is-active" role="tab" aria-selected="true" aria-controls="sector-guzellik" id="tab-guzellik" data-sector="guzellik">
+                Güzellik Merkezleri
+              </button>
+              <button type="button" class="sz-sector-tab" role="tab" aria-selected="false" aria-controls="sector-klinik" id="tab-klinik" data-sector="klinik">
+                Klinikler &amp; Diş
+              </button>
+              <button type="button" class="sz-sector-tab" role="tab" aria-selected="false" aria-controls="sector-kuafor" id="tab-kuafor" data-sector="kuafor">
+                Kuaför &amp; Berber
+              </button>
+            </div>
+
+            <div class="sz-sector-panels">
+              <div class="sz-sector-panel is-active" role="tabpanel" id="sector-guzellik" aria-labelledby="tab-guzellik">
+                <div class="sz-sector-grid">
+                  <div class="sz-sector-info">
+                    <span class="sz-sector-tag">Lazer • Cilt Bakımı • Bölgesel İncelme</span>
+                    <h3>Seanslı Paketler ve Oda/Cihaz Planlaması</h3>
+                    <p>Müşteriniz 4. seansı için WhatsApp'tan yazdığında asistan kalan seans sayısını görür, cihaz uygunluğunu kontrol eder ve randevuyu otomatik işler.</p>
+                    <ul class="sz-sector-points">
+                      <li>Kalan seans ve bakiye bilgisini otomatik takip</li>
+                      <li>İşlem öncesi hazırlık bilgilendirmesi</li>
+                    </ul>
+                  </div>
+                  <div class="sz-sector-scenario">
+                    <div class="sz-scenario-bubble is-customer">
+                      <strong>Müşteri:</strong> "Lazer 4. seansım için cuma öğleden sonra yer var mı?"
+                    </div>
+                    <div class="sz-scenario-bubble is-ai">
+                      <strong>SalonZeka AI:</strong> "Merhaba Elif Hanım, 4/8 seansınız için Cuma 15:00 ve 16:30 cihazımız müsait. Hangisini onaylayalım?"
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sz-sector-panel" role="tabpanel" id="sector-klinik" aria-labelledby="tab-klinik" hidden>
+                <div class="sz-sector-grid">
+                  <div class="sz-sector-info">
+                    <span class="sz-sector-tag">Diş Hekimliği • Estetik • Fizyoterapi</span>
+                    <h3>Hekim Bazlı Takvim ve KVKK Uyumlu Onam Akışı</h3>
+                    <p>Hasta tercih ettiği hekime veya işlem süresine göre uygun muayene saatlerini alır, randevu öncesi otomatik hatırlatma ile gelmeme oranı düşer.</p>
+                    <ul class="sz-sector-points">
+                      <li>Hekim/oda bazlı çakışmasız saat önerisi</li>
+                      <li>24 saat ve 2 saat kala otomatik hatırlatma</li>
+                    </ul>
+                  </div>
+                  <div class="sz-sector-scenario">
+                    <div class="sz-scenario-bubble is-customer">
+                      <strong>Hasta:</strong> "Dt. Kemal Bey'e diş taşı temizliği için yarın gelebilir miyim?"
+                    </div>
+                    <div class="sz-scenario-bubble is-ai">
+                      <strong>SalonZeka AI:</strong> "Dt. Kemal Bey yarın 11:30 ve 15:15'te müsait. 30 dakikalık temizlik randevunuzu hangisine oluşturalım?"
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sz-sector-panel" role="tabpanel" id="sector-kuafor" aria-labelledby="tab-kuafor" hidden>
+                <div class="sz-sector-grid">
+                  <div class="sz-sector-info">
+                    <span class="sz-sector-tag">Saç Tasarım • Renklendirme • Berber</span>
+                    <h3>Koltuk ve İşlem Süresine Göre Akıllı Sıralama</h3>
+                    <p>Fön gibi 30 dakikalık işlerle ombre gibi 3 saatlik işlemleri birbirine karıştırmaz; koltuk doluluğunu maksimize eder.</p>
+                    <ul class="sz-sector-points">
+                      <li>Uzun ve kısa işlemlere göre dinamik süre hesabı</li>
+                      <li>Makas/boya başındayken telefon trafiğini sıfırlar</li>
+                    </ul>
+                  </div>
+                  <div class="sz-sector-scenario">
+                    <div class="sz-scenario-bubble is-customer">
+                      <strong>Müşteri:</strong> "Cumartesi saat 13:00'te kesim ve fön için Caner Bey müsait mi?"
+                    </div>
+                    <div class="sz-scenario-bubble is-ai">
+                      <strong>SalonZeka AI:</strong> "Caner Bey 13:00'te dolu ancak 13:45'te 45 dakikalık boşluğu var. Sizin için ayırayım mı?"
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           BÖLÜM 4: 4'LÜ BENTO GRID (MİNİ UI BİLEŞENLERİ)
            ==================================================================== -->
       <section class="sz-section sz-section-panel" id="panel">
         <div class="sz-container">
           <div class="sz-section-header" data-reveal>
             <span class="sz-section-kicker">Yönetim Paneli</span>
-            <h2 class="sz-section-title">Tek Ekranda Tüm Salonunuzun Kontrolü</h2>
+            <h2 class="sz-section-title">Tek Ekranda Operasyon Hakimiyeti</h2>
             <p class="sz-section-desc">
-              Karmaşık yazılımlara son. Bir bakışta günün randevularını, seans durumlarını ve finansal tablonuzu görün.
+              Canlı bildirimler, gelmeme önleme, seans/bakiye özeti ve uzman takvimi bir arada.
             </p>
           </div>
 
-          <!-- Salon OS Komuta Çerçevesi -->
           <div class="sz-os-frame" data-reveal>
             <div class="sz-os-windowbar" aria-hidden="true">
               <div class="sz-os-dots">
                 <span></span><span></span><span></span>
               </div>
-              <div class="sz-os-address">salonzeka.app / komuta-paneli • canlı-senkronizasyon</div>
+              <div class="sz-os-address">salonzeka.app / komuta-paneli</div>
               <div class="sz-os-status">● Canlı</div>
             </div>
 
             <div class="sz-bento-grid">
-              <!-- Bento 1: Takvim (Geniş) -->
-              <div class="sz-bento-card sz-bento-col-8" data-reveal data-delay="100">
+              <!-- Bento 1: Canlı Bildirim Kutusu -->
+              <div class="sz-bento-card sz-bento-col-6" data-reveal data-delay="80">
                 <div class="sz-bento-head">
-                  <div class="sz-bento-head-top">
-                    <h3>Sürükle-Bırak Akıllı Takvim</h3>
-                    <button type="button" class="sz-bento-interactive-btn" id="bentoShuffleCalendarBtn" title="Randevu Sıralamasını Canlı Simüle Et">
-                      <span>✨ Saatleri Hizala</span>
-                    </button>
-                  </div>
-                  <p>Randevuları dilediğiniz gün, hafta veya ay görünümünde sürükleyip bırakarak taşıyın. Hizmet süresine göre takvim saatleri otomatik hizalanır.</p>
+                  <h3>Anlık WhatsApp Randevu Akışı</h3>
+                  <p>Asistan onayladığı her randevuyu panele anlık bildirim olarak düşürür.</p>
                 </div>
 
-                <div class="sz-preview-calendar" id="bentoCalendarPreview">
-                  <div class="sz-preview-slot" data-slot-order="1">
-                    <span class="sz-preview-slot-time">10:00 - 11:00</span>
-                    <span class="sz-preview-slot-name">Merve D.</span>
-                    <span class="sz-preview-slot-service">Cilt Bakımı</span>
+                <div class="sz-mini-notif-box">
+                  <div class="sz-mini-notif-item is-new">
+                    <span class="sz-notif-dot" aria-hidden="true"></span>
+                    <div class="sz-notif-body">
+                      <strong>Yeni Randevu • Sevil K.</strong>
+                      <span>Yarın 14:30 • Cilt Bakımı (WhatsApp AI)</span>
+                    </div>
+                    <span class="sz-notif-badge">Onaylandı</span>
                   </div>
-                  <div class="sz-preview-slot sz-preview-slot-gold" data-slot-order="2">
-                    <span class="sz-preview-slot-time">11:30 - 12:45</span>
-                    <span class="sz-preview-slot-name">Ebru K.</span>
-                    <span class="sz-preview-slot-service">Lazer Epilasyon</span>
-                  </div>
-                  <div class="sz-preview-slot sz-preview-slot-wa" data-slot-order="3">
-                    <span class="sz-preview-slot-time">14:00 - 15:00</span>
-                    <span class="sz-preview-slot-name">Sevil K.</span>
-                    <span class="sz-preview-slot-service">WhatsApp'tan Geldi ✨</span>
+                  <div class="sz-mini-notif-item">
+                    <span class="sz-notif-dot is-gold" aria-hidden="true"></span>
+                    <div class="sz-notif-body">
+                      <strong>Saat Değişikliği • Zeynep A.</strong>
+                      <span>16:30 slotuna taşındı</span>
+                    </div>
+                    <span class="sz-notif-time">2 dk önce</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Bento 2: Seans Takibi -->
-              <div class="sz-bento-card sz-bento-col-4" data-reveal data-delay="200">
+              <!-- Bento 2: No-Show Azaltma Sayacı -->
+              <div class="sz-bento-card sz-bento-col-6" data-reveal data-delay="160">
+                <div class="sz-bento-head">
+                  <h3>Otomatik Hatırlatma ile No-Show Koruması</h3>
+                  <p>Randevu öncesi WhatsApp hatırlatmaları sayesinde boş kalan koltukları azaltın.</p>
+                </div>
+
+                <div class="sz-mini-noshow-box">
+                  <div class="sz-noshow-top">
+                    <div>
+                      <span class="sz-noshow-label">Gelmeme (No-Show) Azalması</span>
+                      <strong class="sz-noshow-value" data-count-target="78" data-count-prefix="%">%78</strong>
+                    </div>
+                    <span class="sz-noshow-pill">Son 30 Gün</span>
+                  </div>
+                  <div class="sz-noshow-bar" aria-hidden="true">
+                    <span class="sz-noshow-fill"></span>
+                  </div>
+                  <div class="sz-noshow-meta">
+                    <span>Otomatik teyit oranı: %94</span>
+                    <span>Kurtarılan saat: 34 saat/ay</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bento 3: Seans / Borç Özet Çubuğu -->
+              <div class="sz-bento-card sz-bento-col-6" data-reveal data-delay="240">
                 <div class="sz-bento-head">
                   <div class="sz-bento-head-top">
-                    <h3>Seans &amp; Paket Takibi</h3>
+                    <h3>Seans &amp; Borç Özet Çubuğu</h3>
                     <button type="button" class="sz-bento-interactive-btn" id="bentoSessionStepBtn" title="Seans İlerlemesini Test Et">
                       <span>+1 Seans İşle</span>
                     </button>
                   </div>
-                  <p>Paket satışlarında müşterinin gelinen seanslarını dairesel ilerleme ile anlık izleyin.</p>
+                  <p>Paket seans ilerlemesini ve kalan müşteri bakiyesini tek çubuktan izleyin.</p>
                 </div>
 
-                <div class="sz-preview-session" id="bentoSessionPreview">
-                  <div class="sz-circle-progress" id="bentoCircleProgress" style="--session-pct: 75%;">
-                    <div class="sz-circle-inner" id="bentoSessionRatio">6 / 8</div>
+                <div class="sz-mini-session-bar-card">
+                  <div class="sz-session-bar-head">
+                    <strong>Lazer Epilasyon Paketi • Ayşe K.</strong>
+                    <span id="bentoSessionRatio">6 / 8 Seans</span>
                   </div>
-                  <div class="sz-session-details">
-                    <strong class="sz-session-title">Lazer Paketi</strong>
-                    <div class="sz-session-remaining" id="bentoSessionRemaining">Kalan Seans: 2</div>
-                    <div class="sz-session-pct" id="bentoSessionPct">%75 Tamamlandı</div>
+                  <div class="sz-session-progress-track" aria-hidden="true">
+                    <div class="sz-session-progress-fill" id="bentoSessionFill"></div>
                   </div>
-                </div>
-              </div>
-
-              <!-- Bento 3: Finans & Kasa -->
-              <div class="sz-bento-card sz-bento-col-6" data-reveal data-delay="300">
-                <div class="sz-bento-head">
-                  <h3>Finansal Kasa ve Alacak Takibi</h3>
-                  <p>Toplam ciro, tahsil edilen nakit/kart ödemeler ve müşterilerin kalan borç bakiyesi tek raporda.</p>
-                </div>
-
-                <div class="sz-finance-preview">
-                  <div class="sz-fin-stat">
-                    <span>Bu Ayki Ciro</span>
-                    <strong data-count-target="142500" data-count-prefix="₺">₺142.500</strong>
-                  </div>
-                  <div class="sz-fin-stat">
-                    <span>Alınan Tahsilat</span>
-                    <strong class="sz-fin-emerald" data-count-target="118000" data-count-prefix="₺">₺118.000</strong>
-                  </div>
-                  <div class="sz-fin-stat">
-                    <span>Kalan Müşteri Bakiyesi</span>
-                    <strong class="sz-fin-gold" data-count-target="24500" data-count-prefix="₺">₺24.500</strong>
-                  </div>
-                  <div class="sz-fin-stat">
-                    <span>Tamamlanan Randevu</span>
-                    <strong data-count-target="184" data-count-suffix=" Seans">184 Seans</strong>
+                  <div class="sz-session-bar-foot">
+                    <span id="bentoSessionRemaining">Kalan Seans: 2</span>
+                    <span class="sz-session-balance" id="bentoSessionPct">%75 • Kalan Bakiye: ₺1.500</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Bento 4: Müşteri Kartı -->
-              <div class="sz-bento-card sz-bento-col-6" data-reveal data-delay="400">
+              <!-- Bento 4: Çoklu Uzman Listesi -->
+              <div class="sz-bento-card sz-bento-col-6" data-reveal data-delay="320">
                 <div class="sz-bento-head">
-                  <h3>Danışan CRM ve Operasyon Notları</h3>
-                  <p>Müşterinin alerjileri, hassasiyetleri, tercih ettiği uzmanlar ve seans notları her randevuda önünüzde.</p>
+                  <h3>Çoklu Uzman &amp; Koltuk Durumu</h3>
+                  <p>Tüm ekibin anlık doluluğunu görün, yapay zeka uygun uzmana yönlendirsin.</p>
                 </div>
 
-                <div class="sz-crm-dossier">
-                  <div class="sz-crm-dossier-head">
-                    <div class="sz-crm-client-identity">
-                      <span class="sz-crm-avatar">YÇ</span>
-                      <strong>Yasemin Çelik</strong>
+                <div class="sz-mini-staff-list">
+                  <div class="sz-staff-row">
+                    <div class="sz-staff-info">
+                      <span class="sz-staff-avatar">EA</span>
+                      <div>
+                        <strong>Elif Aydın</strong>
+                        <span>Cilt Bakımı Uzmanı</span>
+                      </div>
                     </div>
-                    <span class="sz-crm-alert-pill">Hassas Cilt</span>
+                    <span class="sz-staff-status is-free">14:30 Müsait</span>
                   </div>
-                  <p class="sz-crm-note-quote">
-                    "Son seansta aloe vera yatıştırıcı jel uygulandı. Soğuk kompres tercih ediyor."
-                  </p>
+                  <div class="sz-staff-row">
+                    <div class="sz-staff-info">
+                      <span class="sz-staff-avatar">SK</span>
+                      <div>
+                        <strong>Selin Kaya</strong>
+                        <span>Lazer &amp; Estetik</span>
+                      </div>
+                    </div>
+                    <span class="sz-staff-status is-busy">İşlemde (15:00)</span>
+                  </div>
+                  <div class="sz-staff-row">
+                    <div class="sz-staff-info">
+                      <span class="sz-staff-avatar">MT</span>
+                      <div>
+                        <strong>Merve Tunç</strong>
+                        <span>Kıdemli Stilist</span>
+                      </div>
+                    </div>
+                    <span class="sz-staff-status is-free">16:00 Müsait</span>
+                  </div>
                 </div>
               </div>
 
@@ -657,164 +539,178 @@
       </section>
 
       <!-- ====================================================================
-           BÖLÜM 5: 3 ADIMDA KOLAY BAŞLANGIÇ (OPTİK BORU HATTI)
+           BÖLÜM 5: FİYATLANDIRMA & GÜVEN MÜHÜRLERİ
            ==================================================================== -->
-      <section class="sz-section sz-section-steps" id="nasil-calisir">
+      <section class="sz-section sz-section-pricing" id="fiyatlandirma">
         <div class="sz-container">
           <div class="sz-section-header" data-reveal>
-            <span class="sz-section-kicker">Kolay Geçiş</span>
-            <h2 class="sz-section-title">3 Adımda Salonunuzu Yapay Zekaya Taşıyın</h2>
+            <span class="sz-section-kicker">Şeffaf Fiyatlandırma</span>
+            <h2 class="sz-section-title">Salonunuzun Ölçeğine Uygun Paketler</h2>
             <p class="sz-section-desc">
-              Kurulum, sunucu veya teknik ayarlarla uğraşmanıza gerek yok. 14 gün boyunca salonunuzda hiçbir ücret ödemeden ve taahhüt vermeden canlıda test edin.
+              Tüm paketlerde 14 gün ücretsiz deneme dahildir. Kurulum ücreti veya gizli komisyon yoktur.
             </p>
           </div>
 
-          <div class="sz-steps-pipeline">
-            <div class="sz-steps-conduit" aria-hidden="true">
-              <div class="sz-steps-conduit-beam"></div>
-            </div>
-
-            <div class="sz-steps-grid">
-              <div class="sz-step-card" data-reveal data-delay="100">
-                <div class="sz-step-card-top">
-                  <span class="sz-step-num">1</span>
-                  <span class="sz-step-tag">ADIM 01 • ENTEGRASYON</span>
-                </div>
-                <h3>WhatsApp Numaranızı Bağlayalım</h3>
-                <p>Mevcut salon numaranızı değiştirmeden yapay zeka asistanımızı dakikalar içinde hattınıza entegre edelim.</p>
-              </div>
-
-              <div class="sz-step-card" data-reveal data-delay="200">
-                <div class="sz-step-card-top">
-                  <span class="sz-step-num">2</span>
-                  <span class="sz-step-tag">ADIM 02 • KALİBRASYON</span>
-                </div>
-                <h3>Hizmet ve Saatlerinizi Belirleyin</h3>
-                <p>Hangi işlemlerinizin kaç dakika sürdüğünü ve çalışma saatlerinizi panelinizden kolayca kaydedelim.</p>
-              </div>
-
-              <div class="sz-step-card" data-reveal data-delay="300">
-                <div class="sz-step-card-top">
-                  <span class="sz-step-num">3</span>
-                  <span class="sz-step-tag">ADIM 03 • CANLI DENEYİM</span>
-                </div>
-                <h3>14 Gün Boyunca Ücretsiz Test Edin</h3>
-                <p>Asistanınız mesajları karşılasın, randevular takvime aksın; salonunuzun verimini 14 gün boyunca sıfır riskle deneyimleyin.</p>
-              </div>
-            </div>
+          <!-- Aylık / Yıllık Toggle -->
+          <div class="sz-billing-toggle-wrap" data-reveal>
+            <span class="sz-billing-label is-active" id="billingLabelMonthly">Aylık</span>
+            <button type="button" class="sz-billing-switch" id="billingToggleBtn" role="switch" aria-checked="false" aria-label="Yıllık faturalandırma geçişi">
+              <span class="sz-billing-knob"></span>
+            </button>
+            <span class="sz-billing-label" id="billingLabelYearly">Yıllık</span>
+            <span class="sz-billing-discount-badge">Yıllıkta %20 İndirim</span>
           </div>
-        </div>
-      </section>
 
-      <!-- ====================================================================
-           BÖLÜM 6: 14 GÜNLÜK ÜCRETSİZ DENEME VİTRİNİ (HOLOGRAFİK KASA KARTI)
-           ==================================================================== -->
-      <section class="sz-trial-section" id="ucretsiz-deneme">
-        <div class="sz-container">
-          <div class="sz-trial-banner" data-reveal="zoom">
-            <div class="sz-trial-glow" aria-hidden="true"></div>
-
-            <div class="sz-trial-content">
-              <div class="sz-trial-pill">
-                <span class="sz-trial-pill-badge">RİSKSİZ DENEME</span>
-                <span>Kredi Kartı Gerekmez • Anında Başlangıç</span>
+          <!-- 3 Net Paket -->
+          <div class="sz-pricing-grid">
+            <!-- Paket 1 -->
+            <article class="sz-price-card" data-reveal data-delay="80">
+              <div class="sz-price-head">
+                <h3>Başlangıç / Tek Uzman</h3>
+                <p>Bireysel stüdyolar ve tek kabin işletmeler için.</p>
               </div>
-              <h2 class="sz-trial-title">
-                14 Gün Boyunca SalonZeka'yı <span class="sz-gold-text">Ücretsiz Test Edin</span>
-              </h2>
-              <p class="sz-trial-desc">
-                Müşteri kaybına, karışan seans defterlerine ve gece gelen cevapsız WhatsApp mesajlarına son verin. Hiçbir ücret ödemeden ve taahhüt vermeden, SalonZeka'nın işletmenizde yaratacağı farkı bizzat görün.
-              </p>
-
-              <div class="sz-trial-perks">
-                <div class="sz-trial-perk-item">
-                  <div class="sz-trial-perk-icon">
-                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                  </div>
-                  <div>
-                    <strong>7/24 WhatsApp AI Asistanı</strong>
-                    <span>Sınırsız gelen mesaj karşılama ve akıllı takvime otomatik randevu kaydı.</span>
-                  </div>
-                </div>
-                <div class="sz-trial-perk-item">
-                  <div class="sz-trial-perk-icon">
-                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                  </div>
-                  <div>
-                    <strong>Tüm Yönetim Paneli Özellikleri Açık</strong>
-                    <span>Sürükle-bırak takvim, müşteri CRM, seans takipleri ve anlık ciro/borç analizleri.</span>
-                  </div>
-                </div>
-                <div class="sz-trial-perk-item">
-                  <div class="sz-trial-perk-icon">
-                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                  </div>
-                  <div>
-                    <strong>Birebir Ücretsiz Kurulum &amp; Destek</strong>
-                    <span>Uzman ekibimiz mevcut salon numaranızı ve hizmet listenizi aynı gün entegre eder.</span>
-                  </div>
-                </div>
-                <div class="sz-trial-perk-item">
-                  <div class="sz-trial-perk-icon">
-                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                  </div>
-                  <div>
-                    <strong>Sıfır Risk &amp; Otomatik Yenilenme Yok</strong>
-                    <span>Kredi kartı gerekmez, deneme süresi sonunda sürpriz fatura çıkmaz.</span>
-                  </div>
-                </div>
+              <div class="sz-price-amount">
+                <strong class="sz-price-value" data-monthly="₺1.490" data-yearly="₺1.190">₺1.490</strong>
+                <span>/ ay</span>
               </div>
-            </div>
-
-            <div class="sz-trial-card">
-              <div class="sz-trial-card-badge">14 GÜNLÜK DENEME</div>
-              <div class="sz-trial-price-wrap">
-                <span class="sz-trial-duration">Ücretsiz Deneme</span>
-                <span class="sz-trial-price">0 ₺</span>
-                <span class="sz-trial-period">14 Gün Boyunca Tam Sürüm</span>
-              </div>
-
-              <ul class="sz-trial-card-features">
-                <li><span>✓</span> 7/24 WhatsApp Yapay Zekası</li>
-                <li><span>✓</span> Tüm Pro Panel Özellikleri</li>
-                <li><span>✓</span> Kredi Kartı İstenmez</li>
-                <li><span>✓</span> Sıfır Taahhüt &amp; Risksiz</li>
+              <ul class="sz-price-features">
+                <li><span>✓</span> 1 Uzman / Koltuk Takvimi</li>
+                <li><span>✓</span> 7/24 WhatsApp AI Randevu Asistanı</li>
+                <li><span>✓</span> Otomatik Randevu Hatırlatma</li>
+                <li><span>✓</span> Müşteri Kartları &amp; Seans Takibi</li>
               </ul>
+              <a class="sz-btn sz-btn-secondary sz-price-cta sz-wa-link" href="#">14 Gün Ücretsiz Başla</a>
+            </article>
 
-              <a class="sz-btn-trial-action sz-wa-link sz-btn-shimmer" href="#">
-                <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
-                <span>14 Gün Ücretsiz Başlat</span>
-              </a>
-              <div class="sz-trial-card-hint">
-                ⚡ Kurulum uzman ekibimiz tarafından hızla tamamlanır
+            <!-- Paket 2 (En Popüler) -->
+            <article class="sz-price-card sz-price-popular" data-reveal data-delay="160">
+              <div class="sz-popular-badge">En Popüler</div>
+              <div class="sz-price-head">
+                <h3>Profesyonel / Çoklu Koltuk</h3>
+                <p>Büyüyen güzellik merkezleri ve kuaför salonları için.</p>
               </div>
+              <div class="sz-price-amount">
+                <strong class="sz-price-value" data-monthly="₺2.490" data-yearly="₺1.990">₺2.490</strong>
+                <span>/ ay</span>
+              </div>
+              <ul class="sz-price-features">
+                <li><span>✓</span> 5 Uzmana Kadar Çoklu Takvim</li>
+                <li><span>✓</span> 7/24 WhatsApp AI + Tek Tıkla Devralma</li>
+                <li><span>✓</span> Paket Seans &amp; Borç/Alacak Yönetimi</li>
+                <li><span>✓</span> No-Show Önleme &amp; Kasa Raporları</li>
+              </ul>
+              <a class="sz-btn-hero-wa sz-price-cta sz-wa-link" href="#">14 Gün Ücretsiz Başla</a>
+            </article>
+
+            <!-- Paket 3 -->
+            <article class="sz-price-card" data-reveal data-delay="240">
+              <div class="sz-price-head">
+                <h3>Klinik &amp; Şube</h3>
+                <p>Çok şubeli merkezler, klinikler ve yüksek hacimli ekipler için.</p>
+              </div>
+              <div class="sz-price-amount">
+                <strong class="sz-price-value" data-monthly="₺4.490" data-yearly="₺3.590">₺4.490</strong>
+                <span>/ ay</span>
+              </div>
+              <ul class="sz-price-features">
+                <li><span>✓</span> Sınırsız Uzman &amp; Çoklu Şube</li>
+                <li><span>✓</span> Özel AI Bilgi Bankası &amp; Kurallar</li>
+                <li><span>✓</span> Öncelikli Birebir Kurulum Desteği</li>
+                <li><span>✓</span> Gelişmiş Finans &amp; Performans Analizi</li>
+              </ul>
+              <a class="sz-btn sz-btn-secondary sz-price-cta sz-wa-link" href="#">Teklif Al &amp; Dene</a>
+            </article>
+          </div>
+
+          <!-- Güven Mühürleri Alt Bandı -->
+          <div class="sz-trust-seals" data-reveal>
+            <div class="sz-trust-seal-item">
+              <span class="sz-seal-dot" aria-hidden="true">✓</span>
+              <span>Resmi WhatsApp Cloud API Altyapısı</span>
+            </div>
+            <div class="sz-trust-seal-item">
+              <span class="sz-seal-dot" aria-hidden="true">✓</span>
+              <span>KVKK Uyumlu</span>
+            </div>
+            <div class="sz-trust-seal-item">
+              <span class="sz-seal-dot" aria-hidden="true">✓</span>
+              <span>İstediğiniz An İptal</span>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ====================================================================
-           BÖLÜM 7: BÜYÜK DÖNÜŞÜM ÇAĞRISI (PORTAL CTA)
+           BÖLÜM 6: SIKÇA SORULAN SORULAR (NATIVE DETAILS/SUMMARY)
            ==================================================================== -->
-      <section class="sz-section sz-section-cta">
+      <section class="sz-section sz-section-faq" id="sss">
+        <div class="sz-container">
+          <div class="sz-section-header" data-reveal>
+            <span class="sz-section-kicker">Merak Edilenler</span>
+            <h2 class="sz-section-title">Sıkça Sorulan Sorular</h2>
+            <p class="sz-section-desc">
+              Kurulum, numara bağlantısı ve yapay zeka kontrolü hakkında en çok sorulan sorular.
+            </p>
+          </div>
+
+          <div class="sz-faq-list" data-reveal>
+            <details class="sz-faq-item" open>
+              <summary class="sz-faq-summary">Mevcut WhatsApp işletme numaramı değiştirmem gerekir mi?</summary>
+              <div class="sz-faq-body">
+                Hayır. Mevcut salon numaranız Resmi WhatsApp Cloud API altyapısı üzerinden bağlanır; müşterileriniz her zamanki numaranıza yazmaya devam eder.
+              </div>
+            </details>
+
+            <details class="sz-faq-item">
+              <summary class="sz-faq-summary">Yapay zeka dolu saate randevu yazabilir mi?</summary>
+              <div class="sz-faq-body">
+                Kesinlikle hayır. Sistem takviminizdeki mevcut randevuları, hizmet sürelerini ve mola saatlerini anlık olarak kontrol eder; yalnızca gerçekten boş olan aralıkları önerir.
+              </div>
+            </details>
+
+            <details class="sz-faq-item">
+              <summary class="sz-faq-summary">İstediğim zaman sohbeti kendim devralabilir miyim?</summary>
+              <div class="sz-faq-body">
+                Evet. Panel üzerinden tek tıkla yapay zekayı o sohbet için durdurup müşteriyle birebir yazışmaya devam edebilirsiniz.
+              </div>
+            </details>
+
+            <details class="sz-faq-item">
+              <summary class="sz-faq-summary">14 günlük ücretsiz deneme için kredi kartı gerekiyor mu?</summary>
+              <div class="sz-faq-body">
+                Hayır. Kredi kartı bilgisi alınmaz ve deneme süresi sonunda otomatik ücretlendirme yapılmaz. Memnun kalırsanız dilediğiniz pakete geçersiniz.
+              </div>
+            </details>
+
+            <details class="sz-faq-item">
+              <summary class="sz-faq-summary">Kurulum ne kadar sürer?</summary>
+              <div class="sz-faq-body">
+                Hizmet listenizi ve çalışma saatlerinizi girdikten sonra aynı gün içinde canlıya geçebilirsiniz. Ekibimiz ilk kurulumda birebir destek sağlar.
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           BÖLÜM 7: SON DÖNÜŞÜM ÇAĞRISI
+           ==================================================================== -->
+      <section class="sz-section sz-section-cta" id="ucretsiz-deneme">
         <div class="sz-container">
           <div class="sz-cta-box" data-reveal="zoom">
-            <div class="sz-cta-rings" aria-hidden="true">
-              <span></span><span></span><span></span>
-            </div>
-            <div class="sz-cta-kicker">14 Günlük Risksiz Deneme Fırsatı</div>
-            <h2>Salonunuzda Randevu Kaçırmaya 14 Gün Ücretsiz Son Verin</h2>
+            <div class="sz-cta-kicker">14 Günlük Risksiz Deneme</div>
+            <h2>Salonunuzda Randevu Kaçırmaya Bugün Son Verin</h2>
             <p>
-              Müşterilerinizi kapıda bekletmeyin, gece gelen mesajları kaybetmeyin. Kredi kartı gerekmez, hiçbir taahhüt yok. 14 gün boyunca SalonZeka'yı işletmenizde ücretsiz deneyin, farkı bizzat görün.
+              Kredi kartı gerekmez, taahhüt yok. Mevcut WhatsApp hattınızı bağlayın, 14 gün boyunca farkı canlıda görün.
             </p>
 
-            <a class="sz-cta-btn-huge sz-wa-link sz-btn-shimmer" href="#">
-              <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
-              <span>14 Günlük Ücretsiz Denemeyi WhatsApp'tan Başlatın</span>
+            <a class="sz-cta-btn-huge sz-wa-link" href="#">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
+              <span>WhatsApp Asistanı Canlı Dene</span>
             </a>
 
             <div class="sz-cta-note">
-              Telefon: +90 551 065 30 51 • 14 Gün Ücretsiz Deneme • Kredi Kartı Gerekmez • Aynı Gün Hızlı Kurulum
+              +90 551 065 30 51 • 14 Gün Ücretsiz Deneme • İstediğiniz An İptal
             </div>
           </div>
         </div>
@@ -826,28 +722,28 @@
       <div class="sz-container">
         <div class="sz-footer-content">
           <div class="sz-footer-left">
-            <div class="sz-brand-mark sz-footer-mark">SZ</div>
+            <div class="sz-brand-mark sz-footer-mark" aria-hidden="true">SZ</div>
             <span class="sz-footer-brand">SalonZeka</span>
-            <span class="sz-footer-copy">© 2026 SalonZeka. Tüm hakları saklıdır. Güzellik merkezleri için akıllı işletim sistemi.</span>
+            <span class="sz-footer-copy">© 2026 SalonZeka. Tüm hakları saklıdır.</span>
           </div>
         </div>
       </div>
     </footer>
 
-    <!-- MOBİL SABİT ADA GEZİNME ÇUBUĞU (FLOATING MOBILE BOTTOM NAV) -->
+    <!-- MOBİL SABİT GEZİNME ÇUBUĞU -->
     <nav class="sz-mobile-bottom-nav" aria-label="Mobil Hızlı Menü">
       <div class="sz-mobile-bottom-nav-inner">
-        <a href="#asistan" class="sz-bottom-nav-item">Asistan</a>
-        <a href="#panel" class="sz-bottom-nav-item">Panel</a>
-        <a href="#ucretsiz-deneme" class="sz-bottom-nav-item sz-bottom-nav-gold">14 Gün</a>
+        <a href="#kontrol" class="sz-bottom-nav-item">Kontrol</a>
+        <a href="#sektorler" class="sz-bottom-nav-item">Sektörler</a>
+        <a href="#fiyatlandirma" class="sz-bottom-nav-item sz-bottom-nav-gold">Fiyatlar</a>
         <a href="#" class="sz-bottom-nav-item sz-wa-link sz-bottom-nav-wa">Ücretsiz Dene</a>
         <a href="login.html" class="sz-bottom-nav-item" id="mobileBottomLoginBtn">Giriş</a>
       </div>
     </nav>
 
-    <!-- KAYAN (FLOATING) WHATSAPP CANLI BUTONU -->
-    <a class="sz-floating-wa sz-wa-link sz-btn-shimmer" href="#" aria-label="WhatsApp'tan 14 Günlük Ücretsiz Denemeyi Başlatın">
-      <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
+    <!-- KAYAN WHATSAPP BUTONU -->
+    <a class="sz-floating-wa sz-wa-link" href="#" aria-label="WhatsApp'tan 14 Günlük Ücretsiz Denemeyi Başlatın">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.42 0-2.82-.37-4.06-1.07l-.29-.17-3.12.82.83-3.04-.19-.3a8.16 8.16 0 0 1-1.25-4.48c0-4.54 3.7-8.23 8.24-8.23m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.71 4.3 3.8.6.26 1.07.42 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.3"/></svg>
       <span>14 Gün Ücretsiz Dene</span>
     </a>
 
