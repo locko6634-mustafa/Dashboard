@@ -13,23 +13,25 @@
 }
 
 .toast {
-    min-width: 240px;
-    padding: 10px 14px;
+    min-width: 248px;
+    padding: 11px 14px;
     border-radius: var(--radius-md, 12px);
-    background: var(--bg-card, rgba(255, 255, 255, 0.7));
-    border: 1px solid var(--border, rgba(0, 0, 0, 0.06));
-    box-shadow: var(--shadow-lg, 0 20px 45px rgba(58, 50, 45, 0.1));
-    color: var(--text-main, #18181B);
-    font-size: 12px;
-    font-weight: 600;
+    background: rgba(23, 24, 22, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.48);
+    color: #f6f6f2;
+    font-family: var(--font-sans, 'Inter', sans-serif);
+    font-size: 12.5px;
+    font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
     transform: translateX(120%);
     opacity: 0;
     transition: transform 0.3s var(--anim-ease, cubic-bezier(0.34, 1.56, 0.64, 1)), opacity 0.3s;
     pointer-events: auto;
-    backdrop-filter: var(--glass-blur, blur(20px));
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
 }
 
 .toast-icon {
@@ -45,13 +47,13 @@
 }
 
 .btn-toast-undo {
-    background: var(--accent-soft, rgba(16, 185, 129, 0.08));
-    color: var(--accent, #10B981);
-    border: 1px solid var(--accent, #10B981);
-    padding: 3px 8px;
+    background: rgba(223, 179, 155, 0.14);
+    color: #dfb39b;
+    border: 1px solid rgba(223, 179, 155, 0.45);
+    padding: 3px 9px;
     border-radius: var(--radius-sm, 8px);
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 10.5px;
+    font-weight: 600;
     text-transform: uppercase;
     cursor: pointer;
     margin-left: auto;
@@ -59,13 +61,8 @@
 }
 
 .btn-toast-undo:hover {
-    background: var(--accent, #10B981);
-    color: white;
-}
-
-.dark-theme .btn-toast-undo {
-    color: var(--accent, #34D399);
-    border-color: var(--accent, #34D399);
+    background: #dfb39b;
+    color: #0a0c0b;
 }
 
 .toast.show {
@@ -73,7 +70,7 @@
     opacity: 1;
 }
 
-.toast-error { border-left: 3px solid var(--rose, #EF4444); }
-.toast-success { border-left: 3px solid var(--accent, #10B981); }
-.toast-warning { border-left: 3px solid var(--gold, #F59E0B); }
-.toast-info { border-left: 3px solid var(--accent, #10B981); }
+.toast-error { border-left: 3px solid var(--rose, #ef4444); }
+.toast-success { border-left: 3px solid #a4b19e; }
+.toast-warning { border-left: 3px solid #dfb39b; }
+.toast-info { border-left: 3px solid #dfb39b; }

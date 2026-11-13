@@ -2,7 +2,8 @@
    BASE VARIABLES & THEMES (Shared)
    ========================================== */
 :root {
-    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-display: 'Lora', Georgia, serif;
+    --font-sans: 'Inter', 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
     --bg-deep: #FCFBF8;
@@ -83,35 +84,36 @@
 }
 
 .dark-theme {
-    /* Dark Mode - Sleek Metallic Obsidian Aesthetic */
-    --bg-deep: #09090B;       /* Pure obsidian black */
-    --bg-main: #18181B;
-    --bg-secondary: #27272A;
-    --bg-subtle: rgba(255, 255, 255, 0.04);
-    --bg-hover: rgba(255, 255, 255, 0.08);
-    --bg-card: rgba(18, 18, 20, 0.65); /* Frosted glass overlay */
-    
-    --border: rgba(255, 255, 255, 0.06); /* Ultra sharp subtle border */
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.18);
-    --border-hover: rgba(255, 255, 255, 0.12);
-    
-    --text-main: #F4F4F6;     /* Pristine off-white */
-    --text-muted: #8E8E93;    /* Cool metallic grey */
-    
-    --accent: #34D399;
-    --accent-hover: #10B981;
-    --accent-soft: rgba(52, 211, 153, 0.1);
-    --accent-dim: rgba(52, 211, 153, 0.12);
-    --accent-alpha: rgba(52, 211, 153, 0.15);
-    --accent-glow: 0 0 20px rgba(52, 211, 153, 0.16);
-    --accent-rgb: 52, 211, 153;
+    /* Dark Mode - Wayline Editorial Dark Palette */
+    --bg-deep: #050708;
+    --bg-main: #080a08;
+    --bg-secondary: #131513;
+    --bg-subtle: #1b1e19;
+    --bg-hover: #242622;
+    --bg-card: #171816;
+
+    --border: rgba(255, 255, 255, 0.08);
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.14);
+    --border-hover: rgba(255, 255, 255, 0.22);
+
+    --text-main: #f6f6f2;
+    --text-muted: rgba(246, 246, 242, 0.62);
+
+    --accent: #dfb39b;
+    --accent-hover: #e6c2ad;
+    --accent-soft: rgba(223, 179, 155, 0.14);
+    --accent-dim: rgba(223, 179, 155, 0.14);
+    --accent-alpha: rgba(223, 179, 155, 0.18);
+    --accent-glow: 0 0 20px rgba(223, 179, 155, 0.16);
+    --accent-rgb: 223, 179, 155;
     --accent-pink: var(--accent);
     --accent-pink-soft: var(--accent-soft);
-    
-    --success: #22C55E;
-    --success-hover: #16A34A;
-    --success-soft: rgba(34, 197, 94, 0.1);
+
+    --success: #a4b19e;
+    --success-hover: #8ca572;
+    --success-soft: rgba(164, 177, 158, 0.14);
+    --emerald: #8ca572;
     
     --warning: #F59E0B;
     --warning-hover: #D97706;

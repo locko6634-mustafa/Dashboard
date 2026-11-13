@@ -8,10 +8,10 @@
     <title>SalonZeka | Süper Admin Yönetim Konsolu</title>
     <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="14" fill="%23c59b27"/%3E%3Cpath d="M18 20h28l-20 24h20" stroke="%23ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/%3E%3C/svg%3E'>
     <link rel="stylesheet" href="css/shared/fonts.css">
-    <link rel="stylesheet" href="css/shared/base.css?v=20261013-3">
-    <link rel="stylesheet" href="css/dashboard/admin.css?v=20261013-3">
+    <link rel="stylesheet" href="css/shared/base.css?v=20261114">
+    <link rel="stylesheet" href="css/dashboard/admin.css?v=20261114">
   </head>
-  <body class="admin-body">
+  <body class="admin-body dark-theme">
 
     <!-- PRELOADER (LÜKS SALONZEKA YÜKLEME PERDESİ) -->
     <div id="admin-loader" class="sz-preloader" aria-label="Yükleniyor">
@@ -129,7 +129,7 @@
           </div>
           <div class="admin-kpi-card">
             <div class="admin-kpi-label">Aktif Salonlar</div>
-            <div class="admin-kpi-value" id="kpiActiveTenants" style="color: #34d399;">0</div>
+            <div class="admin-kpi-value" id="kpiActiveTenants" style="color: #a4b19e;">0</div>
             <div class="admin-kpi-trend">Hizmet vermeye devam edenler</div>
           </div>
           <div class="admin-kpi-card">
@@ -177,7 +177,7 @@
             </thead>
             <tbody id="tenantsTableBody">
               <tr>
-                <td colspan="7" style="text-align: center; padding: 40px; color: #9ca3af;">İşletmeler yükleniyor...</td>
+                <td colspan="7" style="text-align: center; padding: 40px; color: rgba(246, 246, 242, 0.62);">İşletmeler yükleniyor...</td>
               </tr>
             </tbody>
           </table>
@@ -221,7 +221,7 @@
               <div class="admin-form-group">
                 <label class="admin-label" for="tenantPassword" id="lblTenantPassword">Giriş Şifresi *</label>
                 <input class="admin-input" type="password" id="tenantPassword" placeholder="En az 6 karakter">
-                <small style="font-size: 0.72rem; color: #9ca3af;" id="helpPasswordNote">Yeni oluştururken zorunludur.</small>
+                <small style="font-size: 0.72rem; color: rgba(246, 246, 242, 0.62);" id="helpPasswordNote">Yeni oluştururken zorunludur.</small>
               </div>
               <div class="admin-form-group">
                 <label class="admin-label" for="tenantWhatsapp">WhatsApp İşletme Numarası</label>
@@ -268,7 +268,7 @@
               </button>
             </div>
 
-            <div style="font-size: 0.8rem; font-weight: 600; color: #ffd875; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;">
+            <div style="font-size: 0.8rem; font-weight: 600; color: #dfb39b; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;">
               Terim Özelleştirme
             </div>
 
@@ -337,14 +337,14 @@
               <!-- Dinamik çipler buraya eklenecek -->
             </div>
 
-            <div style="font-size: 0.8rem; font-weight: 600; color: #d1d5db; margin-bottom: 8px;">
+            <div style="font-size: 0.8rem; font-weight: 600; color: rgba(246, 246, 242, 0.82); margin-bottom: 8px;">
               Yeni Hizmet Ekle
             </div>
-            <div style="display: flex; gap: 10px; align-items: flex-end;">
-              <div style="flex: 2;">
+            <div class="admin-service-add-row" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+              <div style="flex: 2; min-width: 160px;">
                 <input class="admin-input" type="text" id="newServiceName" placeholder="Hizmet adı (Örn: Cilt Bakımı)">
               </div>
-              <div style="flex: 1; max-width: 110px;">
+              <div style="flex: 1; min-width: 84px; max-width: 110px;">
                 <input class="admin-input" type="number" id="newServiceDuration" min="10" max="360" step="5" value="30" placeholder="dk">
               </div>
               <div>

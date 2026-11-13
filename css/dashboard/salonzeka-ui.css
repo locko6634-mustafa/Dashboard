@@ -133,8 +133,8 @@ button.search-badge:hover {
 }
 
 .sz-range-pill.active {
-    background: #10B981;
-    color: #ffffff;
+    background: #fafaf8;
+    color: #0a0c0b;
 }
 
 .sz-kpi-grid {
@@ -1081,6 +1081,182 @@ button.search-badge:hover {
     }
     .sz-kpi-card:hover,
     .btn-walkin:hover {
+        transform: none !important;
+    }
+}
+
+/* ==========================================================================
+   8. WAYLINE EDITORIAL DARK OVERRIDE KATMANI (GLOBAL DASHBOARD UYUMU)
+   ========================================================================== */
+body.dark-theme {
+    background:
+        radial-gradient(ellipse 70% 45% at 50% 0%, rgba(164, 177, 158, 0.09), transparent 65%),
+        #050708 !important;
+    color: #f6f6f2 !important;
+    font-family: var(--font-sans, 'Inter', -apple-system, sans-serif);
+}
+
+.dark-theme .glass,
+.dark-theme .calendar-filter-bar,
+.dark-theme .agenda-wrapper,
+.dark-theme .calendar-wrapper,
+.dark-theme .sz-kpi-card,
+.dark-theme .overview-card,
+.dark-theme .report-card,
+.dark-theme .settings-card,
+.dark-theme .crm-card {
+    background: #131513 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.36);
+}
+
+.dark-theme header,
+.dark-theme .top-header,
+.dark-theme .app-header {
+    background: rgba(14, 19, 21, 0.9) !important;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .brand-name,
+.dark-theme .sz-kpi-value,
+.dark-theme .sz-kpi-title,
+.dark-theme .modal-title,
+.dark-theme .section-title,
+.dark-theme h1,
+.dark-theme h2,
+.dark-theme h3 {
+    font-family: var(--font-display, 'Lora', Georgia, serif);
+    letter-spacing: -0.02em;
+    color: #f6f6f2;
+}
+
+.dark-theme .btn-add-primary,
+.dark-theme .btn-primary,
+.dark-theme .modal-btn-primary,
+.dark-theme .btn-save {
+    background: #fafaf8 !important;
+    color: #0a0c0b !important;
+    border: 1px solid #fafaf8 !important;
+    border-radius: 9999px !important;
+    font-weight: 600;
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, background-color 0.2s ease;
+}
+
+.dark-theme .btn-add-primary:hover,
+.dark-theme .btn-primary:hover,
+.dark-theme .modal-btn-primary:hover,
+.dark-theme .btn-save:hover {
+    background: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(250, 250, 248, 0.14);
+}
+
+.dark-theme .btn-secondary-soft,
+.dark-theme .btn-icon-soft,
+.dark-theme .btn-walkin,
+.dark-theme .cal-filter-chip,
+.dark-theme .crm-filter-chip {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #f6f6f2 !important;
+}
+
+.dark-theme .btn-walkin svg {
+    color: #dfb39b !important;
+}
+
+.dark-theme .cal-filter-chip.active,
+.dark-theme .crm-filter-chip.active {
+    background: #fafaf8 !important;
+    color: #0a0c0b !important;
+    border-color: #fafaf8 !important;
+}
+
+.dark-theme input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+.dark-theme select,
+.dark-theme textarea,
+.dark-theme .cal-search-input,
+.dark-theme .crm-search-input,
+.dark-theme .cmd-palette-input {
+    background: #0b110d !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #f6f6f2 !important;
+}
+
+.dark-theme input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):focus,
+.dark-theme select:focus,
+.dark-theme textarea:focus {
+    outline: none;
+    border-color: #dfb39b !important;
+    box-shadow: 0 0 0 3px rgba(223, 179, 155, 0.16) !important;
+}
+
+.dark-theme .modal-content,
+.dark-theme .modal-box,
+.dark-theme .cmd-palette-dialog,
+.dark-theme .context-menu,
+.dark-theme .apt-hover-popup {
+    background: rgba(23, 24, 22, 0.96) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #f6f6f2 !important;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.65);
+}
+
+.dark-theme .calendar-grid,
+.dark-theme .time-slot-cell,
+.dark-theme .crm-table th,
+.dark-theme .crm-table td {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .crm-table tbody tr:hover {
+    background: #1b1e19 !important;
+}
+
+.dark-theme .wa-inbox-shell {
+    background: #131513 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .wa-conv-pane {
+    background: #080a08 !important;
+    border-right-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .wa-conv-item:hover,
+.dark-theme .wa-conv-item.is-active {
+    background: #1b1e19 !important;
+}
+
+.dark-theme .sz-trend-badge.is-up {
+    background: rgba(140, 165, 114, 0.18) !important;
+    color: #a4b19e !important;
+}
+
+.dark-theme a:focus-visible,
+.dark-theme button:focus-visible,
+.dark-theme input:focus-visible,
+.dark-theme select:focus-visible,
+.dark-theme textarea:focus-visible {
+    outline: 2px solid #dfb39b;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dark-theme .btn-add-primary,
+    .dark-theme .btn-primary,
+    .dark-theme .modal-btn-primary,
+    .dark-theme .btn-save {
+        transition: none !important;
+    }
+    .dark-theme .btn-add-primary:hover,
+    .dark-theme .btn-primary:hover,
+    .dark-theme .modal-btn-primary:hover,
+    .dark-theme .btn-save:hover {
         transform: none !important;
     }
 }
