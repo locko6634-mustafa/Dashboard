@@ -10,73 +10,150 @@ const WHATSAPP_DEFAULT_MSG = encodeURIComponent(
 );
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_DEFAULT_MSG}`;
 
-// --- 1. TEMA ANAHTARI (OBSIDIAN <-> PEARL) ---
-function initThemeSwitcher() {
-    const toggleBtn = document.getElementById('szThemeToggle');
-    const rootHtml = document.documentElement;
-    const savedTheme = localStorage.getItem('sz_lander_theme');
+const prefersReducedMotion = () =>
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    if (savedTheme === 'pearl' || savedTheme === 'obsidian') {
-        rootHtml.setAttribute('data-lander-theme', savedTheme);
+// --- 1. HERO GİRİŞ ANİMASYONU ---
+function initHeroIntro() {
+    const hero = document.querySelector('.sz-hero');
+    if (!hero) return;
+
+    if (prefersReducedMotion()) {
+        hero.classList.add('is-hero-ready');
+        return;
     }
 
-    if (!toggleBtn) return;
-
-    toggleBtn.addEventListener('click', () => {
-        const current = rootHtml.getAttribute('data-lander-theme') || 'obsidian';
-        const next = current === 'obsidian' ? 'pearl' : 'obsidian';
-        rootHtml.setAttribute('data-lander-theme', next);
-        localStorage.setItem('sz_lander_theme', next);
+    window.requestAnimationFrame(() => {
+        hero.classList.add('is-hero-ready');
     });
 }
 
-// --- 2. HEADER & SCROLL SPY ---
+// --- 2. FLOATING HEADER (--header-progress), PARALLAX & SCROLL SPY ---
 function initHeaderAndScrollSpy() {
+    const rootStyle = document.documentElement.style;
     const header = document.querySelector('.sz-header');
     const navLinks = document.querySelectorAll('#szNavLinks a[data-nav-target]');
     const sections = ['kontrol', 'sektorler', 'panel', 'fiyatlandirma', 'sss']
         .map((id) => document.getElementById(id))
         .filter(Boolean);
 
+    const reducedMotion = prefersReducedMotion();
     let ticking = false;
+
+    function updateOnScroll() {
+        const scrollTop = window.scrollY || window.pageYOffset || 0;
+        const progress = Math.min(1, Math.max(0, scrollTop / 220));
+        rootStyle.setProperty('--header-progress', progress.toFixed(3));
+
+        if (!reducedMotion) {
+            const parallax = Math.min(72, scrollTop * 0.14);
+            rootStyle.setProperty('--hero-parallax', `${parallax.toFixed(1)}px`);
+        }
+
+        if (header) {
+            header.classList.toggle('is-scrolled', scrollTop > 24);
+        }
+
+        let currentSectionId = '';
+        const triggerPoint = scrollTop + window.innerHeight * 0.34;
+        sections.forEach((sec) => {
+            if (sec.offsetTop <= triggerPoint) {
+                currentSectionId = sec.id;
+            }
+        });
+
+        navLinks.forEach((link) => {
+            const isMatch = link.getAttribute('data-nav-target') === currentSectionId;
+            link.classList.toggle('is-active', isMatch);
+        });
+
+        ticking = false;
+    }
+
     function onScroll() {
         if (ticking) return;
         ticking = true;
-        window.requestAnimationFrame(() => {
-            const scrollTop = window.scrollY;
-
-            if (header) {
-                header.classList.toggle('is-scrolled', scrollTop > 24);
-            }
-
-            let currentSectionId = '';
-            const triggerPoint = scrollTop + window.innerHeight * 0.32;
-            sections.forEach((sec) => {
-                if (sec.offsetTop <= triggerPoint) {
-                    currentSectionId = sec.id;
-                }
-            });
-
-            navLinks.forEach((link) => {
-                const isMatch = link.getAttribute('data-nav-target') === currentSectionId;
-                link.classList.toggle('is-active', isMatch);
-            });
-
-            ticking = false;
-        });
+        window.requestAnimationFrame(updateOnScroll);
     }
 
     window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+    updateOnScroll();
 }
 
-// --- 3. BÖLÜM GÖRÜNÜRLÜĞÜ (WIREFRAME - ANİMASYONSUZ) ---
+// --- 3. MOBİL MENÜ DRAWER ---
+function initMobileDrawer() {
+    const menuBtn = document.getElementById('mobileNavBtn');
+    const drawer = document.getElementById('mobileNavDrawer');
+    if (!menuBtn || !drawer) return;
+
+    function setDrawerOpen(isOpen) {
+        menuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        menuBtn.setAttribute('aria-label', isOpen ? 'Menüyü kapat' : 'Menüyü aç');
+        drawer.hidden = !isOpen;
+    }
+
+    menuBtn.addEventListener('click', () => {
+        const isCurrentlyOpen = menuBtn.getAttribute('aria-expanded') === 'true';
+        setDrawerOpen(!isCurrentlyOpen);
+    });
+
+    drawer.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => setDrawerOpen(false));
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && menuBtn.getAttribute('aria-expanded') === 'true') {
+            setDrawerOpen(false);
+            menuBtn.focus();
+        }
+    });
+}
+
+// --- 4. SCROLL REVEAL (IntersectionObserver) ---
 function initScrollReveal() {
-    const revealElements = document.querySelectorAll('[data-reveal]');
-    revealElements.forEach((el) => el.classList.add('is-revealed'));
+    const revealElements = Array.from(document.querySelectorAll('[data-reveal]'));
+    if (!revealElements.length) return;
+
+    if (prefersReducedMotion() || typeof IntersectionObserver === 'undefined') {
+        revealElements.forEach((el) => el.classList.add('is-revealed'));
+        return;
+    }
+
+    const revealElement = (el) => {
+        const delayAttr = parseInt(el.getAttribute('data-delay') || '0', 10);
+        if (delayAttr > 0) {
+            el.style.transitionDelay = `${Math.min(delayAttr, 360)}ms`;
+        }
+        el.classList.add('is-revealed');
+    };
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    revealElement(entry.target);
+                    observer.unobserve(entry.target);
+                }
+            });
+        },
+        {
+            threshold: 0.08,
+            rootMargin: '0px 0px -32px 0px',
+        }
+    );
+
+    revealElements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.95) {
+            revealElement(el);
+        } else {
+            observer.observe(el);
+        }
+    });
 }
 
-// --- 4. İNTERAKTİF WHATSAPP & MİNİ TAKVİM SİMÜLASYONU ---
+// --- 5. İNTERAKTİF WHATSAPP & MİNİ TAKVİM SİMÜLASYONU ---
 function initLiveSimulation() {
     const chatBody = document.getElementById('simChatBody');
     const msg1 = document.getElementById('simMsg1');
@@ -253,7 +330,7 @@ function initLiveSimulation() {
     runSimulation();
 }
 
-// --- 5. SEKTÖR SEKMELERİ ---
+// --- 6. SEKTÖR SEKMELERİ ---
 function initSectorTabs() {
     const tabs = document.querySelectorAll('.sz-sector-tab[data-sector]');
     const panels = document.querySelectorAll('.sz-sector-panel');
@@ -277,7 +354,7 @@ function initSectorTabs() {
     });
 }
 
-// --- 6. FİYATLANDIRMA AYLIK / YILLIK TOGGLE ---
+// --- 7. FİYATLANDIRMA AYLIK / YILLIK TOGGLE ---
 function initPricingToggle() {
     const toggleBtn = document.getElementById('billingToggleBtn');
     const monthlyLabel = document.getElementById('billingLabelMonthly');
@@ -307,7 +384,7 @@ function initPricingToggle() {
     });
 }
 
-// --- 7. BENTO MİNİ UI ETKİLEŞİMLERİ & SAYAÇLAR ---
+// --- 8. BENTO MİNİ UI ETKİLEŞİMLERİ ---
 function initSectionInteractions() {
     const sessionBtn = document.getElementById('bentoSessionStepBtn');
     const fillEl = document.getElementById('bentoSessionFill');
@@ -333,7 +410,7 @@ function initSectionInteractions() {
     }
 }
 
-// --- 8. AUTH KONTROLÜ VE WHATSAPP BAĞLANTILARI ---
+// --- 9. AUTH KONTROLÜ VE WHATSAPP BAĞLANTILARI ---
 function checkAuthNav() {
     if (isAuthenticated()) {
         const loginBtn = document.getElementById('navLoginBtn');
@@ -360,8 +437,9 @@ function setupWhatsAppLinks() {
 
 // --- BAŞLATMA ---
 function init() {
-    initThemeSwitcher();
+    initHeroIntro();
     initHeaderAndScrollSpy();
+    initMobileDrawer();
     initScrollReveal();
     initLiveSimulation();
     initSectorTabs();
