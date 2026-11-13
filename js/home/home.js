@@ -10,8 +10,6 @@ const WHATSAPP_DEFAULT_MSG = encodeURIComponent(
 );
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_DEFAULT_MSG}`;
 
-const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 // --- 1. TEMA ANAHTARI (OBSIDIAN <-> PEARL) ---
 function initThemeSwitcher() {
     const toggleBtn = document.getElementById('szThemeToggle');
@@ -32,40 +30,13 @@ function initThemeSwitcher() {
     });
 }
 
-// --- 2. SCROLL PROGRESS BAR & HEADER DOCK SPY ---
+// --- 2. HEADER & SCROLL SPY ---
 function initHeaderAndScrollSpy() {
-    const progressBar = document.querySelector('.sz-scroll-progress');
     const header = document.querySelector('.sz-header');
-    const navLinksContainer = document.getElementById('szNavLinks');
-    const navPill = document.getElementById('szNavPill');
     const navLinks = document.querySelectorAll('#szNavLinks a[data-nav-target]');
     const sections = ['kontrol', 'sektorler', 'panel', 'fiyatlandirma', 'sss']
         .map((id) => document.getElementById(id))
         .filter(Boolean);
-
-    function movePillToLink(link) {
-        if (!navPill || !navLinksContainer || !link) return;
-        const containerRect = navLinksContainer.getBoundingClientRect();
-        const linkRect = link.getBoundingClientRect();
-        navPill.style.width = `${linkRect.width}px`;
-        navPill.style.transform = `translate3d(${linkRect.left - containerRect.left - 5}px, 0, 0)`;
-        navPill.style.opacity = '1';
-    }
-
-    navLinks.forEach((link) => {
-        link.addEventListener('mouseenter', () => movePillToLink(link), { passive: true });
-    });
-
-    if (navLinksContainer) {
-        navLinksContainer.addEventListener('mouseleave', () => {
-            const activeLink = navLinksContainer.querySelector('a.is-active');
-            if (activeLink) {
-                movePillToLink(activeLink);
-            } else if (navPill) {
-                navPill.style.opacity = '0';
-            }
-        }, { passive: true });
-    }
 
     let ticking = false;
     function onScroll() {
@@ -73,11 +44,6 @@ function initHeaderAndScrollSpy() {
         ticking = true;
         window.requestAnimationFrame(() => {
             const scrollTop = window.scrollY;
-            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-            if (progressBar) {
-                const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-                progressBar.style.width = `${Math.min(100, Math.max(0, pct))}%`;
-            }
 
             if (header) {
                 header.classList.toggle('is-scrolled', scrollTop > 24);
@@ -94,7 +60,6 @@ function initHeaderAndScrollSpy() {
             navLinks.forEach((link) => {
                 const isMatch = link.getAttribute('data-nav-target') === currentSectionId;
                 link.classList.toggle('is-active', isMatch);
-                if (isMatch) movePillToLink(link);
             });
 
             ticking = false;
@@ -105,33 +70,10 @@ function initHeaderAndScrollSpy() {
     onScroll();
 }
 
-// --- 3. SCROLL REVEAL ---
+// --- 3. BÖLÜM GÖRÜNÜRLÜĞÜ (WIREFRAME - ANİMASYONSUZ) ---
 function initScrollReveal() {
     const revealElements = document.querySelectorAll('[data-reveal]');
-    if (!revealElements.length) return;
-
-    if (prefersReducedMotion() || typeof IntersectionObserver === 'undefined') {
-        revealElements.forEach((el) => el.classList.add('is-revealed'));
-        return;
-    }
-
-    const observer = new IntersectionObserver(
-        (entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    const el = entry.target;
-                    const delay = parseInt(el.getAttribute('data-delay') || '0', 10);
-                    setTimeout(() => {
-                        el.classList.add('is-revealed');
-                    }, delay);
-                    observer.unobserve(el);
-                }
-            });
-        },
-        { threshold: 0.12, rootMargin: '0px 0px -24px 0px' }
-    );
-
-    revealElements.forEach((el) => observer.observe(el));
+    revealElements.forEach((el) => el.classList.add('is-revealed'));
 }
 
 // --- 4. İNTERAKTİF WHATSAPP & MİNİ TAKVİM SİMÜLASYONU ---
@@ -388,39 +330,6 @@ function initSectionInteractions() {
             remainingEl.textContent = `Kalan Seans: ${rem}`;
             pctEl.textContent = `%${pct} • Kalan Bakiye: ₺${balance.toLocaleString('tr-TR')}`;
         });
-    }
-
-    const counters = document.querySelectorAll('[data-count-target]');
-    if (counters.length && !prefersReducedMotion() && typeof IntersectionObserver !== 'undefined') {
-        const counterObserver = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (!entry.isIntersecting) return;
-                    const el = entry.target;
-                    const target = parseInt(el.getAttribute('data-count-target') || '0', 10);
-                    const prefix = el.getAttribute('data-count-prefix') || '';
-                    const suffix = el.getAttribute('data-count-suffix') || '';
-                    const duration = 900;
-                    const start = performance.now();
-
-                    function tick(now) {
-                        const elapsed = Math.min(1, (now - start) / duration);
-                        const eased = 1 - Math.pow(1 - elapsed, 3);
-                        const val = Math.round(target * eased);
-                        el.textContent = `${prefix}${val.toLocaleString('tr-TR')}${suffix}`;
-                        if (elapsed < 1) {
-                            requestAnimationFrame(tick);
-                        }
-                    }
-
-                    requestAnimationFrame(tick);
-                    counterObserver.unobserve(el);
-                });
-            },
-            { threshold: 0.4 }
-        );
-
-        counters.forEach((c) => counterObserver.observe(c));
     }
 }
 
