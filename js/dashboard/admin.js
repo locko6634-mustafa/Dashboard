@@ -3,6 +3,7 @@
 // ==========================================
 
 import { SECTOR_PRESETS } from '../shared/terminology.js';
+import { Utils } from '../shared/utils.js';
 
 const isLocal = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
 const API_BASE = isLocal 
@@ -210,7 +211,7 @@ async function loadTenants() {
     }
   } catch (err) {
     console.error('Tenants fetch error:', err);
-    tenantsTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#ef4444;">İşletmeler yüklenirken hata oluştu: ${err.message}</td></tr>`;
+    tenantsTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#ef4444;">İşletmeler yüklenirken hata oluştu: ${escapeHtml(err.message)}</td></tr>`;
   }
 }
 
@@ -230,7 +231,7 @@ function renderTenantsTable(tenants) {
       <tr>
         <td>
           <div style="font-weight: 600; color: #ffffff;">${escapeHtml(t.salon_adi)}</div>
-          <small style="color: #9ca3af; font-size: 0.76rem;">ID: ${t.id}</small>
+          <small style="color: #9ca3af; font-size: 0.76rem;">ID: ${escapeHtml(t.id)}</small>
         </td>
         <td>
           <div>${escapeHtml(t.email)}</div>
@@ -242,29 +243,29 @@ function renderTenantsTable(tenants) {
         </td>
         <td>
           <div style="display: flex; align-items: center; gap: 6px;">
-            <code style="font-size: 0.78rem; background: rgba(255,255,255,0.06); padding: 3px 6px; border-radius: 6px;">${apiKeyShort}</code>
-            ${t.api_key ? `<button class="admin-action-btn" style="padding: 2px 6px; font-size: 0.72rem;" onclick="copyApiKey('${t.api_key}')" title="Kopyala">Kopyala</button>` : ''}
+            <code style="font-size: 0.78rem; background: rgba(255,255,255,0.06); padding: 3px 6px; border-radius: 6px;">${escapeHtml(apiKeyShort)}</code>
+            ${t.api_key ? `<button class="admin-action-btn" style="padding: 2px 6px; font-size: 0.72rem;" data-action="copy-api-key" data-api-key="${escapeHtml(t.api_key)}" title="Kopyala">Kopyala</button>` : ''}
           </div>
         </td>
         <td>
-          <div style="font-size: 0.82rem;">👥 <strong>${t.client_count ?? 0}</strong> müşteri</div>
-          <div style="font-size: 0.82rem; color: #9ca3af;">📅 <strong>${t.appointment_count ?? 0}</strong> randevu</div>
+          <div style="font-size: 0.82rem;">👥 <strong>${escapeHtml(t.client_count ?? 0)}</strong> müşteri</div>
+          <div style="font-size: 0.82rem; color: #9ca3af;">📅 <strong>${escapeHtml(t.appointment_count ?? 0)}</strong> randevu</div>
         </td>
         <td>
           <span class="admin-badge ${badgeClass}">${escapeHtml(t.durum || 'Aktif')}</span>
         </td>
         <td style="text-align: right;">
           <div style="display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
-            <button class="admin-action-btn admin-action-impersonate" onclick="impersonateTenant('${t.id}')" title="İşletmenin Paneline Giriş Yap">
+            <button class="admin-action-btn admin-action-impersonate" data-action="impersonate" data-id="${escapeHtml(t.id)}" title="İşletmenin Paneline Giriş Yap">
               ⚡ Giriş Yap
             </button>
-            <button class="admin-action-btn" onclick="openEditTenantModal('${t.id}')" title="Düzenle">
+            <button class="admin-action-btn" data-action="edit" data-id="${escapeHtml(t.id)}" title="Düzenle">
               Düzenle
             </button>
-            <button class="admin-action-btn" onclick="toggleTenantStatus('${t.id}', '${t.durum}')" title="Durum Değiştir">
+            <button class="admin-action-btn" data-action="toggle-status" data-id="${escapeHtml(t.id)}" data-status="${escapeHtml(t.durum || 'Aktif')}" title="Durum Değiştir">
               ${isActive ? 'Dondur' : 'Aktif Et'}
             </button>
-            <button class="admin-action-btn admin-action-danger" onclick="deleteTenant('${t.id}', '${escapeHtml(t.salon_adi)}')" title="İşletmeyi Kalıcı Olarak Sil">
+            <button class="admin-action-btn admin-action-danger" data-action="delete" data-id="${escapeHtml(t.id)}" data-salon-adi="${escapeHtml(t.salon_adi)}" title="İşletmeyi Kalıcı Olarak Sil">
               Sil
             </button>
           </div>
@@ -273,6 +274,30 @@ function renderTenantsTable(tenants) {
     `;
   }).join('');
 }
+
+tenantsTableBody?.addEventListener('click', (e) => {
+  const actionBtn = e.target.closest('button[data-action]');
+  if (!actionBtn) return;
+
+  const { action, id, apiKey, status, salonAdi } = actionBtn.dataset;
+  switch (action) {
+    case 'copy-api-key':
+      copyApiKey(apiKey);
+      break;
+    case 'impersonate':
+      impersonateTenant(id);
+      break;
+    case 'edit':
+      openEditTenantModal(id);
+      break;
+    case 'toggle-status':
+      toggleTenantStatus(id, status);
+      break;
+    case 'delete':
+      deleteTenant(id, salonAdi);
+      break;
+  }
+});
 
 // 4. FORMLAR & ETKİLEŞİMLER
 // İlk Kurulum
@@ -715,13 +740,7 @@ window.copyApiKey = function(apiKey) {
 };
 
 function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+  return Utils.escapeHtml(str);
 }
 
 // Uygulamayı Başlat

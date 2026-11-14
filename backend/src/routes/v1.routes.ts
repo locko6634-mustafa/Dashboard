@@ -59,15 +59,15 @@ router.get('/settings', authMiddleware, SettingsController.getSettings);
 router.post('/settings', authMiddleware, SettingsController.updateSettings);
 
 // Chatbot APIs
-router.get('/chatbot/client-by-phone', chatbotRateLimiter, ChatbotController.getClientByPhone);
-router.get('/chatbot/appointments', chatbotRateLimiter, ChatbotController.getAppointments);
-router.get('/chatbot/available-slots', chatbotRateLimiter, ChatbotController.getAvailableSlots);
-router.post('/chatbot/appointments', chatbotRateLimiter, ChatbotController.bookAppointment);
-router.post('/chatbot/cancel', chatbotRateLimiter, ChatbotController.cancelAppointment);
-router.post('/chatbot/reschedule', chatbotRateLimiter, ChatbotController.rescheduleAppointment);
-router.get('/chatbot/state', chatbotRateLimiter, ChatbotController.getState);
-router.post('/chatbot/state', chatbotRateLimiter, ChatbotController.setState);
-router.delete('/chatbot/state', chatbotRateLimiter, ChatbotController.deleteState);
-router.post('/chatbot/state/delete', chatbotRateLimiter, ChatbotController.deleteState);
+router.get('/chatbot/client-by-phone', authMiddleware, chatbotRateLimiter, ChatbotController.getClientByPhone);
+router.get('/chatbot/appointments', authMiddleware, chatbotRateLimiter, ChatbotController.getAppointments);
+router.get('/chatbot/available-slots', authMiddleware, chatbotRateLimiter, ChatbotController.getAvailableSlots);
+router.post('/chatbot/appointments', authMiddleware, chatbotRateLimiter, ChatbotController.bookAppointment);
+router.post('/chatbot/cancel', authMiddleware, chatbotRateLimiter, ChatbotController.cancelAppointment);
+router.post('/chatbot/reschedule', authMiddleware, chatbotRateLimiter, ChatbotController.rescheduleAppointment);
+router.get('/chatbot/state', authMiddleware, chatbotRateLimiter, ChatbotController.getState);
+router.post('/chatbot/state', authMiddleware, chatbotRateLimiter, ChatbotController.setState);
+router.delete('/chatbot/state', authMiddleware, chatbotRateLimiter, ChatbotController.deleteState);
+router.post('/chatbot/state/delete', authMiddleware, chatbotRateLimiter, ChatbotController.deleteState);
 
 export default router;

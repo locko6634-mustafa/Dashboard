@@ -33,6 +33,7 @@ export class ChatbotService {
     const whereClause: any = {
       hasta_id: client.id,
       deleted_at: null,
+      ...(tenantId ? { tenant_id: tenantId } : {}),
     };
 
     if (activeOnly) {
@@ -151,86 +152,97 @@ export class ChatbotService {
     saat: string;
     hizmet?: string;
     sure?: number;
-    tenant_id?: string;
+    tenant_id: string;
   }) {
-    let tenantId = data.tenant_id;
+    const tenantId = data.tenant_id;
     if (!tenantId) {
-      const firstTenant = await prisma.tenant.findFirst();
-      if (!firstTenant) throw new Error('Tenant bulunamadı');
-      tenantId = firstTenant.id;
+      throw { status: 400, message: 'tenant_id zorunludur' };
     }
 
-    // Check or create client
-    let client = await this.getClientByPhone(data.telefon, tenantId);
-    if (!client) {
-      client = await prisma.client.create({
-        data: {
-          tenant_id: tenantId,
-          ad_soyad: data.ad_soyad || 'Chatbot Danışanı',
-          telefon: data.telefon,
-        },
-      });
+    const cleanedPhone = data.telefon.replace(/\D/g, '');
+    if (cleanedPhone.length < 10) {
+      throw { status: 400, message: 'Geçersiz telefon numarası' };
     }
+    const targetDigits = cleanedPhone.slice(-10);
 
     const duration = data.sure || calculateDefaultDuration(data.hizmet);
     const bitisSaati = calculateEndTime(data.saat, duration);
-
-    // Conflict check
-    const conflicts = await prisma.appointment.findMany({
-      where: {
-        tenant_id: tenantId,
-        tarih: data.tarih,
-        deleted_at: null,
-        durum: { not: 'İptal' },
-      },
-    });
-
     const [reqH, reqM] = data.saat.split(':').map(Number);
     const reqStart = reqH * 60 + reqM;
     const reqEnd = reqStart + duration;
 
-    const hasConflict = conflicts.some((c) => {
-      const [cStartH, cStartM] = c.baslangic_saati.split(':').map(Number);
-      const cStart = cStartH * 60 + cStartM;
-      let cEnd = cStart + (c.sure || 30);
-      if (c.bitis_saati) {
-        const [ceh, cem] = c.bitis_saati.split(':').map(Number);
-        cEnd = ceh * 60 + cem;
+    return await prisma.$transaction(async (tx) => {
+      // Conflict check first to avoid creating orphan clients on conflict
+      const conflicts = await tx.appointment.findMany({
+        where: {
+          tenant_id: tenantId,
+          tarih: data.tarih,
+          deleted_at: null,
+          durum: { not: 'İptal' },
+        },
+      });
+
+      const hasConflict = conflicts.some((c) => {
+        const [cStartH, cStartM] = c.baslangic_saati.split(':').map(Number);
+        const cStart = cStartH * 60 + cStartM;
+        let cEnd = cStart + (c.sure || 30);
+        if (c.bitis_saati) {
+          const [ceh, cem] = c.bitis_saati.split(':').map(Number);
+          cEnd = ceh * 60 + cem;
+        }
+        return Math.max(reqStart, cStart) < Math.min(reqEnd, cEnd);
+      });
+
+      if (hasConflict) {
+        return {
+          success: false,
+          conflict: true,
+          message: 'Seçtiğiniz tarih ve saatte başka bir randevu mevcuttur. Lütfen başka bir saat seçiniz.',
+        };
       }
-      return Math.max(reqStart, cStart) < Math.min(reqEnd, cEnd);
-    });
 
-    if (hasConflict) {
+      // Check or create client inside transaction
+      let client = await tx.client.findFirst({
+        where: {
+          tenant_id: tenantId,
+          telefon: { contains: targetDigits },
+        },
+      });
+
+      if (!client) {
+        client = await tx.client.create({
+          data: {
+            tenant_id: tenantId,
+            ad_soyad: data.ad_soyad || 'Chatbot Danışanı',
+            telefon: data.telefon,
+          },
+        });
+      }
+
+      const appointment = await tx.appointment.create({
+        data: {
+          tenant_id: tenantId,
+          hasta_id: client.id,
+          tarih: data.tarih,
+          baslangic_saati: data.saat,
+          bitis_saati: bitisSaati,
+          durum: 'Bekliyor',
+          hizmet: data.hizmet || 'Diğer',
+          sure: duration,
+        },
+      });
+
       return {
-        success: false,
-        conflict: true,
-        message: 'Seçtiğiniz tarih ve saatte başka bir randevu mevcuttur. Lütfen başka bir saat seçiniz.',
+        success: true,
+        message: 'Randevunuz başarıyla oluşturuldu.',
+        appointment_id: appointment.id,
+        tarih: appointment.tarih,
+        saat: appointment.baslangic_saati,
+        bitis_saati: appointment.bitis_saati,
+        hizmet: appointment.hizmet,
+        musteri: client.ad_soyad,
       };
-    }
-
-    const appointment = await prisma.appointment.create({
-      data: {
-        tenant_id: tenantId,
-        hasta_id: client.id,
-        tarih: data.tarih,
-        baslangic_saati: data.saat,
-        bitis_saati: bitisSaati,
-        durum: 'Bekliyor',
-        hizmet: data.hizmet || 'Diğer',
-        sure: duration,
-      },
     });
-
-    return {
-      success: true,
-      message: 'Randevunuz başarıyla oluşturuldu.',
-      appointment_id: appointment.id,
-      tarih: appointment.tarih,
-      saat: appointment.baslangic_saati,
-      bitis_saati: appointment.bitis_saati,
-      hizmet: appointment.hizmet,
-      musteri: client.ad_soyad,
-    };
   }
 
   static async cancelAppointment(appointmentId: string, phone: string, tenantId?: string) {
@@ -300,11 +312,12 @@ export class ChatbotService {
     };
   }
 
-  static async getConversationState(identifier: string) {
-    if (!identifier) return null;
+  static async getConversationState(identifier: string, tenantId: string) {
+    if (!identifier || !tenantId) return null;
     const cleaned = identifier.replace(/\D/g, '');
     return await prisma.conversationState.findFirst({
       where: {
+        tenant_id: tenantId,
         OR: [
           { conversation_id: String(identifier) },
           { phone_number: identifier },
@@ -326,17 +339,31 @@ export class ChatbotService {
       context_data?: any;
       phone?: string;
       phone_number?: string;
-    }
+    },
+    tenantId: string
   ) {
+    if (!tenantId) {
+      throw { status: 400, message: 'tenant_id zorunludur' };
+    }
     const convId = String(identifier || (data.phone ? `conv_${data.phone}` : `conv_${Date.now()}`));
     const ph = data.phone_number || data.phone || '';
     const it = data.current_intent || data.intent || null;
     const st = data.current_stage || data.stage || 'START';
     const ctx = data.context_data || data.context || {};
 
+    const existing = await prisma.conversationState.findUnique({
+      where: { conversation_id: convId },
+      select: { tenant_id: true },
+    });
+
+    if (existing && existing.tenant_id && existing.tenant_id !== tenantId) {
+      throw { status: 403, message: 'Bu konuşma durumuna erişim yetkiniz yok' };
+    }
+
     return await prisma.conversationState.upsert({
       where: { conversation_id: convId },
       update: {
+        tenant_id: tenantId,
         current_intent: it,
         current_stage: st,
         context_data: ctx,
@@ -345,6 +372,7 @@ export class ChatbotService {
       },
       create: {
         conversation_id: convId,
+        tenant_id: tenantId,
         phone_number: ph,
         current_intent: it,
         current_stage: st,
@@ -353,11 +381,12 @@ export class ChatbotService {
     });
   }
 
-  static async deleteConversationState(identifier: string) {
-    if (!identifier) return { success: false, message: 'ID belirtilmedi' };
+  static async deleteConversationState(identifier: string, tenantId: string) {
+    if (!identifier || !tenantId) return { success: false, message: 'ID veya tenant_id belirtilmedi' };
     const cleaned = identifier.replace(/\D/g, '');
     await prisma.conversationState.deleteMany({
       where: {
+        tenant_id: tenantId,
         OR: [
           { conversation_id: String(identifier) },
           { phone_number: identifier },

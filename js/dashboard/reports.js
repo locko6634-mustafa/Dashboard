@@ -319,23 +319,23 @@ class ReportsManager {
             const clientInitial = (clientName || 'M').charAt(0).toUpperCase();
 
             tr.innerHTML = `
-                <td><span class="font-medium text-main font-12">${dateDisplay}</span></td>
-                <td><span class="text-muted font-12">${timeRange}</span></td>
+                <td><span class="font-medium text-main font-12">${Utils.escapeHtml(dateDisplay)}</span></td>
+                <td><span class="text-muted font-12">${Utils.escapeHtml(timeRange)}</span></td>
                 <td>
                     <div class="crm-client-cell">
-                        <div class="crm-client-avatar">${clientInitial}</div>
+                        <div class="crm-client-avatar">${Utils.escapeHtml(clientInitial)}</div>
                         <div class="crm-client-info">
-                            <span class="crm-client-name">${clientName}</span>
-                            <span class="crm-client-phone">${apt.telefon || '-'}</span>
+                            <span class="crm-client-name">${Utils.escapeHtml(clientName)}</span>
+                            <span class="crm-client-phone">${Utils.escapeHtml(apt.telefon || '-')}</span>
                         </div>
                     </div>
                 </td>
-                <td><span class="crm-package-name">${apt.hizmet || '-'}</span></td>
-                <td><span class="font-12">${apt.sure || 0} dk</span></td>
+                <td><span class="crm-package-name">${Utils.escapeHtml(apt.hizmet || '-')}</span></td>
+                <td><span class="font-12">${Utils.escapeHtml(apt.sure || 0)} dk</span></td>
                 <td>
                     <span class="report-status-badge ${statusClass}">
                         <span class="status-dot ${dotClass}"></span>
-                        ${apt.durum || '-'}
+                        ${Utils.escapeHtml(apt.durum || '-')}
                     </span>
                 </td>
             `;

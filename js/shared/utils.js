@@ -32,6 +32,16 @@ export class DateUtils {
 }
 
 export class Utils {
+    static escapeHtml = (value) => {
+        if (value === null || value === undefined) return '';
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+
     static formatName = (str) => {
         if (!str) return '';
         return str.trim().split(/\s+/)

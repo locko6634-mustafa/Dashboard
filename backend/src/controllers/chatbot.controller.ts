@@ -1,41 +1,35 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
 import { ChatbotService } from '../services/chatbot.service.js';
-import { prisma } from '../config/prisma.js';
 
 /**
  * Multi-tenant safe tenant resolution for chatbot requests.
- * Uses header x-tenant-id, body tenant_id, or query tenant_id.
- * If not supplied, falls back to the single active tenant only if exactly 1 active tenant exists.
+ * Relies strictly on req.tenantId populated by authMiddleware.
+ * Rejects with 403 if the client supplies a different tenant_id.
  */
-async function resolveTenantId(req: Request): Promise<string | null> {
+function resolveTenantId(req: AuthenticatedRequest): string {
+  const authTenantId = req.tenantId;
+  if (!authTenantId) {
+    throw { status: 401, message: 'Yetkisiz erişim: Geçerli bir tenant oturumu zorunludur' };
+  }
+
   const explicit =
     (req.headers['x-tenant-id'] as string) ||
     (req.query.tenant_id as string) ||
     (req.body?.tenant_id as string);
 
-  if (explicit && explicit.trim()) {
-    return explicit.trim();
+  if (explicit && explicit.trim() && explicit.trim() !== authTenantId) {
+    throw { status: 403, message: 'Farklı bir tenant adına işlem yapma yetkiniz yok' };
   }
 
-  try {
-    const activeTenants = await prisma.tenant.findMany({
-      where: { durum: 'Aktif' },
-      select: { id: true },
-      take: 2,
-    });
-    if (activeTenants.length === 1) {
-      return activeTenants[0].id;
-    }
-  } catch {
-    // DB error fallback
-  }
-
-  return null;
+  return authTenantId;
 }
 
 export class ChatbotController {
-  static async getClientByPhone(req: Request, res: Response, next: NextFunction) {
+  static async getClientByPhone(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
+      const tenantId = resolveTenantId(req);
+
       const phone = (req.query.phone as string) || (req.query.telefon as string);
       if (!phone) {
         res.status(400).json({ success: false, error: 'Telefon numarası zorunludur' });
@@ -48,12 +42,6 @@ export class ChatbotController {
           success: false,
           error: 'Geçersiz telefon numarası. Lütfen en az 10 haneli telefon numarası giriniz.',
         });
-        return;
-      }
-
-      const tenantId = await resolveTenantId(req);
-      if (!tenantId) {
-        res.status(400).json({ success: false, error: 'Multi-tenant ortamında tenant_id parametresi zorunludur' });
         return;
       }
 
@@ -68,8 +56,10 @@ export class ChatbotController {
     }
   }
 
-  static async getAppointments(req: Request, res: Response, next: NextFunction) {
+  static async getAppointments(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
+      const tenantId = resolveTenantId(req);
+
       const phone = (req.query.phone as string) || (req.query.telefon as string);
       if (!phone) {
         res.status(400).json({ success: false, error: 'Telefon numarası zorunludur' });
@@ -85,12 +75,6 @@ export class ChatbotController {
         return;
       }
 
-      const tenantId = await resolveTenantId(req);
-      if (!tenantId) {
-        res.status(400).json({ success: false, error: 'Multi-tenant ortamında tenant_id parametresi zorunludur' });
-        return;
-      }
-
       const activeOnly = req.query.active !== 'false';
       const result = await ChatbotService.getAppointmentsByPhone(phone, activeOnly, tenantId);
       res.json(result);
@@ -99,17 +83,13 @@ export class ChatbotController {
     }
   }
 
-  static async getAvailableSlots(req: Request, res: Response, next: NextFunction) {
+  static async getAvailableSlots(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
+      const tenantId = resolveTenantId(req);
+
       const date = (req.query.date as string) || (req.query.tarih as string);
       if (!date) {
         res.status(400).json({ success: false, error: 'Tarih zorunludur (YYYY-MM-DD)' });
-        return;
-      }
-
-      const tenantId = await resolveTenantId(req);
-      if (!tenantId) {
-        res.status(400).json({ success: false, error: 'Multi-tenant ortamında tenant_id parametresi zorunludur' });
         return;
       }
 
@@ -121,9 +101,11 @@ export class ChatbotController {
     }
   }
 
-  static async bookAppointment(req: Request, res: Response, next: NextFunction) {
+  static async bookAppointment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const { ad_soyad, telefon, tarih, saat, hizmet, sure, tenant_id } = req.body;
+      const resolvedTenantId = resolveTenantId(req);
+
+      const { ad_soyad, telefon, tarih, saat, hizmet, sure } = req.body;
       if (!telefon || !tarih || !saat) {
         res.status(400).json({ success: false, error: 'Telefon, tarih ve saat zorunludur' });
         return;
@@ -135,12 +117,6 @@ export class ChatbotController {
           success: false,
           error: 'Geçersiz telefon numarası. Lütfen en az 10 haneli telefon numarası giriniz.',
         });
-        return;
-      }
-
-      const resolvedTenantId = await resolveTenantId(req);
-      if (!resolvedTenantId) {
-        res.status(400).json({ success: false, error: 'Multi-tenant ortamında tenant_id parametresi zorunludur' });
         return;
       }
 
@@ -159,9 +135,11 @@ export class ChatbotController {
     }
   }
 
-  static async cancelAppointment(req: Request, res: Response, next: NextFunction) {
+  static async cancelAppointment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const { appointment_id, id, telefon, phone, tenant_id } = req.body;
+      const resolvedTenantId = resolveTenantId(req);
+
+      const { appointment_id, id, telefon, phone } = req.body;
       const aptId = appointment_id || id;
       const ph = telefon || phone;
 
@@ -179,12 +157,6 @@ export class ChatbotController {
         return;
       }
 
-      const resolvedTenantId = await resolveTenantId(req);
-      if (!resolvedTenantId) {
-        res.status(400).json({ success: false, error: 'Multi-tenant ortamında tenant_id parametresi zorunludur' });
-        return;
-      }
-
       const result = await ChatbotService.cancelAppointment(aptId, ph, resolvedTenantId);
       res.json(result);
     } catch (err) {
@@ -192,9 +164,11 @@ export class ChatbotController {
     }
   }
 
-  static async rescheduleAppointment(req: Request, res: Response, next: NextFunction) {
+  static async rescheduleAppointment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const { appointment_id, id, tarih, date, saat, time, telefon, phone, tenant_id } = req.body;
+      const resolvedTenantId = resolveTenantId(req);
+
+      const { appointment_id, id, tarih, date, saat, time, telefon, phone } = req.body;
       const aptId = appointment_id || id;
       const newDate = tarih || date;
       const newTime = saat || time;
@@ -216,12 +190,6 @@ export class ChatbotController {
         }
       }
 
-      const resolvedTenantId = await resolveTenantId(req);
-      if (!resolvedTenantId) {
-        res.status(400).json({ success: false, error: 'Multi-tenant ortamında tenant_id parametresi zorunludur' });
-        return;
-      }
-
       const result = await ChatbotService.rescheduleAppointment(aptId, newDate, newTime, ph, resolvedTenantId);
       res.json(result);
     } catch (err) {
@@ -229,8 +197,10 @@ export class ChatbotController {
     }
   }
 
-  static async getState(req: Request, res: Response, next: NextFunction) {
+  static async getState(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
+      const tenantId = resolveTenantId(req);
+
       const identifier =
         (req.query.conversation_id as string) ||
         (req.query.conversationId as string) ||
@@ -248,7 +218,7 @@ export class ChatbotController {
         return;
       }
 
-      const state = await ChatbotService.getConversationState(identifier);
+      const state = await ChatbotService.getConversationState(identifier, tenantId);
       if (state) {
         res.json({
           id: state.conversation_id,
@@ -273,8 +243,10 @@ export class ChatbotController {
     }
   }
 
-  static async setState(req: Request, res: Response, next: NextFunction) {
+  static async setState(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
+      const tenantId = resolveTenantId(req);
+
       const {
         conversation_id,
         conversationId,
@@ -294,23 +266,29 @@ export class ChatbotController {
         return;
       }
 
-      const state = await ChatbotService.setConversationState(String(identifier), {
-        intent,
-        current_intent,
-        stage,
-        current_stage,
-        context,
-        context_data,
-        phone: phone || telefon,
-      });
+      const state = await ChatbotService.setConversationState(
+        String(identifier),
+        {
+          intent,
+          current_intent,
+          stage,
+          current_stage,
+          context,
+          context_data,
+          phone: phone || telefon,
+        },
+        tenantId
+      );
       res.json({ success: true, state });
     } catch (err) {
       next(err);
     }
   }
 
-  static async deleteState(req: Request, res: Response, next: NextFunction) {
+  static async deleteState(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
+      const tenantId = resolveTenantId(req);
+
       const identifier =
         (req.body?.conversation_id as string) ||
         (req.body?.conversationId as string) ||
@@ -318,7 +296,7 @@ export class ChatbotController {
         (req.body?.phone as string) ||
         (req.query?.phone as string);
 
-      const result = await ChatbotService.deleteConversationState(identifier);
+      const result = await ChatbotService.deleteConversationState(identifier, tenantId);
       res.json(result);
     } catch (err) {
       next(err);

@@ -1,6 +1,11 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
-import { AppointmentService } from '../services/appointment.service.js';
+import {
+  AppointmentService,
+  batchUpdateAppointmentSchema,
+  createAppointmentSchema,
+  updateAppointmentSchema,
+} from '../services/appointment.service.js';
 
 export class AppointmentController {
   static async getAppointments(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -23,7 +28,8 @@ export class AppointmentController {
   static async createAppointment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = req.tenantId!;
-      const data = req.body?.payload ? req.body.payload : req.body;
+      const rawData = req.body?.payload ? req.body.payload : req.body;
+      const data = createAppointmentSchema.parse(rawData);
 
       const result = await AppointmentService.createAppointment(tenantId, data);
       res.status(201).json(result);
@@ -35,7 +41,8 @@ export class AppointmentController {
   static async updateAppointment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = req.tenantId!;
-      const data = req.body?.payload ? req.body.payload : req.body;
+      const rawData = req.body?.payload ? req.body.payload : req.body;
+      const data = updateAppointmentSchema.parse(rawData);
       const id = req.params.id || data.id || data.randevu_id;
 
       if (!id) {
@@ -53,15 +60,13 @@ export class AppointmentController {
   static async batchUpdate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = req.tenantId!;
-      const data = req.body?.payload ? req.body.payload : req.body;
-      const ids = data.ids || req.body.ids;
+      const rawData = req.body?.payload ? req.body.payload : req.body;
+      const parsed = batchUpdateAppointmentSchema.parse({
+        ...rawData,
+        ids: rawData?.ids ?? req.body?.ids,
+      });
 
-      if (!ids) {
-        res.status(400).json({ success: false, error: 'Randevu ID listesi zorunludur' });
-        return;
-      }
-
-      const result = await AppointmentService.batchUpdateAppointments(tenantId, ids, data);
+      const result = await AppointmentService.batchUpdateAppointments(tenantId, parsed.ids, parsed);
       res.json(result);
     } catch (err) {
       next(err);

@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
-import { ClientService } from '../services/client.service.js';
+import { ClientService, createClientSchema, updateClientSchema } from '../services/client.service.js';
 
 export class ClientController {
   static async searchClients(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -18,7 +18,8 @@ export class ClientController {
   static async createClient(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = req.tenantId!;
-      const data = req.body?.payload ? req.body.payload : req.body;
+      const rawData = req.body?.payload ? req.body.payload : req.body;
+      const data = createClientSchema.parse(rawData);
       const result = await ClientService.createClient(tenantId, data);
       res.status(201).json(result);
     } catch (err) {
@@ -29,7 +30,8 @@ export class ClientController {
   static async updateClient(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = req.tenantId!;
-      const data = req.body?.payload ? req.body.payload : req.body;
+      const rawData = req.body?.payload ? req.body.payload : req.body;
+      const data = updateClientSchema.parse(rawData);
       const id = req.params.id || data.hasta_id || data.id;
 
       if (!id) {

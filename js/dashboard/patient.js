@@ -648,17 +648,17 @@ class PatientCRM {
             tr.innerHTML = `
                 <td>
                     <div class="crm-client-cell">
-                        <div class="crm-client-avatar">${(c.ad_soyad || 'M').charAt(0).toUpperCase()}</div>
+                        <div class="crm-client-avatar">${Utils.escapeHtml((c.ad_soyad || 'M').charAt(0).toUpperCase())}</div>
                         <div class="crm-client-info">
-                            <span class="crm-client-name">${Utils.formatName(c.ad_soyad)}</span>
-                            <span class="crm-client-phone">${c.telefon || 'Telefon Yok'}</span>
-                            ${c.kronik_rahatsizlik ? `<span class="crm-chronic-badge" title="${c.kronik_rahatsizlik}">⚠️ ${c.kronik_rahatsizlik}</span>` : ''}
+                            <span class="crm-client-name">${Utils.escapeHtml(Utils.formatName(c.ad_soyad))}</span>
+                            <span class="crm-client-phone">${Utils.escapeHtml(c.telefon || 'Telefon Yok')}</span>
+                            ${c.kronik_rahatsizlik ? `<span class="crm-chronic-badge" title="${Utils.escapeHtml(c.kronik_rahatsizlik)}">⚠️ ${Utils.escapeHtml(c.kronik_rahatsizlik)}</span>` : ''}
                         </div>
                     </div>
                 </td>
                 <td>
                     <div class="crm-package-cell">
-                        <span class="crm-package-name">${c.paket_adi && c.paket_adi !== CONFIG.DEFAULTS.PACKAGE ? c.paket_adi : 'Paketsiz'}</span>
+                        <span class="crm-package-name">${c.paket_adi && c.paket_adi !== CONFIG.DEFAULTS.PACKAGE ? Utils.escapeHtml(c.paket_adi) : 'Paketsiz'}</span>
                         ${totalS > 0 ? `
                             <div class="crm-progress-wrap" title="${currentS} / ${totalS} Seans">
                                 <div class="crm-progress-bar">

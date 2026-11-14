@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { Prisma } from '@prisma/client';
 import { ZodError } from 'zod';
 
 export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
@@ -13,8 +14,25 @@ export function errorHandler(err: any, req: Request, res: Response, next: NextFu
     return;
   }
 
-  const statusCode = err.statusCode || err.status || 500;
-  const message = err.message || 'Sunucu içi hata oluştu';
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === 'P2002') {
+      res.status(409).json({
+        error: 'Bu kayıt zaten mevcut (benzersiz alan çakışması)',
+        success: false,
+      });
+      return;
+    }
+    if (err.code === 'P2025') {
+      res.status(404).json({
+        error: 'İlgili kayıt bulunamadı',
+        success: false,
+      });
+      return;
+    }
+  }
+
+  const statusCode = err?.statusCode || err?.status || 500;
+  const message = err?.message || 'Sunucu içi hata oluştu';
 
   res.status(statusCode).json({
     error: message,

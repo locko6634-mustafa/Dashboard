@@ -1,4 +1,26 @@
+import { z } from 'zod';
 import { prisma } from '../config/prisma.js';
+
+export const createClientSchema = z
+  .object({
+    ad_soyad: z.string().optional(),
+    telefon: z.string().optional(),
+    kronik_rahatsizlik: z.string().optional().nullable(),
+    paket_adi: z.string().optional().nullable(),
+    toplam_seans: z.coerce.number().int().min(0).optional(),
+    gelinen_seans: z.coerce.number().int().min(0).optional(),
+    toplam_tutar: z.coerce.number().min(0).optional(),
+    alinan_odeme: z.coerce.number().min(0).optional(),
+  })
+  .passthrough();
+
+export const updateClientSchema = createClientSchema.extend({
+  id: z.string().optional(),
+  hasta_id: z.string().optional(),
+});
+
+export type CreateClientInput = z.infer<typeof createClientSchema>;
+export type UpdateClientInput = z.infer<typeof updateClientSchema>;
 
 export class ClientService {
   static async searchClients(tenantId: string, query: string) {
@@ -24,7 +46,7 @@ export class ClientService {
     }));
   }
 
-  static async createClient(tenantId: string, data: any) {
+  static async createClient(tenantId: string, data: CreateClientInput) {
     const created = await prisma.client.create({
       data: {
         tenant_id: tenantId,
@@ -32,10 +54,10 @@ export class ClientService {
         telefon: data.telefon || '',
         kronik_rahatsizlik: data.kronik_rahatsizlik || null,
         paket_adi: data.paket_adi || null,
-        toplam_seans: parseInt(data.toplam_seans, 10) || 0,
-        gelinen_seans: parseInt(data.gelinen_seans, 10) || 0,
-        toplam_tutar: data.toplam_tutar ? Number(data.toplam_tutar) : 0,
-        alinan_odeme: data.alinan_odeme ? Number(data.alinan_odeme) : 0,
+        toplam_seans: data.toplam_seans ?? 0,
+        gelinen_seans: data.gelinen_seans ?? 0,
+        toplam_tutar: data.toplam_tutar ?? 0,
+        alinan_odeme: data.alinan_odeme ?? 0,
       },
     });
 
@@ -50,7 +72,7 @@ export class ClientService {
     };
   }
 
-  static async updateClient(tenantId: string, id: string, data: any) {
+  static async updateClient(tenantId: string, id: string, data: UpdateClientInput) {
     const existing = await prisma.client.findFirst({
       where: { id, tenant_id: tenantId },
     });
@@ -66,10 +88,10 @@ export class ClientService {
         telefon: data.telefon !== undefined ? data.telefon : existing.telefon,
         kronik_rahatsizlik: data.kronik_rahatsizlik !== undefined ? data.kronik_rahatsizlik : existing.kronik_rahatsizlik,
         paket_adi: data.paket_adi !== undefined ? data.paket_adi : existing.paket_adi,
-        toplam_seans: data.toplam_seans !== undefined ? parseInt(data.toplam_seans, 10) : existing.toplam_seans,
-        gelinen_seans: data.gelinen_seans !== undefined ? parseInt(data.gelinen_seans, 10) : existing.gelinen_seans,
-        toplam_tutar: data.toplam_tutar !== undefined ? Number(data.toplam_tutar) : existing.toplam_tutar,
-        alinan_odeme: data.alinan_odeme !== undefined ? Number(data.alinan_odeme) : existing.alinan_odeme,
+        toplam_seans: data.toplam_seans !== undefined ? data.toplam_seans : existing.toplam_seans,
+        gelinen_seans: data.gelinen_seans !== undefined ? data.gelinen_seans : existing.gelinen_seans,
+        toplam_tutar: data.toplam_tutar !== undefined ? data.toplam_tutar : existing.toplam_tutar,
+        alinan_odeme: data.alinan_odeme !== undefined ? data.alinan_odeme : existing.alinan_odeme,
       },
     });
 

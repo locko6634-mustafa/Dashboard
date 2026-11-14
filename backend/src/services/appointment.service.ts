@@ -1,4 +1,52 @@
+import { z } from 'zod';
 import { prisma } from '../config/prisma.js';
+
+export const createAppointmentSchema = z
+  .object({
+    hasta_id: z.string().optional().nullable(),
+    is_new: z.union([z.boolean(), z.enum(['true', 'false'])]).optional(),
+    ad_soyad: z.string().optional(),
+    telefon: z.string().optional(),
+    kronik_rahatsizlik: z.string().optional().nullable(),
+    paket_adi: z.string().optional().nullable(),
+    toplam_seans: z.coerce.number().int().min(0).optional(),
+    gelinen_seans: z.coerce.number().int().min(0).optional(),
+    toplam_tutar: z.coerce.number().min(0).optional(),
+    alinan_odeme: z.coerce.number().min(0).optional(),
+    tarih: z.string().min(1, 'Tarih zorunludur'),
+    saat: z.string().optional(),
+    baslangic_saati: z.string().optional(),
+    bitis_saati: z.string().optional(),
+    sure: z.coerce.number().int().positive().optional(),
+    durum: z.string().optional(),
+    hizmet: z.string().optional(),
+  })
+  .passthrough();
+
+export const updateAppointmentSchema = z
+  .object({
+    id: z.string().optional(),
+    randevu_id: z.string().optional(),
+    durum: z.string().optional(),
+    tarih: z.string().min(1).optional(),
+    saat: z.string().optional(),
+    baslangic_saati: z.string().optional(),
+    bitis_saati: z.string().optional(),
+    sure: z.coerce.number().int().positive().optional(),
+    hizmet: z.string().optional(),
+  })
+  .passthrough();
+
+export const batchUpdateAppointmentSchema = z
+  .object({
+    ids: z.union([z.array(z.string().min(1)), z.string().min(1)]),
+    durum: z.string().optional(),
+  })
+  .passthrough();
+
+export type CreateAppointmentInput = z.infer<typeof createAppointmentSchema>;
+export type UpdateAppointmentInput = z.infer<typeof updateAppointmentSchema>;
+export type BatchUpdateAppointmentInput = z.infer<typeof batchUpdateAppointmentSchema>;
 
 export function calculateDefaultDuration(hizmet?: string | null): number {
   if (!hizmet) return 30;
@@ -159,45 +207,47 @@ export class AppointmentService {
     });
   }
 
-  static async createAppointment(tenantId: string, data: any) {
-    let hastaId = data.hasta_id;
-
-    // Handle is_new client
-    if (data.is_new === true || data.is_new === 'true' || !hastaId) {
-      const newClient = await prisma.client.create({
-        data: {
-          tenant_id: tenantId,
-          ad_soyad: data.ad_soyad || 'İsimsiz Müşteri',
-          telefon: data.telefon || '',
-          kronik_rahatsizlik: data.kronik_rahatsizlik || null,
-          paket_adi: data.paket_adi || null,
-          toplam_seans: parseInt(data.toplam_seans, 10) || 0,
-          gelinen_seans: parseInt(data.gelinen_seans, 10) || 0,
-          toplam_tutar: data.toplam_tutar ? Number(data.toplam_tutar) : 0,
-          alinan_odeme: data.alinan_odeme ? Number(data.alinan_odeme) : 0,
-        },
-      });
-      hastaId = newClient.id;
-    }
-
-    const sure = parseInt(data.sure, 10) || calculateDefaultDuration(data.hizmet);
+  static async createAppointment(tenantId: string, data: CreateAppointmentInput) {
+    const sure = data.sure ?? calculateDefaultDuration(data.hizmet);
     const baslangicSaati = (data.saat || data.baslangic_saati || '09:00').trim();
     const bitisSaati = data.bitis_saati || calculateEndTime(baslangicSaati, sure);
 
-    const appointment = await prisma.appointment.create({
-      data: {
-        tenant_id: tenantId,
-        hasta_id: hastaId,
-        tarih: data.tarih,
-        baslangic_saati: baslangicSaati,
-        bitis_saati: bitisSaati,
-        durum: data.durum || 'Bekliyor',
-        hizmet: data.hizmet || 'Diğer',
-        sure: sure,
-      },
-      include: {
-        client: true,
-      },
+    const appointment = await prisma.$transaction(async (tx) => {
+      let hastaId = data.hasta_id || undefined;
+
+      // Handle is_new client
+      if (data.is_new === true || data.is_new === 'true' || !hastaId) {
+        const newClient = await tx.client.create({
+          data: {
+            tenant_id: tenantId,
+            ad_soyad: data.ad_soyad || 'İsimsiz Müşteri',
+            telefon: data.telefon || '',
+            kronik_rahatsizlik: data.kronik_rahatsizlik || null,
+            paket_adi: data.paket_adi || null,
+            toplam_seans: data.toplam_seans ?? 0,
+            gelinen_seans: data.gelinen_seans ?? 0,
+            toplam_tutar: data.toplam_tutar ?? 0,
+            alinan_odeme: data.alinan_odeme ?? 0,
+          },
+        });
+        hastaId = newClient.id;
+      }
+
+      return await tx.appointment.create({
+        data: {
+          tenant_id: tenantId,
+          hasta_id: hastaId,
+          tarih: data.tarih,
+          baslangic_saati: baslangicSaati,
+          bitis_saati: bitisSaati,
+          durum: data.durum || 'Bekliyor',
+          hizmet: data.hizmet || 'Diğer',
+          sure: sure,
+        },
+        include: {
+          client: true,
+        },
+      });
     });
 
     return {
@@ -208,7 +258,7 @@ export class AppointmentService {
     };
   }
 
-  static async updateAppointment(tenantId: string, id: string, data: any) {
+  static async updateAppointment(tenantId: string, id: string, data: UpdateAppointmentInput) {
     const existing = await prisma.appointment.findFirst({
       where: { id, tenant_id: tenantId, deleted_at: null },
     });
@@ -217,7 +267,14 @@ export class AppointmentService {
       throw { status: 404, message: 'Randevu bulunamadı' };
     }
 
-    const updateData: any = {};
+    const updateData: {
+      durum?: string;
+      tarih?: string;
+      baslangic_saati?: string;
+      sure?: number;
+      bitis_saati?: string;
+      hizmet?: string;
+    } = {};
 
     if (data.durum !== undefined) updateData.durum = data.durum;
     if (data.tarih !== undefined) updateData.tarih = data.tarih;
@@ -225,7 +282,7 @@ export class AppointmentService {
       updateData.baslangic_saati = data.saat || data.baslangic_saati;
     }
     if (data.sure !== undefined) {
-      updateData.sure = parseInt(data.sure, 10);
+      updateData.sure = data.sure;
     }
     if (data.bitis_saati !== undefined) {
       updateData.bitis_saati = data.bitis_saati;
@@ -245,7 +302,7 @@ export class AppointmentService {
     return { success: true, data: updated };
   }
 
-  static async batchUpdateAppointments(tenantId: string, ids: string[] | string, data?: any) {
+  static async batchUpdateAppointments(tenantId: string, ids: string[] | string, data?: Partial<BatchUpdateAppointmentInput>) {
     let idList: string[] = [];
     if (Array.isArray(ids)) {
       idList = ids;
