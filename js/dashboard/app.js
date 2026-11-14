@@ -28,9 +28,7 @@ class App {
     static initEventListeners() {
         if (Utils.$('btnLogout')) {
             Utils.$('btnLogout').addEventListener('click', () => {
-                localStorage.removeItem('user_token');
-                localStorage.removeItem('tenant_id');
-                window.location.href = 'login.html';
+                logoutUser('login.html');
             });
         }
 
@@ -411,12 +409,13 @@ class App {
     }
 
     static async bootstrap() {
-        const token = localStorage.getItem('user_token');
-        const tenant = localStorage.getItem('tenant_id');
-        if (!token || !tenant) {
+        const tenant = getTenantId();
+        if (!tenant) {
             window.location.href = 'login.html';
             return;
         }
+
+        const isPlainObject = (val) => typeof val === 'object' && val !== null && !Array.isArray(val);
 
         try {
             const settingsData = await ApiService.call(CONFIG.ENDPOINTS.GET_SETTINGS, { method: 'GET', returnData: true });
@@ -425,20 +424,24 @@ class App {
                 settingsData.forEach(item => {
                     const key = item.setting_key;
                     const val = item.setting_value;
-                    if (key && val) {
+                    if (key && val !== undefined && val !== null) {
                         if (key === 'ui_preferences') {
-                            if (val.currency) CONFIG.DEFAULTS.CURRENCY = val.currency;
-                            if (val.colors) CONFIG.COLORS = { ...CONFIG.COLORS, ...val.colors };
-                            CONFIG.UI_PREFERENCES = val;
+                            if (isPlainObject(val)) {
+                                if (val.currency) CONFIG.DEFAULTS.CURRENCY = val.currency;
+                                if (isPlainObject(val.colors)) CONFIG.COLORS = { ...CONFIG.COLORS, ...val.colors };
+                                CONFIG.UI_PREFERENCES = val;
+                            }
                         } else if (key === 'sector') {
                             CONFIG.SECTOR = val;
                         } else if (key === 'terminology') {
-                            CONFIG.TERMINOLOGY = val;
+                            if (isPlainObject(val)) {
+                                CONFIG.TERMINOLOGY = { ...CONFIG.TERMINOLOGY, ...val };
+                            }
                         } else {
                             const upperKey = key.toUpperCase();
-                            if (CONFIG[upperKey] && typeof CONFIG[upperKey] === 'object' && !Array.isArray(CONFIG[upperKey])) {
+                            if (isPlainObject(CONFIG[upperKey]) && isPlainObject(val)) {
                                 CONFIG[upperKey] = { ...CONFIG[upperKey], ...val };
-                            } else {
+                            } else if (!isPlainObject(CONFIG[upperKey])) {
                                 CONFIG[upperKey] = val;
                             }
                         }

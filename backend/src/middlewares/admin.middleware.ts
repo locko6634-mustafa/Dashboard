@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.config.js';
 import { prisma } from '../config/prisma.js';
+import { ADMIN_AUTH_COOKIE_NAME, parseCookies } from './auth.middleware.js';
 
 export interface AdminJwtPayload {
   adminId: string;
@@ -33,12 +34,21 @@ export interface AuthenticatedAdminRequest extends Request {
 export async function adminMiddleware(req: AuthenticatedAdminRequest, res: Response, next: NextFunction) {
   try {
     const authHeader = req.headers['authorization'];
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({ success: false, error: 'Yetkilendirme başlığı (Bearer token) bulunamadı' });
+    let token = '';
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    } else {
+      const cookies = parseCookies(req.headers.cookie);
+      if (cookies[ADMIN_AUTH_COOKIE_NAME]) {
+        token = cookies[ADMIN_AUTH_COOKIE_NAME];
+      }
+    }
+
+    if (!token) {
+      res.status(401).json({ success: false, error: 'Yetkilendirme bilgisi (Bearer token veya oturum çerezi) bulunamadı' });
       return;
     }
 
-    const token = authHeader.substring(7);
     let decoded: unknown;
     try {
       decoded = jwt.verify(token, ENV.JWT_SECRET);

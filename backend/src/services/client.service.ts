@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../config/prisma.js';
 import { MoneyInput, toMoneyNumber } from '../utils/decimal.util.js';
@@ -34,7 +35,7 @@ export type UpdateClientInput = z.infer<typeof updateClientSchema>;
 export class ClientService {
   static async searchClients(tenantId: string, query: string) {
     const q = (query || '').trim();
-    const whereClause: any = { tenant_id: tenantId };
+    const whereClause: Prisma.ClientWhereInput = { tenant_id: tenantId };
     if (q && q !== '*') {
       whereClause.OR = [
         { ad_soyad: { contains: q, mode: 'insensitive' } },
@@ -74,26 +75,35 @@ export class ClientService {
   }
 
   static async updateClient(tenantId: string, id: string, data: UpdateClientInput) {
-    const existing = await prisma.client.findFirst({
-      where: { id, tenant_id: tenantId },
-    });
+    const updateData: Prisma.ClientUpdateManyMutationInput = {};
+    if (data.ad_soyad !== undefined) updateData.ad_soyad = data.ad_soyad;
+    if (data.telefon !== undefined) updateData.telefon = data.telefon;
+    if (data.kronik_rahatsizlik !== undefined) updateData.kronik_rahatsizlik = data.kronik_rahatsizlik;
+    if (data.paket_adi !== undefined) updateData.paket_adi = data.paket_adi;
+    if (data.toplam_seans !== undefined) updateData.toplam_seans = data.toplam_seans;
+    if (data.gelinen_seans !== undefined) updateData.gelinen_seans = data.gelinen_seans;
+    if (data.toplam_tutar !== undefined) updateData.toplam_tutar = data.toplam_tutar;
+    if (data.alinan_odeme !== undefined) updateData.alinan_odeme = data.alinan_odeme;
 
-    if (!existing) {
-      throw { status: 404, message: 'Müşteri bulunamadı' };
-    }
+    const updated = await prisma.$transaction(async (tx) => {
+      const result = await tx.client.updateMany({
+        where: { id, tenant_id: tenantId },
+        data: updateData,
+      });
 
-    const updated = await prisma.client.update({
-      where: { id },
-      data: {
-        ad_soyad: data.ad_soyad !== undefined ? data.ad_soyad : existing.ad_soyad,
-        telefon: data.telefon !== undefined ? data.telefon : existing.telefon,
-        kronik_rahatsizlik: data.kronik_rahatsizlik !== undefined ? data.kronik_rahatsizlik : existing.kronik_rahatsizlik,
-        paket_adi: data.paket_adi !== undefined ? data.paket_adi : existing.paket_adi,
-        toplam_seans: data.toplam_seans !== undefined ? data.toplam_seans : existing.toplam_seans,
-        gelinen_seans: data.gelinen_seans !== undefined ? data.gelinen_seans : existing.gelinen_seans,
-        toplam_tutar: data.toplam_tutar !== undefined ? data.toplam_tutar : existing.toplam_tutar,
-        alinan_odeme: data.alinan_odeme !== undefined ? data.alinan_odeme : existing.alinan_odeme,
-      },
+      if (result.count === 0) {
+        throw { status: 404, message: 'Müşteri bulunamadı' };
+      }
+
+      const record = await tx.client.findFirst({
+        where: { id, tenant_id: tenantId },
+      });
+
+      if (!record) {
+        throw { status: 404, message: 'Müşteri bulunamadı' };
+      }
+
+      return record;
     });
 
     return {

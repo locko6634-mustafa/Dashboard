@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { Prisma } from '@prisma/client';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.config.js';
@@ -365,74 +366,74 @@ export class AdminService {
     const password_hash = await argon2.hash(data.password);
     const apiKey = 'sk_live_' + crypto.randomBytes(20).toString('hex');
 
-    const tenant = await prisma.tenant.create({
-      data: {
-        salon_adi: data.salon_adi.trim(),
-        email: data.email.trim().toLowerCase(),
-        password_hash,
-        whatsapp_phone: data.whatsapp_phone ? data.whatsapp_phone.trim() : null,
-        n8n_webhook_url: data.n8n_webhook_url ? data.n8n_webhook_url.trim() : null,
-        chatwoot_inbox_id: data.chatwoot_inbox_id ? data.chatwoot_inbox_id.trim() : null,
-        api_key: apiKey,
-        durum: data.durum || 'Aktif',
-      },
-    });
+    const settingsPayload: Array<{ setting_key: string; setting_value: Prisma.InputJsonValue }> = [];
 
-    // İşletmenin ayarlarını tohumlama / kaydetme (calendar, services, sector, terminology, ui_preferences)
-    try {
-      const settingsPayload: Array<{ setting_key: string; setting_value: any }> = [];
-
-      if (data.settings) {
-        if (data.settings.calendar) {
-          settingsPayload.push({ setting_key: 'calendar', setting_value: data.settings.calendar });
-        }
-        if (data.settings.services) {
-          settingsPayload.push({ setting_key: 'services', setting_value: data.settings.services });
-        }
-        if (data.settings.sector) {
-          settingsPayload.push({ setting_key: 'sector', setting_value: data.settings.sector });
-        }
-        if (data.settings.terminology) {
-          settingsPayload.push({ setting_key: 'terminology', setting_value: data.settings.terminology });
-        }
-        if (data.settings.ui_preferences) {
-          settingsPayload.push({ setting_key: 'ui_preferences', setting_value: data.settings.ui_preferences });
-        }
+    if (data.settings) {
+      if (data.settings.calendar) {
+        settingsPayload.push({ setting_key: 'calendar', setting_value: data.settings.calendar as Prisma.InputJsonValue });
       }
-
-      // Varsayılan ayarlar yedek
-      if (!settingsPayload.some(s => s.setting_key === 'calendar')) {
-        settingsPayload.push({
-          setting_key: 'calendar',
-          setting_value: { START_HOUR: 9, END_HOUR: 19, SLOT_MINS: 15, DAYS: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'] }
-        });
+      if (data.settings.services) {
+        settingsPayload.push({ setting_key: 'services', setting_value: data.settings.services as Prisma.InputJsonValue });
       }
-      if (!settingsPayload.some(s => s.setting_key === 'services')) {
-        settingsPayload.push({
-          setting_key: 'services',
-          setting_value: { DEFAULT_MINS: 30, MAP: { 'Standart': 30 }, LIST: ['Standart'] }
-        });
+      if (data.settings.sector) {
+        settingsPayload.push({ setting_key: 'sector', setting_value: data.settings.sector as Prisma.InputJsonValue });
       }
+      if (data.settings.terminology) {
+        settingsPayload.push({ setting_key: 'terminology', setting_value: data.settings.terminology as Prisma.InputJsonValue });
+      }
+      if (data.settings.ui_preferences) {
+        settingsPayload.push({ setting_key: 'ui_preferences', setting_value: data.settings.ui_preferences as Prisma.InputJsonValue });
+      }
+    }
 
+    // Varsayılan ayarlar yedek
+    if (!settingsPayload.some(s => s.setting_key === 'calendar')) {
+      settingsPayload.push({
+        setting_key: 'calendar',
+        setting_value: { START_HOUR: 9, END_HOUR: 19, SLOT_MINS: 15, DAYS: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'] }
+      });
+    }
+    if (!settingsPayload.some(s => s.setting_key === 'services')) {
+      settingsPayload.push({
+        setting_key: 'services',
+        setting_value: { DEFAULT_MINS: 30, MAP: { 'Standart': 30 }, LIST: ['Standart'] }
+      });
+    }
+
+    const tenant = await prisma.$transaction(async (tx) => {
+      const createdTenant = await tx.tenant.create({
+        data: {
+          salon_adi: data.salon_adi.trim(),
+          email: data.email.trim().toLowerCase(),
+          password_hash,
+          whatsapp_phone: data.whatsapp_phone ? data.whatsapp_phone.trim() : null,
+          n8n_webhook_url: data.n8n_webhook_url ? data.n8n_webhook_url.trim() : null,
+          chatwoot_inbox_id: data.chatwoot_inbox_id ? data.chatwoot_inbox_id.trim() : null,
+          api_key: apiKey,
+          durum: data.durum || 'Aktif',
+        },
+      });
+
+      // İşletmenin ayarlarını tohumlama / kaydetme (calendar, services, sector, terminology, ui_preferences)
       for (const item of settingsPayload) {
-        await prisma.appSetting.upsert({
+        await tx.appSetting.upsert({
           where: {
             setting_key_tenant_id: {
               setting_key: item.setting_key,
-              tenant_id: tenant.id,
+              tenant_id: createdTenant.id,
             },
           },
           update: { setting_value: item.setting_value },
           create: {
             setting_key: item.setting_key,
-            tenant_id: tenant.id,
+            tenant_id: createdTenant.id,
             setting_value: item.setting_value,
           },
         });
       }
-    } catch (e) {
-      console.warn('Tenant settings initialization error:', e);
-    }
+
+      return createdTenant;
+    });
 
     return {
       success: true,

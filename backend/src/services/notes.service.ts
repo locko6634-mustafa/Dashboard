@@ -1,10 +1,11 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma.js';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export class NotesService {
   static async getNotes(tenantId: string, hastaId?: string) {
-    const whereClause: any = { tenant_id: tenantId };
+    const whereClause: Prisma.HastaNotuWhereInput = { tenant_id: tenantId };
     if (hastaId) {
       whereClause.hasta_id = hastaId;
     }
@@ -66,17 +67,13 @@ export class NotesService {
   }
 
   static async deleteNote(tenantId: string, noteId: string) {
-    const existing = await prisma.hastaNotu.findFirst({
+    const result = await prisma.hastaNotu.deleteMany({
       where: { id: noteId, tenant_id: tenantId },
     });
 
-    if (!existing) {
+    if (result.count === 0) {
       throw { status: 404, message: 'Not bulunamadı' };
     }
-
-    await prisma.hastaNotu.delete({
-      where: { id: noteId },
-    });
 
     return { success: true, message: 'Not başarıyla silindi' };
   }

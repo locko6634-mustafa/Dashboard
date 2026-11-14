@@ -25,6 +25,7 @@ router.get('/health', (req, res) => {
 
 // Auth
 router.post('/auth/login', authRateLimiter, AuthController.login);
+router.post('/auth/logout', AuthController.logout);
 
 // Stats
 router.get('/stats/overview', authMiddleware, StatsController.getOverview);

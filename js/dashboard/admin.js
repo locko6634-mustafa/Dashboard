@@ -14,7 +14,6 @@ const API_BASE = isLocal
       : 'https://randevu.n8n-mustafa.me/api/v1');
 
 const STORAGE_KEYS = {
-  ADMIN_TOKEN: 'sz_super_admin_token',
   ADMIN_USER: 'sz_super_admin_user',
 };
 
@@ -84,33 +83,31 @@ const btnAddServiceItem = document.getElementById('btnAddServiceItem');
 
 let localServices = [];
 
-// Yardımcı: Token Alma
-function getAdminToken() {
-  return localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN);
+// Yardımcı: Admin Oturum Metadata Temizleme
+function clearAdminSession() {
+  sessionStorage.removeItem(STORAGE_KEYS.ADMIN_USER);
+  localStorage.removeItem('sz_super_admin_token');
+  localStorage.removeItem(STORAGE_KEYS.ADMIN_USER);
 }
 
 // Yardımcı: HTTP Fetch Wrapper
 async function adminFetch(endpoint, options = {}) {
-  const token = getAdminToken();
   const headers = {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...(options.headers || {}),
   };
 
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers,
+    credentials: 'include',
   });
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
-      if (token) {
-        localStorage.removeItem(STORAGE_KEYS.ADMIN_TOKEN);
-        localStorage.removeItem(STORAGE_KEYS.ADMIN_USER);
-        showScreen('login');
-      }
+      clearAdminSession();
+      showScreen('login');
     }
     throw new Error(data.error || data.message || 'İşlem sırasında sunucu hatası oluştu');
   }
@@ -155,14 +152,19 @@ async function init() {
       return;
     }
 
-    const token = getAdminToken();
-    if (!token) {
+    const rawAdminUser = sessionStorage.getItem(STORAGE_KEYS.ADMIN_USER);
+    if (!rawAdminUser) {
       showScreen('login');
       return;
     }
 
     // Admin oturumu var, kullanıcı bilgilerini güncelle
-    const savedUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.ADMIN_USER) || '{}');
+    let savedUser = {};
+    try {
+      savedUser = JSON.parse(rawAdminUser) || {};
+    } catch {
+      savedUser = {};
+    }
     if (adminHeaderName && savedUser.ad_soyad) adminHeaderName.textContent = savedUser.ad_soyad;
     if (adminHeaderEmail && savedUser.email) adminHeaderEmail.textContent = savedUser.email;
 
@@ -334,12 +336,12 @@ formAdminSetup?.addEventListener('submit', async (e) => {
     const res = await fetch(`${API_BASE}/admin/setup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ ad_soyad, email, password }),
     });
     const data = await parseAdminAuthResponse(res, 'Kurulum başarısız');
 
-    localStorage.setItem(STORAGE_KEYS.ADMIN_TOKEN, data.token);
-    localStorage.setItem(STORAGE_KEYS.ADMIN_USER, JSON.stringify(data.admin));
+    sessionStorage.setItem(STORAGE_KEYS.ADMIN_USER, JSON.stringify(data.admin || {}));
 
     alert('Süper Admin hesabı başarıyla oluşturuldu!');
     showScreen('dashboard');
@@ -368,16 +370,16 @@ formAdminLogin?.addEventListener('submit', async (e) => {
     const res = await fetch(`${API_BASE}/admin/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
     const data = await parseAdminAuthResponse(res, 'Giriş yapılamadı');
 
-    localStorage.setItem(STORAGE_KEYS.ADMIN_TOKEN, data.token);
-    localStorage.setItem(STORAGE_KEYS.ADMIN_USER, JSON.stringify(data.admin));
+    sessionStorage.setItem(STORAGE_KEYS.ADMIN_USER, JSON.stringify(data.admin || {}));
 
     showScreen('dashboard');
-    if (adminHeaderName && data.admin.ad_soyad) adminHeaderName.textContent = data.admin.ad_soyad;
-    if (adminHeaderEmail && data.admin.email) adminHeaderEmail.textContent = data.admin.email;
+    if (adminHeaderName && data.admin?.ad_soyad) adminHeaderName.textContent = data.admin.ad_soyad;
+    if (adminHeaderEmail && data.admin?.email) adminHeaderEmail.textContent = data.admin.email;
     await loadDashboardData();
   } catch (err) {
     alert(err.message);
@@ -388,10 +390,17 @@ formAdminLogin?.addEventListener('submit', async (e) => {
 });
 
 // Çıkış Yap
-btnAdminLogout?.addEventListener('click', () => {
+btnAdminLogout?.addEventListener('click', async () => {
   if (confirm('Süper Admin oturumunu kapatmak istediğinize emin misiniz?')) {
-    localStorage.removeItem(STORAGE_KEYS.ADMIN_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.ADMIN_USER);
+    try {
+      await fetch(`${API_BASE}/admin/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // Ağ hatasında da istemci oturumunu temizle
+    }
+    clearAdminSession();
     showScreen('login');
   }
 });
@@ -684,10 +693,9 @@ window.impersonateTenant = async function(id) {
 
   try {
     const data = await adminFetch(`/admin/tenants/${id}/impersonate`, { method: 'POST' });
-    if (data.success && data.token) {
-      // Normal salon oturumu olarak kaydet (auth-session.js üzerinden tekilleştirilmiş)
+    if (data.success && data.tenant_id) {
+      // Normal salon oturumu metadata'sını kaydet (auth-session.js üzerinden tekilleştirilmiş)
       setSession({
-        token: data.token,
         tenantId: data.tenant_id,
         salonAdi: data.salon_adi || '',
       });

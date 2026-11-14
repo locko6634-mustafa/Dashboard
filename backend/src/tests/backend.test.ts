@@ -444,6 +444,7 @@ describe('Security, Env, Validation and Error Handling Regression Tests', () => 
 
   test('AppointmentService.createAppointment throws 404 for cross-tenant hasta_id', async (t) => {
     const fakeTx = {
+      $executeRaw: async () => 0,
       appointment: {
         findMany: async () => [],
       },

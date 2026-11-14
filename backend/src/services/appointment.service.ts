@@ -210,7 +210,7 @@ export class AppointmentService {
       maxDate = bitisStr > todayStr ? bitisStr : todayStr;
     }
 
-    const whereClause: any = {
+    const whereClause: Prisma.AppointmentWhereInput = {
       tenant_id: tenantId,
       deleted_at: null,
       tarih: {
@@ -276,6 +276,9 @@ export class AppointmentService {
     const appointment = await prisma.$transaction(
       async (tx) => {
         if (durum !== 'İptal') {
+          const lockKey = `${tenantId}:${data.tarih}`;
+          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+
           const conflict = await hasAppointmentConflict({
             tx,
             tenantId,
@@ -400,10 +403,14 @@ export class AppointmentService {
           existing.durum === 'İptal';
 
         if (effectiveDurum !== 'İptal' && timeOrDateChanged) {
+          const targetTarih = updateData.tarih ?? existing.tarih;
+          const lockKey = `${tenantId}:${targetTarih}`;
+          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+
           const conflict = await hasAppointmentConflict({
             tx,
             tenantId,
-            tarih: updateData.tarih ?? existing.tarih,
+            tarih: targetTarih,
             baslangicSaati: updateData.baslangic_saati ?? existing.baslangic_saati,
             bitisSaati: updateData.bitis_saati ?? existing.bitis_saati,
             sure: updateData.sure ?? existing.sure,
@@ -455,18 +462,14 @@ export class AppointmentService {
   }
 
   static async deleteAppointment(tenantId: string, id: string) {
-    const existing = await prisma.appointment.findFirst({
+    const result = await prisma.appointment.updateMany({
       where: { id, tenant_id: tenantId, deleted_at: null },
-    });
-
-    if (!existing) {
-      throw { status: 404, message: 'Randevu bulunamadı veya zaten silinmiş' };
-    }
-
-    await prisma.appointment.update({
-      where: { id },
       data: { deleted_at: new Date() },
     });
+
+    if (result.count === 0) {
+      throw { status: 404, message: 'Randevu bulunamadı veya zaten silinmiş' };
+    }
 
     return { success: true, message: 'Randevu başarıyla silindi' };
   }

@@ -101,7 +101,7 @@ model AppSetting {
 }
 
 model ConversationState {
-  conversation_id String         @id @db.VarChar(255)
+  conversation_id String         @db.VarChar(255)
   phone_number    String         @db.VarChar(50)
   current_intent  String?        @db.VarChar(100)
   current_stage   String?        @db.VarChar(100)
@@ -112,6 +112,7 @@ model ConversationState {
 
   tenant          Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
+  @@id([conversation_id, tenant_id])
   @@index([phone_number])
   @@index([tenant_id])
   @@map("conversation_states")

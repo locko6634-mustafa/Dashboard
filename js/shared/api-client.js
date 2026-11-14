@@ -4,7 +4,7 @@
 
 import { CONFIG } from './config.js';
 import { showToast } from './toast.js';
-import { getToken, getTenantId, clearSession } from './auth-session.js';
+import { getTenantId, clearSession } from './auth-session.js';
 
 export class ApiService {
     static call = async (endpoint, options = {}) => {
@@ -20,10 +20,9 @@ export class ApiService {
             customErrorMsg = CONFIG.UI.MSG_API_ERROR
         } = options;
 
-        const currentToken = getToken();
         const tenantId = getTenantId();
 
-        if (!currentToken || !tenantId) {
+        if (!tenantId) {
             showToast('Oturum bulunamadı! Lütfen giriş yapın.', 'error', 8000);
             setTimeout(() => window.location.href = 'login.html', 1000);
             return null;
@@ -41,7 +40,6 @@ export class ApiService {
         try {
             const headers = {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + currentToken,
                 'x-tenant-id': tenantId
             };
             if (apiKey) {
@@ -50,7 +48,8 @@ export class ApiService {
 
             const fetchOpts = {
                 method,
-                headers
+                headers,
+                credentials: 'include'
             };
             if (payload && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
                 fetchOpts.body = JSON.stringify(payload);

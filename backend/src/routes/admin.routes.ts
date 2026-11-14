@@ -9,6 +9,7 @@ const router = Router();
 router.get('/setup-status', AdminController.checkSetup);
 router.post('/setup', authRateLimiter, AdminController.setup);
 router.post('/login', authRateLimiter, AdminController.login);
+router.post('/logout', AdminController.logout);
 
 // Korumalı Süper Admin Rotaları
 router.get('/stats', adminMiddleware, AdminController.getStats);

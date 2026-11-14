@@ -1,7 +1,52 @@
-import { Request, Response, NextFunction } from 'express';
+import { CookieOptions, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.config.js';
 import { prisma } from '../config/prisma.js';
+
+export const USER_AUTH_COOKIE_NAME = 'rp_user_token';
+export const ADMIN_AUTH_COOKIE_NAME = 'rp_admin_token';
+
+/**
+ * Harici bağımlılık olmadan Cookie başlığını ayrıştırır.
+ */
+export function parseCookies(cookieHeader: string | undefined): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  if (!cookieHeader) {
+    return cookies;
+  }
+
+  for (const part of cookieHeader.split(';')) {
+    const eqIndex = part.indexOf('=');
+    if (eqIndex === -1) continue;
+    const key = part.slice(0, eqIndex).trim();
+    const rawValue = part.slice(eqIndex + 1).trim();
+    if (!key) continue;
+
+    try {
+      cookies[key] = decodeURIComponent(rawValue);
+    } catch {
+      cookies[key] = rawValue;
+    }
+  }
+
+  return cookies;
+}
+
+/**
+ * Auth HttpOnly cookie ayarlarını üretir (set ve clearCookie için ortak).
+ */
+export function getAuthCookieOptions(maxAgeMs?: number): CookieOptions {
+  const options: CookieOptions = {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+  };
+  if (typeof maxAgeMs === 'number') {
+    options.maxAge = maxAgeMs;
+  }
+  return options;
+}
 
 export interface AuthenticatedRequest extends Request {
   tenantId?: string;
@@ -23,6 +68,11 @@ export async function authMiddleware(req: AuthenticatedRequest, res: Response, n
       token = authHeader.substring(7);
     } else if (apiKeyHeader) {
       token = apiKeyHeader;
+    } else {
+      const cookies = parseCookies(req.headers.cookie);
+      if (cookies[USER_AUTH_COOKIE_NAME]) {
+        token = cookies[USER_AUTH_COOKIE_NAME];
+      }
     }
 
     // Tenant ID detection
@@ -53,6 +103,11 @@ export async function authMiddleware(req: AuthenticatedRequest, res: Response, n
         const jwtTenantId = decoded.tenant_id || decoded.tenantId || decoded.id;
         if (!jwtTenantId) {
           res.status(403).json({ error: 'Hesabınız aktif değil veya bulunamadı', success: false });
+          return;
+        }
+
+        if (typeof tenantId === 'string' && tenantId.trim() && tenantId.trim() !== jwtTenantId) {
+          res.status(403).json({ error: 'Farklı bir tenant adına işlem yapma yetkiniz yok', success: false });
           return;
         }
 

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Prisma } from '@prisma/client';
 import { ZodError } from 'zod';
 
-export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
+export function errorHandler(err: unknown, req: Request, res: Response, next: NextFunction) {
   console.error('API Error:', err);
 
   if (err instanceof ZodError) {
@@ -45,16 +45,29 @@ export function errorHandler(err: any, req: Request, res: Response, next: NextFu
     }
   }
 
-  const statusCode =
-    typeof err?.statusCode === 'number'
-      ? err.statusCode
-      : typeof err?.status === 'number'
-        ? err.status
-        : 500;
+  let statusCode = 500;
+  let errMessage: string | undefined;
+
+  if (err instanceof Error) {
+    errMessage = err.message;
+  }
+
+  if (typeof err === 'object' && err !== null) {
+    const errObj = err as Record<string, unknown>;
+    if (typeof errObj.statusCode === 'number') {
+      statusCode = errObj.statusCode;
+    } else if (typeof errObj.status === 'number') {
+      statusCode = errObj.status;
+    }
+    if (typeof errObj.message === 'string') {
+      errMessage = errObj.message;
+    }
+  }
+
   const message =
     statusCode >= 500
       ? 'Sunucu içi hata oluştu'
-      : err?.message || 'Sunucu içi hata oluştu';
+      : errMessage || 'Sunucu içi hata oluştu';
 
   res.status(statusCode).json({
     error: message,

@@ -31,7 +31,7 @@ export class ChatbotService {
       day: '2-digit',
     }).format(new Date());
 
-    const whereClause: any = {
+    const whereClause: Prisma.AppointmentWhereInput = {
       hasta_id: client.id,
       deleted_at: null,
       ...(tenantId ? { tenant_id: tenantId } : {}),
@@ -66,35 +66,42 @@ export class ChatbotService {
     };
   }
 
-  static async getAvailableSlots(date: string, durationMinutes: number = 30, tenantId?: string) {
+  static async getAvailableSlots(date: string, durationMinutes: number = 30, tenantId: string) {
+    if (!tenantId || !tenantId.trim()) {
+      throw { status: 400, message: 'tenant_id zorunludur' };
+    }
+
     // Salon çalışma saatleri (varsayılan: 09:00 - 19:00)
     let startHour = 9;
     let endHour = 19;
     let slotStep = 15; // 15 dk
 
-    if (tenantId) {
-      try {
-        const calSetting = await prisma.appSetting.findFirst({
-          where: { tenant_id: tenantId, setting_key: 'calendar' },
-        });
-        if (calSetting && calSetting.setting_value) {
-          const val = calSetting.setting_value as any;
-          if (val.START_HOUR !== undefined) startHour = Number(val.START_HOUR);
-          if (val.END_HOUR !== undefined) endHour = Number(val.END_HOUR);
-          if (val.SLOT_MINS !== undefined) slotStep = Number(val.SLOT_MINS);
-        }
-      } catch {
-        // Varsayılan ayarlarla devam et
+    try {
+      const calSetting = await prisma.appSetting.findFirst({
+        where: { tenant_id: tenantId, setting_key: 'calendar' },
+      });
+      if (
+        calSetting &&
+        calSetting.setting_value &&
+        typeof calSetting.setting_value === 'object' &&
+        !Array.isArray(calSetting.setting_value)
+      ) {
+        const val = calSetting.setting_value as Record<string, unknown>;
+        if (val.START_HOUR !== undefined) startHour = Number(val.START_HOUR);
+        if (val.END_HOUR !== undefined) endHour = Number(val.END_HOUR);
+        if (val.SLOT_MINS !== undefined) slotStep = Number(val.SLOT_MINS);
       }
+    } catch {
+      // Varsayılan ayarlarla devam et
     }
 
     // Get all existing appointments on this date
     const existing = await prisma.appointment.findMany({
       where: {
+        tenant_id: tenantId,
         tarih: date,
         deleted_at: null,
         durum: { not: 'İptal' },
-        ...(tenantId ? { tenant_id: tenantId } : {}),
       },
       select: {
         baslangic_saati: true,
@@ -171,6 +178,9 @@ export class ChatbotService {
 
     return await prisma.$transaction(
       async (tx) => {
+        const lockKey = `${tenantId}:${data.tarih}`;
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+
         // Conflict check first to avoid creating orphan clients on conflict
         const hasConflict = await hasAppointmentConflict({
           tx,
@@ -281,47 +291,76 @@ export class ChatbotService {
       throw { status: 400, message: 'tenant_id zorunludur' };
     }
 
-    const whereClause: Prisma.AppointmentWhereInput = {
-      id: appointmentId,
-      tenant_id: tenantId,
-      deleted_at: null,
-    };
+    let clientId: string | undefined;
     if (phone) {
       const client = await this.getClientByPhone(phone, tenantId);
       if (!client) return { success: false, message: 'Müşteri bulunamadı' };
-      whereClause.hasta_id = client.id;
+      clientId = client.id;
     }
 
-    const appointment = await prisma.appointment.findFirst({ where: whereClause });
-    if (!appointment) {
-      return { success: false, message: 'Randevu bulunamadı' };
-    }
+    return await prisma.$transaction(
+      async (tx) => {
+        const whereClause: Prisma.AppointmentWhereInput = {
+          id: appointmentId,
+          tenant_id: tenantId,
+          deleted_at: null,
+          ...(clientId ? { hasta_id: clientId } : {}),
+        };
 
-    const duration = appointment.sure || calculateDefaultDuration(appointment.hizmet);
-    const newEndTime = calculateEndTime(newTime, duration);
+        const appointment = await tx.appointment.findFirst({ where: whereClause });
+        if (!appointment) {
+          return { success: false, message: 'Randevu bulunamadı' };
+        }
 
-    const updated = await prisma.appointment.updateMany({
-      where: { id: appointmentId, tenant_id: tenantId, deleted_at: null },
-      data: {
-        tarih: newDate,
-        baslangic_saati: newTime,
-        bitis_saati: newEndTime,
-        durum: 'Bekliyor',
+        const duration = appointment.sure || calculateDefaultDuration(appointment.hizmet);
+        const newEndTime = calculateEndTime(newTime, duration);
+
+        const lockKey = `${tenantId}:${newDate}`;
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+
+        const hasConflict = await hasAppointmentConflict({
+          tx,
+          tenantId,
+          tarih: newDate,
+          baslangicSaati: newTime,
+          bitisSaati: newEndTime,
+          sure: duration,
+          excludeId: appointmentId,
+        });
+
+        if (hasConflict) {
+          return {
+            success: false,
+            conflict: true,
+            message: 'Seçtiğiniz tarih ve saatte başka bir randevu mevcuttur. Lütfen başka bir saat seçiniz.',
+          };
+        }
+
+        const updated = await tx.appointment.updateMany({
+          where: { id: appointmentId, tenant_id: tenantId, deleted_at: null },
+          data: {
+            tarih: newDate,
+            baslangic_saati: newTime,
+            bitis_saati: newEndTime,
+            durum: 'Bekliyor',
+          },
+        });
+
+        if (updated.count === 0) {
+          return { success: false, message: 'Randevu bulunamadı' };
+        }
+
+        return {
+          success: true,
+          message: 'Randevunuz başarıyla güncellendi.',
+          id: appointment.id,
+          tarih: newDate,
+          saat: newTime,
+          bitis_saati: newEndTime,
+        };
       },
-    });
-
-    if (updated.count === 0) {
-      return { success: false, message: 'Randevu bulunamadı' };
-    }
-
-    return {
-      success: true,
-      message: 'Randevunuz başarıyla güncellendi.',
-      id: appointment.id,
-      tarih: newDate,
-      saat: newTime,
-      bitis_saati: newEndTime,
-    };
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+    );
   }
 
   static async getConversationState(identifier: string, tenantId: string) {
@@ -347,8 +386,8 @@ export class ChatbotService {
       current_intent?: string;
       stage?: string;
       current_stage?: string;
-      context?: any;
-      context_data?: any;
+      context?: Prisma.InputJsonValue;
+      context_data?: Prisma.InputJsonValue;
       phone?: string;
       phone_number?: string;
     },
@@ -361,21 +400,16 @@ export class ChatbotService {
     const ph = data.phone_number || data.phone || '';
     const it = data.current_intent || data.intent || null;
     const st = data.current_stage || data.stage || 'START';
-    const ctx = data.context_data || data.context || {};
-
-    const existing = await prisma.conversationState.findUnique({
-      where: { conversation_id: convId },
-      select: { tenant_id: true },
-    });
-
-    if (existing && existing.tenant_id !== tenantId) {
-      throw { status: 403, message: 'Bu konuşma durumuna erişim yetkiniz yok' };
-    }
+    const ctx: Prisma.InputJsonValue = data.context_data ?? data.context ?? {};
 
     return await prisma.conversationState.upsert({
-      where: { conversation_id: convId },
+      where: {
+        conversation_id_tenant_id: {
+          conversation_id: convId,
+          tenant_id: tenantId,
+        },
+      },
       update: {
-        tenant_id: tenantId,
         current_intent: it,
         current_stage: st,
         context_data: ctx,

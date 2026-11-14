@@ -173,23 +173,34 @@ export class WhatsappAiInbox {
     static async setTakeover(paused) {
         const conv = WhatsappAiInbox.getActiveConversation();
         if (!conv) return;
-        conv.aiPaused = Boolean(paused);
-        WhatsappAiInbox.saveState();
-        WhatsappAiInbox.render();
+        const nextPaused = Boolean(paused);
 
         try {
-            await ApiService.call('whatsapp-takeover', {
+            const res = await ApiService.call('whatsapp-takeover', {
                 method: 'POST',
-                payload: { conversation_id: conv.id, ai_paused: conv.aiPaused },
+                payload: { conversation_id: conv.id, ai_paused: nextPaused },
                 returnData: true,
                 customErrorMsg: null
             });
-        } catch { /* yerel durum korunur */ }
 
-        Utils.showToast(
-            conv.aiPaused ? 'AI durduruldu — Manuel yanıt modundasınız' : 'AI Asistan yeniden devrede',
-            conv.aiPaused ? 'warning' : 'success'
-        );
+            if (!res || res === false) {
+                WhatsappAiInbox.render();
+                Utils.showToast('AI durumu güncellenemedi. Lütfen tekrar deneyin.', 'error');
+                return;
+            }
+
+            conv.aiPaused = nextPaused;
+            WhatsappAiInbox.saveState();
+            WhatsappAiInbox.render();
+
+            Utils.showToast(
+                conv.aiPaused ? 'AI durduruldu — Manuel yanıt modundasınız' : 'AI Asistan yeniden devrede',
+                conv.aiPaused ? 'warning' : 'success'
+            );
+        } catch {
+            WhatsappAiInbox.render();
+            Utils.showToast('AI durumu güncellenemedi. Lütfen tekrar deneyin.', 'error');
+        }
     }
 
     static async sendManualReply() {
@@ -201,25 +212,32 @@ export class WhatsappAiInbox {
         const conv = WhatsappAiInbox.getActiveConversation();
         if (!conv) return;
 
-        if (!conv.aiPaused) {
-            conv.aiPaused = true;
-        }
-
-        const now = new Date();
-        const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-        conv.messages.push({ sender: 'manual', text, time: timeStr });
-        input.value = '';
-        WhatsappAiInbox.saveState();
-        WhatsappAiInbox.render();
-
         try {
-            await ApiService.call('whatsapp-reply', {
+            const res = await ApiService.call('whatsapp-reply', {
                 method: 'POST',
                 payload: { conversation_id: conv.id, message: text },
                 returnData: true,
                 customErrorMsg: null
             });
-        } catch { /* yerel durum korunur */ }
+
+            if (!res || res === false) {
+                Utils.showToast('Mesaj gönderilemedi. Lütfen tekrar deneyin.', 'error');
+                return;
+            }
+
+            if (!conv.aiPaused) {
+                conv.aiPaused = true;
+            }
+
+            const now = new Date();
+            const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+            conv.messages.push({ sender: 'manual', text, time: timeStr });
+            input.value = '';
+            WhatsappAiInbox.saveState();
+            WhatsappAiInbox.render();
+        } catch {
+            Utils.showToast('Mesaj gönderilemedi. Lütfen tekrar deneyin.', 'error');
+        }
     }
 
     static render() {

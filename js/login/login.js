@@ -4,7 +4,7 @@
 
 import { CONFIG } from '../shared/config.js';
 import { showToast } from '../shared/toast.js';
-import { saveSession, redirectIfAuthenticated } from '../shared/auth-session.js';
+import { setSession, redirectIfAuthenticated } from '../shared/auth-session.js';
 
 // Eğer kullanıcı zaten giriş yapmışsa doğrudan dashboard'a yönlendir
 redirectIfAuthenticated('dashboard.html');
@@ -58,6 +58,7 @@ export async function handleLogin(e) {
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ email, password })
         });
 
@@ -67,8 +68,8 @@ export async function handleLogin(e) {
 
         const data = await res.json();
         
-        if (data.success && data.token && data.tenant_id) {
-            saveSession(data.token, data.tenant_id);
+        if (data.success && data.tenant_id) {
+            setSession({ tenantId: data.tenant_id, salonAdi: data.salon_adi });
             showToast('Giriş başarılı, yönlendiriliyor...', 'success');
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
