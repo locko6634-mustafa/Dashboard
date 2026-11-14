@@ -1,5 +1,6 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma.js';
-import { calculateDefaultDuration, calculateEndTime } from './appointment.service.js';
+import { calculateDefaultDuration, calculateEndTime, hasAppointmentConflict } from './appointment.service.js';
 
 export class ChatbotService {
   static async getClientByPhone(phone: string, tenantId?: string) {
@@ -167,82 +168,71 @@ export class ChatbotService {
 
     const duration = data.sure || calculateDefaultDuration(data.hizmet);
     const bitisSaati = calculateEndTime(data.saat, duration);
-    const [reqH, reqM] = data.saat.split(':').map(Number);
-    const reqStart = reqH * 60 + reqM;
-    const reqEnd = reqStart + duration;
 
-    return await prisma.$transaction(async (tx) => {
-      // Conflict check first to avoid creating orphan clients on conflict
-      const conflicts = await tx.appointment.findMany({
-        where: {
-          tenant_id: tenantId,
+    return await prisma.$transaction(
+      async (tx) => {
+        // Conflict check first to avoid creating orphan clients on conflict
+        const hasConflict = await hasAppointmentConflict({
+          tx,
+          tenantId,
           tarih: data.tarih,
-          deleted_at: null,
-          durum: { not: 'İptal' },
-        },
-      });
+          baslangicSaati: data.saat,
+          bitisSaati,
+          sure: duration,
+        });
 
-      const hasConflict = conflicts.some((c) => {
-        const [cStartH, cStartM] = c.baslangic_saati.split(':').map(Number);
-        const cStart = cStartH * 60 + cStartM;
-        let cEnd = cStart + (c.sure || 30);
-        if (c.bitis_saati) {
-          const [ceh, cem] = c.bitis_saati.split(':').map(Number);
-          cEnd = ceh * 60 + cem;
+        if (hasConflict) {
+          return {
+            success: false,
+            conflict: true,
+            message: 'Seçtiğiniz tarih ve saatte başka bir randevu mevcuttur. Lütfen başka bir saat seçiniz.',
+          };
         }
-        return Math.max(reqStart, cStart) < Math.min(reqEnd, cEnd);
-      });
 
-      if (hasConflict) {
-        return {
-          success: false,
-          conflict: true,
-          message: 'Seçtiğiniz tarih ve saatte başka bir randevu mevcuttur. Lütfen başka bir saat seçiniz.',
-        };
-      }
-
-      // Check or create client inside transaction
-      let client = await tx.client.findFirst({
-        where: {
-          tenant_id: tenantId,
-          telefon: { contains: targetDigits },
-        },
-      });
-
-      if (!client) {
-        client = await tx.client.create({
-          data: {
+        // Check or create client inside transaction
+        let client = await tx.client.findFirst({
+          where: {
             tenant_id: tenantId,
-            ad_soyad: data.ad_soyad || 'Chatbot Danışanı',
-            telefon: data.telefon,
+            telefon: { contains: targetDigits },
           },
         });
-      }
 
-      const appointment = await tx.appointment.create({
-        data: {
-          tenant_id: tenantId,
-          hasta_id: client.id,
-          tarih: data.tarih,
-          baslangic_saati: data.saat,
-          bitis_saati: bitisSaati,
-          durum: 'Bekliyor',
-          hizmet: data.hizmet || 'Diğer',
-          sure: duration,
-        },
-      });
+        if (!client) {
+          client = await tx.client.create({
+            data: {
+              tenant_id: tenantId,
+              ad_soyad: data.ad_soyad || 'Chatbot Danışanı',
+              telefon: data.telefon,
+            },
+          });
+        }
 
-      return {
-        success: true,
-        message: 'Randevunuz başarıyla oluşturuldu.',
-        appointment_id: appointment.id,
-        tarih: appointment.tarih,
-        saat: appointment.baslangic_saati,
-        bitis_saati: appointment.bitis_saati,
-        hizmet: appointment.hizmet,
-        musteri: client.ad_soyad,
-      };
-    });
+        const appointment = await tx.appointment.create({
+          data: {
+            tenant_id: tenantId,
+            hasta_id: client.id,
+            tarih: data.tarih,
+            baslangic_saati: data.saat,
+            bitis_saati: bitisSaati,
+            durum: 'Bekliyor',
+            hizmet: data.hizmet || 'Diğer',
+            sure: duration,
+          },
+        });
+
+        return {
+          success: true,
+          message: 'Randevunuz başarıyla oluşturuldu.',
+          appointment_id: appointment.id,
+          tarih: appointment.tarih,
+          saat: appointment.baslangic_saati,
+          bitis_saati: appointment.bitis_saati,
+          hizmet: appointment.hizmet,
+          musteri: client.ad_soyad,
+        };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+    );
   }
 
   static async cancelAppointment(appointmentId: string, phone: string, tenantId?: string) {

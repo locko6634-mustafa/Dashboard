@@ -76,7 +76,14 @@ export class ApiService {
             
             let parsedData = null;
             if (resText) {
-                try { parsedData = JSON.parse(resText); } catch(e) {}
+                try {
+                    parsedData = JSON.parse(resText);
+                } catch (e) {
+                    console.error('JSON Parse Error:', e);
+                    if (!isText) {
+                        throw new Error('Sunucudan geçersiz JSON yanıtı alındı.');
+                    }
+                }
             }
             
             if (parsedData && typeof parsedData === 'object' && parsedData.error) {

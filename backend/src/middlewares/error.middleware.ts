@@ -22,6 +22,20 @@ export function errorHandler(err: any, req: Request, res: Response, next: NextFu
       });
       return;
     }
+    if (err.code === 'P2003') {
+      res.status(400).json({
+        error: 'Geçersiz ilişkili kayıt referansı',
+        success: false,
+      });
+      return;
+    }
+    if (err.code === 'P2023') {
+      res.status(400).json({
+        error: 'Geçersiz kimlik formatı',
+        success: false,
+      });
+      return;
+    }
     if (err.code === 'P2025') {
       res.status(404).json({
         error: 'İlgili kayıt bulunamadı',
@@ -31,8 +45,16 @@ export function errorHandler(err: any, req: Request, res: Response, next: NextFu
     }
   }
 
-  const statusCode = err?.statusCode || err?.status || 500;
-  const message = err?.message || 'Sunucu içi hata oluştu';
+  const statusCode =
+    typeof err?.statusCode === 'number'
+      ? err.statusCode
+      : typeof err?.status === 'number'
+        ? err.status
+        : 500;
+  const message =
+    statusCode >= 500
+      ? 'Sunucu içi hata oluştu'
+      : err?.message || 'Sunucu içi hata oluştu';
 
   res.status(statusCode).json({
     error: message,

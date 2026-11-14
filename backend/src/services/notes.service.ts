@@ -18,6 +18,15 @@ export class NotesService {
       throw { status: 400, message: 'Not metni boş olamaz' };
     }
 
+    if (hastaId) {
+      const client = await prisma.client.findFirst({
+        where: { id: hastaId, tenant_id: tenantId },
+      });
+      if (!client) {
+        throw { status: 404, message: 'Belirtilen müşteri bulunamadı' };
+      }
+    }
+
     const note = await prisma.hastaNotu.create({
       data: {
         tenant_id: tenantId,

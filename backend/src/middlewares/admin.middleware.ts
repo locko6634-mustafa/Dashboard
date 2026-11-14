@@ -3,6 +3,24 @@ import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.config.js';
 import { prisma } from '../config/prisma.js';
 
+export interface AdminJwtPayload {
+  adminId: string;
+  role: 'super_admin';
+  email?: string;
+}
+
+function isAdminJwtPayload(payload: unknown): payload is AdminJwtPayload {
+  if (typeof payload !== 'object' || payload === null) {
+    return false;
+  }
+  const candidate = payload as Record<string, unknown>;
+  return (
+    typeof candidate.adminId === 'string' &&
+    candidate.adminId.length > 0 &&
+    candidate.role === 'super_admin'
+  );
+}
+
 export interface AuthenticatedAdminRequest extends Request {
   admin?: {
     id: string;
@@ -21,15 +39,15 @@ export async function adminMiddleware(req: AuthenticatedAdminRequest, res: Respo
     }
 
     const token = authHeader.substring(7);
-    let decoded: any;
+    let decoded: unknown;
     try {
       decoded = jwt.verify(token, ENV.JWT_SECRET);
-    } catch (jwtErr) {
+    } catch {
       res.status(401).json({ success: false, error: 'Geçersiz veya süresi dolmuş oturum anahtarı' });
       return;
     }
 
-    if (decoded.role !== 'super_admin' || !decoded.adminId) {
+    if (!isAdminJwtPayload(decoded)) {
       res.status(403).json({ success: false, error: 'Bu işlem için Süper Admin yetkisi gereklidir' });
       return;
     }

@@ -301,6 +301,22 @@ tenantsTableBody?.addEventListener('click', (e) => {
 
 // 4. FORMLAR & ETKİLEŞİMLER
 // İlk Kurulum
+async function parseAdminAuthResponse(res, fallbackMsg) {
+  let data = {};
+  try {
+    data = await res.json();
+  } catch {
+    if (!res.ok) {
+      throw new Error(`${fallbackMsg} (HTTP ${res.status})`);
+    }
+    throw new Error('Sunucudan geçersiz yanıt alındı.');
+  }
+  if (!res.ok) {
+    throw new Error(data?.error || data?.message || `${fallbackMsg} (HTTP ${res.status})`);
+  }
+  return data;
+}
+
 formAdminSetup?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const ad_soyad = document.getElementById('setupName')?.value.trim();
@@ -319,8 +335,7 @@ formAdminSetup?.addEventListener('submit', async (e) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ad_soyad, email, password }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || data.message || 'Kurulum başarısız');
+    const data = await parseAdminAuthResponse(res, 'Kurulum başarısız');
 
     localStorage.setItem(STORAGE_KEYS.ADMIN_TOKEN, data.token);
     localStorage.setItem(STORAGE_KEYS.ADMIN_USER, JSON.stringify(data.admin));
@@ -354,8 +369,7 @@ formAdminLogin?.addEventListener('submit', async (e) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || data.message || 'Giriş yapılamadı');
+    const data = await parseAdminAuthResponse(res, 'Giriş yapılamadı');
 
     localStorage.setItem(STORAGE_KEYS.ADMIN_TOKEN, data.token);
     localStorage.setItem(STORAGE_KEYS.ADMIN_USER, JSON.stringify(data.admin));

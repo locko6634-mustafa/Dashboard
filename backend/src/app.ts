@@ -26,29 +26,41 @@ app.use(
   })
 );
 
-// CORS configuration (supports wildcard or comma-separated domain whitelist)
+// CORS configuration (wildcard disables credentials; explicit allowlist enables credentials)
+const rawCorsOrigin = ENV.CORS_ORIGIN.trim();
+const isWildcardCors = !rawCorsOrigin || rawCorsOrigin === '*';
+const allowedOrigins = isWildcardCors
+  ? []
+  : rawCorsOrigin
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean);
+
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server)
-      if (!origin) return callback(null, true);
+  cors(
+    isWildcardCors
+      ? {
+          origin: '*',
+          methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+          allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-tenant-id'],
+          credentials: false,
+        }
+      : {
+          origin: (origin, callback) => {
+            // Allow requests with no origin (like mobile apps, curl, server-to-server)
+            if (!origin) return callback(null, true);
 
-      const allowed = ENV.CORS_ORIGIN;
-      if (!allowed || allowed === '*') {
-        return callback(null, true);
-      }
+            if (allowedOrigins.includes(origin)) {
+              return callback(null, true);
+            }
 
-      const allowedOrigins = allowed.split(',').map((o) => o.trim());
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error('CORS ilkesi bu kaynağa erişimi engelledi.'));
-    },
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-tenant-id'],
-    credentials: true,
-  })
+            return callback(new Error('CORS ilkesi bu kaynağa erişimi engelledi.'));
+          },
+          methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+          allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-tenant-id'],
+          credentials: true,
+        }
+  )
 );
 
 app.use(express.json({ limit: '10mb' }));

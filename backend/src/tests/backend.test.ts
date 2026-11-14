@@ -1,18 +1,36 @@
-import { test, describe } from 'node:test';
+import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { Prisma } from '@prisma/client';
 import { ZodError, z } from 'zod';
 import {
+  AppointmentService,
   calculateDefaultDuration,
   calculateEndTime,
   createAppointmentSchema,
+  hasAppointmentConflict,
 } from '../services/appointment.service.js';
+import { AuthService } from '../services/auth.service.js';
 import { createClientSchema } from '../services/client.service.js';
+import { NotesService } from '../services/notes.service.js';
 import { updateSettingsSchema } from '../services/settings.service.js';
 import { ChatbotService } from '../services/chatbot.service.js';
 import { ENV, validateEnv } from '../config/env.config.js';
+import { prisma } from '../config/prisma.js';
 import { errorHandler } from '../middlewares/error.middleware.js';
+
+function stubMethod<T extends object, K extends keyof T>(
+  obj: T,
+  key: K,
+  impl: T[K]
+): () => void {
+  const original = obj[key];
+  (obj as any)[key] = impl;
+  return () => {
+    (obj as any)[key] = original;
+  };
+}
 
 describe('Appointment Service Logic Tests', () => {
   test('calculateDefaultDuration maps service names correctly', () => {
@@ -48,6 +66,31 @@ import type { Server } from 'http';
 describe('HTTP API Endpoints Integration Tests', () => {
   let server: Server;
   let baseUrl: string;
+  let restoreTenantFindUnique: (() => void) | undefined;
+
+  const testTenantId = '11111111-1111-4111-8111-111111111111';
+  const passiveTenantId = '33333333-3333-4333-8333-333333333333';
+  const otherTenantId = '22222222-2222-4222-8222-222222222222';
+
+  before(() => {
+    restoreTenantFindUnique = stubMethod(
+      prisma.tenant,
+      'findUnique',
+      (async (args: { where?: { id?: string } }) => {
+        if (args?.where?.id === testTenantId) {
+          return { id: testTenantId, durum: 'Aktif' } as any;
+        }
+        if (args?.where?.id === passiveTenantId) {
+          return { id: passiveTenantId, durum: 'Pasif' } as any;
+        }
+        return null;
+      }) as any
+    );
+  });
+
+  after(() => {
+    restoreTenantFindUnique?.();
+  });
 
   test('Start test HTTP server', async () => {
     await new Promise<void>((resolve) => {
@@ -99,14 +142,22 @@ describe('HTTP API Endpoints Integration Tests', () => {
     assert.equal(body.success, false);
   });
 
-  const testTenantId = '11111111-1111-4111-8111-111111111111';
-  const otherTenantId = '22222222-2222-4222-8222-222222222222';
   const authToken = jwt.sign(
     {
       id: testTenantId,
       tenant_id: testTenantId,
       email: 'test@salon.local',
       salon_adi: 'Test Salon',
+    },
+    ENV.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+  const passiveAuthToken = jwt.sign(
+    {
+      id: passiveTenantId,
+      tenant_id: passiveTenantId,
+      email: 'pasif@salon.local',
+      salon_adi: 'Pasif Salon',
     },
     ENV.JWT_SECRET,
     { expiresIn: '1h' }
@@ -193,6 +244,25 @@ describe('HTTP API Endpoints Integration Tests', () => {
     const body = await res.json();
     assert.equal(body.success, false);
     assert.equal(body.error, 'Doğrulama hatası');
+  });
+
+  test('GET /api/v1/chatbot/* rejects passive tenant JWT with 403', async () => {
+    const res = await fetch(`${baseUrl}/api/v1/chatbot/available-slots?date=2026-11-15`, {
+      headers: { Authorization: `Bearer ${passiveAuthToken}` },
+    });
+    assert.equal(res.status, 403);
+    const body = await res.json();
+    assert.equal(body.success, false);
+  });
+
+  test('CORS with wildcard origin does not return Access-Control-Allow-Credentials true', async () => {
+    assert.equal(ENV.CORS_ORIGIN.trim() === '*' || !ENV.CORS_ORIGIN.trim(), true);
+    const res = await fetch(`${baseUrl}/health`, {
+      headers: { Origin: 'https://example.com' },
+    });
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('access-control-allow-origin'), '*');
+    assert.notEqual(res.headers.get('access-control-allow-credentials'), 'true');
   });
 
   test('Close test HTTP server', async () => {
@@ -304,6 +374,145 @@ describe('Security, Env, Validation and Error Handling Regression Tests', () => 
       () => ChatbotService.setConversationState('conv_1', { stage: 'START' }, ''),
       (err: any) => err?.status === 400
     );
+  });
+
+  test('AuthService.login rejects passive tenant with 403', async (t) => {
+    const passwordHash = await argon2.hash('Sifre123!');
+    const restore = stubMethod(
+      prisma.tenant,
+      'findUnique',
+      (async () => ({
+        id: '33333333-3333-4333-8333-333333333333',
+        email: 'pasif@salon.local',
+        salon_adi: 'Pasif Salon',
+        password_hash: passwordHash,
+        durum: 'Pasif',
+      })) as any
+    );
+    t.after(restore);
+
+    await assert.rejects(
+      () => AuthService.login('pasif@salon.local', 'Sifre123!'),
+      (err: any) => err?.status === 403
+    );
+  });
+
+  test('errorHandler maps P2003 and P2023 to 400 and hides raw 500 error message', () => {
+    const createMockRes = () => {
+      const out: { statusCode: number; body: any } = { statusCode: 0, body: null };
+      return {
+        out,
+        res: {
+          status(code: number) {
+            out.statusCode = code;
+            return this;
+          },
+          json(payload: any) {
+            out.body = payload;
+            return this;
+          },
+        } as any,
+      };
+    };
+
+    const p2003Err = new Prisma.PrismaClientKnownRequestError('Foreign key constraint failed', {
+      code: 'P2003',
+      clientVersion: '6.3.0',
+    });
+    const mockP2003 = createMockRes();
+    errorHandler(p2003Err, {} as any, mockP2003.res, (() => {}) as any);
+    assert.equal(mockP2003.out.statusCode, 400);
+    assert.equal(mockP2003.out.body.success, false);
+
+    const p2023Err = new Prisma.PrismaClientKnownRequestError('Inconsistent column data', {
+      code: 'P2023',
+      clientVersion: '6.3.0',
+    });
+    const mockP2023 = createMockRes();
+    errorHandler(p2023Err, {} as any, mockP2023.res, (() => {}) as any);
+    assert.equal(mockP2023.out.statusCode, 400);
+    assert.equal(mockP2023.out.body.success, false);
+
+    const rawSecretErr = new Error('Sensitive internal DB failure: postgres://user:pass@host/db');
+    const mock500 = createMockRes();
+    errorHandler(rawSecretErr, {} as any, mock500.res, (() => {}) as any);
+    assert.equal(mock500.out.statusCode, 500);
+    assert.equal(mock500.out.body.success, false);
+    assert.equal(mock500.out.body.error, 'Sunucu içi hata oluştu');
+  });
+
+  test('AppointmentService.createAppointment throws 404 for cross-tenant hasta_id', async (t) => {
+    const fakeTx = {
+      appointment: {
+        findMany: async () => [],
+      },
+      client: {
+        findFirst: async () => null,
+      },
+    };
+    const restore = stubMethod(
+      prisma,
+      '$transaction',
+      (async (cb: any) => cb(fakeTx)) as any
+    );
+    t.after(restore);
+
+    await assert.rejects(
+      () =>
+        AppointmentService.createAppointment('11111111-1111-4111-8111-111111111111', {
+          hasta_id: '99999999-9999-4999-8999-999999999999',
+          tarih: '2026-11-15',
+          saat: '10:00',
+        }),
+      (err: any) => err?.status === 404
+    );
+  });
+
+  test('NotesService.addNote throws 404 for cross-tenant hasta_id', async (t) => {
+    const restore = stubMethod(prisma.client, 'findFirst', (async () => null) as any);
+    t.after(restore);
+
+    await assert.rejects(
+      () =>
+        NotesService.addNote(
+          '11111111-1111-4111-8111-111111111111',
+          '99999999-9999-4999-8999-999999999999',
+          'Yetkisiz müşteri notu'
+        ),
+      (err: any) => err?.status === 404
+    );
+  });
+
+  test('hasAppointmentConflict returns true on overlapping appointment time', async () => {
+    const fakeTx = {
+      appointment: {
+        findMany: async () => [
+          {
+            baslangic_saati: '10:00:00',
+            bitis_saati: '10:45:00',
+            sure: 45,
+          },
+        ],
+      },
+    } as any;
+
+    const overlapping = await hasAppointmentConflict({
+      tx: fakeTx,
+      tenantId: '11111111-1111-4111-8111-111111111111',
+      tarih: '2026-11-15',
+      baslangicSaati: '10:15',
+      sure: 30,
+    });
+    assert.equal(overlapping, true);
+
+    const adjacent = await hasAppointmentConflict({
+      tx: fakeTx,
+      tenantId: '11111111-1111-4111-8111-111111111111',
+      tarih: '2026-11-15',
+      baslangicSaati: '10:45',
+      sure: 30,
+    });
+    assert.equal(adjacent, false);
   });
 });
 

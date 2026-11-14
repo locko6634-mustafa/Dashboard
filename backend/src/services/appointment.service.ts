@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../config/prisma.js';
 
@@ -27,6 +28,7 @@ export const updateAppointmentSchema = z
   .object({
     id: z.string().optional(),
     randevu_id: z.string().optional(),
+    hasta_id: z.string().optional().nullable(),
     durum: z.string().optional(),
     tarih: z.string().min(1).optional(),
     saat: z.string().optional(),
@@ -73,6 +75,64 @@ export function calculateEndTime(startTime: string, durationMinutes: number): st
   const pad = (n: number) => n.toString().padStart(2, '0');
   const sec = parts[2] ? `:${parts[2]}` : ':00';
   return `${pad(endH)}:${pad(endM)}${sec}`;
+}
+
+function parseTimeToMinutes(timeStr: string): number | null {
+  const parts = timeStr.trim().split(':');
+  if (parts.length < 2) return null;
+  const h = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  if (isNaN(h) || isNaN(m)) return null;
+  return h * 60 + m;
+}
+
+export interface ConflictCheckParams {
+  tx: Prisma.TransactionClient;
+  tenantId: string;
+  tarih: string;
+  baslangicSaati: string;
+  bitisSaati?: string | null;
+  sure?: number | null;
+  excludeId?: string;
+}
+
+export async function hasAppointmentConflict({
+  tx,
+  tenantId,
+  tarih,
+  baslangicSaati,
+  bitisSaati,
+  sure,
+  excludeId,
+}: ConflictCheckParams): Promise<boolean> {
+  const reqStart = parseTimeToMinutes(baslangicSaati);
+  if (reqStart === null) return false;
+
+  const parsedEnd = bitisSaati ? parseTimeToMinutes(bitisSaati) : null;
+  const reqEnd = parsedEnd !== null && parsedEnd > reqStart ? parsedEnd : reqStart + (sure || 30);
+
+  const existing = await tx.appointment.findMany({
+    where: {
+      tenant_id: tenantId,
+      tarih,
+      deleted_at: null,
+      durum: { not: 'İptal' },
+      ...(excludeId ? { id: { not: excludeId } } : {}),
+    },
+    select: {
+      baslangic_saati: true,
+      bitis_saati: true,
+      sure: true,
+    },
+  });
+
+  return existing.some((c) => {
+    const cStart = parseTimeToMinutes(c.baslangic_saati);
+    if (cStart === null) return false;
+    const cParsedEnd = c.bitis_saati ? parseTimeToMinutes(c.bitis_saati) : null;
+    const cEnd = cParsedEnd !== null && cParsedEnd > cStart ? cParsedEnd : cStart + (c.sure || 30);
+    return Math.max(reqStart, cStart) < Math.min(reqEnd, cEnd);
+  });
 }
 
 export class AppointmentService {
@@ -211,44 +271,69 @@ export class AppointmentService {
     const sure = data.sure ?? calculateDefaultDuration(data.hizmet);
     const baslangicSaati = (data.saat || data.baslangic_saati || '09:00').trim();
     const bitisSaati = data.bitis_saati || calculateEndTime(baslangicSaati, sure);
+    const durum = data.durum || 'Bekliyor';
 
-    const appointment = await prisma.$transaction(async (tx) => {
-      let hastaId = data.hasta_id || undefined;
+    const appointment = await prisma.$transaction(
+      async (tx) => {
+        if (durum !== 'İptal') {
+          const conflict = await hasAppointmentConflict({
+            tx,
+            tenantId,
+            tarih: data.tarih,
+            baslangicSaati,
+            bitisSaati,
+            sure,
+          });
+          if (conflict) {
+            throw { status: 409, message: 'Seçilen saatte başka bir randevu bulunmaktadır' };
+          }
+        }
 
-      // Handle is_new client
-      if (data.is_new === true || data.is_new === 'true' || !hastaId) {
-        const newClient = await tx.client.create({
+        let hastaId = data.hasta_id || undefined;
+
+        // Handle is_new client
+        if (data.is_new === true || data.is_new === 'true' || !hastaId) {
+          const newClient = await tx.client.create({
+            data: {
+              tenant_id: tenantId,
+              ad_soyad: data.ad_soyad || 'İsimsiz Müşteri',
+              telefon: data.telefon || '',
+              kronik_rahatsizlik: data.kronik_rahatsizlik || null,
+              paket_adi: data.paket_adi || null,
+              toplam_seans: data.toplam_seans ?? 0,
+              gelinen_seans: data.gelinen_seans ?? 0,
+              toplam_tutar: data.toplam_tutar ?? 0,
+              alinan_odeme: data.alinan_odeme ?? 0,
+            },
+          });
+          hastaId = newClient.id;
+        } else {
+          const clientExists = await tx.client.findFirst({
+            where: { id: hastaId, tenant_id: tenantId },
+          });
+          if (!clientExists) {
+            throw { status: 404, message: 'Belirtilen müşteri bulunamadı' };
+          }
+        }
+
+        return await tx.appointment.create({
           data: {
             tenant_id: tenantId,
-            ad_soyad: data.ad_soyad || 'İsimsiz Müşteri',
-            telefon: data.telefon || '',
-            kronik_rahatsizlik: data.kronik_rahatsizlik || null,
-            paket_adi: data.paket_adi || null,
-            toplam_seans: data.toplam_seans ?? 0,
-            gelinen_seans: data.gelinen_seans ?? 0,
-            toplam_tutar: data.toplam_tutar ?? 0,
-            alinan_odeme: data.alinan_odeme ?? 0,
+            hasta_id: hastaId,
+            tarih: data.tarih,
+            baslangic_saati: baslangicSaati,
+            bitis_saati: bitisSaati,
+            durum,
+            hizmet: data.hizmet || 'Diğer',
+            sure: sure,
+          },
+          include: {
+            client: true,
           },
         });
-        hastaId = newClient.id;
-      }
-
-      return await tx.appointment.create({
-        data: {
-          tenant_id: tenantId,
-          hasta_id: hastaId,
-          tarih: data.tarih,
-          baslangic_saati: baslangicSaati,
-          bitis_saati: bitisSaati,
-          durum: data.durum || 'Bekliyor',
-          hizmet: data.hizmet || 'Diğer',
-          sure: sure,
-        },
-        include: {
-          client: true,
-        },
-      });
-    });
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+    );
 
     return {
       success: true,
@@ -259,45 +344,84 @@ export class AppointmentService {
   }
 
   static async updateAppointment(tenantId: string, id: string, data: UpdateAppointmentInput) {
-    const existing = await prisma.appointment.findFirst({
-      where: { id, tenant_id: tenantId, deleted_at: null },
-    });
+    const updated = await prisma.$transaction(
+      async (tx) => {
+        const existing = await tx.appointment.findFirst({
+          where: { id, tenant_id: tenantId, deleted_at: null },
+        });
 
-    if (!existing) {
-      throw { status: 404, message: 'Randevu bulunamadı' };
-    }
+        if (!existing) {
+          throw { status: 404, message: 'Randevu bulunamadı' };
+        }
 
-    const updateData: {
-      durum?: string;
-      tarih?: string;
-      baslangic_saati?: string;
-      sure?: number;
-      bitis_saati?: string;
-      hizmet?: string;
-    } = {};
+        if (data.hasta_id) {
+          const clientExists = await tx.client.findFirst({
+            where: { id: data.hasta_id, tenant_id: tenantId },
+          });
+          if (!clientExists) {
+            throw { status: 404, message: 'Belirtilen müşteri bulunamadı' };
+          }
+        }
 
-    if (data.durum !== undefined) updateData.durum = data.durum;
-    if (data.tarih !== undefined) updateData.tarih = data.tarih;
-    if (data.saat !== undefined || data.baslangic_saati !== undefined) {
-      updateData.baslangic_saati = data.saat || data.baslangic_saati;
-    }
-    if (data.sure !== undefined) {
-      updateData.sure = data.sure;
-    }
-    if (data.bitis_saati !== undefined) {
-      updateData.bitis_saati = data.bitis_saati;
-    } else if (updateData.baslangic_saati || updateData.sure) {
-      const startTime = updateData.baslangic_saati || existing.baslangic_saati;
-      const duration = updateData.sure ?? existing.sure ?? 30;
-      updateData.bitis_saati = calculateEndTime(startTime, duration);
-    }
-    if (data.hizmet !== undefined) updateData.hizmet = data.hizmet;
+        const updateData: {
+          hasta_id?: string | null;
+          durum?: string;
+          tarih?: string;
+          baslangic_saati?: string;
+          sure?: number;
+          bitis_saati?: string;
+          hizmet?: string;
+        } = {};
 
-    const updated = await prisma.appointment.update({
-      where: { id },
-      data: updateData,
-      include: { client: true },
-    });
+        if (data.hasta_id !== undefined) updateData.hasta_id = data.hasta_id;
+        if (data.durum !== undefined) updateData.durum = data.durum;
+        if (data.tarih !== undefined) updateData.tarih = data.tarih;
+        if (data.saat !== undefined || data.baslangic_saati !== undefined) {
+          updateData.baslangic_saati = data.saat || data.baslangic_saati;
+        }
+        if (data.sure !== undefined) {
+          updateData.sure = data.sure;
+        }
+        if (data.bitis_saati !== undefined) {
+          updateData.bitis_saati = data.bitis_saati;
+        } else if (updateData.baslangic_saati || updateData.sure) {
+          const startTime = updateData.baslangic_saati || existing.baslangic_saati;
+          const duration = updateData.sure ?? existing.sure ?? 30;
+          updateData.bitis_saati = calculateEndTime(startTime, duration);
+        }
+        if (data.hizmet !== undefined) updateData.hizmet = data.hizmet;
+
+        const effectiveDurum = updateData.durum ?? existing.durum;
+        const timeOrDateChanged =
+          updateData.tarih !== undefined ||
+          updateData.baslangic_saati !== undefined ||
+          updateData.bitis_saati !== undefined ||
+          updateData.sure !== undefined ||
+          existing.durum === 'İptal';
+
+        if (effectiveDurum !== 'İptal' && timeOrDateChanged) {
+          const conflict = await hasAppointmentConflict({
+            tx,
+            tenantId,
+            tarih: updateData.tarih ?? existing.tarih,
+            baslangicSaati: updateData.baslangic_saati ?? existing.baslangic_saati,
+            bitisSaati: updateData.bitis_saati ?? existing.bitis_saati,
+            sure: updateData.sure ?? existing.sure,
+            excludeId: id,
+          });
+          if (conflict) {
+            throw { status: 409, message: 'Seçilen saatte başka bir randevu bulunmaktadır' };
+          }
+        }
+
+        return await tx.appointment.update({
+          where: { id },
+          data: updateData,
+          include: { client: true },
+        });
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+    );
 
     return { success: true, data: updated };
   }

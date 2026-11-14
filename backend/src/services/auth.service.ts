@@ -39,6 +39,10 @@ export class AuthService {
       throw { status: 401, message: 'Geçersiz e-posta veya şifre' };
     }
 
+    if (tenant.durum !== 'Aktif') {
+      throw { status: 403, message: 'Hesabınız aktif değil' };
+    }
+
     // Generate JWT
     const token = jwt.sign(
       {

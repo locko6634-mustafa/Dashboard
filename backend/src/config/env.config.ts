@@ -10,7 +10,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   JWT_SECRET: z.string().optional(),
   STATIC_FILES_PATH: z.string().optional(),
-  CORS_ORIGIN: z.string().default('*'),
+  CORS_ORIGIN: z.string().trim().default('*'),
   CHATBOT_API_KEY: z.string().optional(),
 });
 

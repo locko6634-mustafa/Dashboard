@@ -15,6 +15,12 @@ import { UndoManager } from './undo-manager.js';
 import { AppointmentManager } from './appointment.js';
 import { Terminology } from '../shared/terminology.js';
 
+const toSafeAmount = (val) => {
+    if (val === '' || val === null || val === undefined) return 0;
+    const num = Number(val);
+    return Number.isFinite(num) ? num : 0;
+};
+
 class PatientManager {
     static fillPatientForm = (prefix, app) => {
         Utils.$(prefix + 'Name').value = app.ad_soyad || '';
@@ -23,8 +29,8 @@ class PatientManager {
         Utils.$(prefix + 'Package').value = app.paket_adi === CONFIG.DEFAULTS.PACKAGE ? '' : (app.paket_adi || '');
         Utils.$(prefix + 'TotalSession').value = app.toplam_seans || 0;
         Utils.$(prefix + 'CurrentSession').value = app.gelinen_seans || 0;
-        Utils.$(prefix + 'TotalAmount').value = app.toplam_tutar || 0;
-        Utils.$(prefix + 'PaidAmount').value = app.alinan_odeme || 0;
+        Utils.$(prefix + 'TotalAmount').value = toSafeAmount(app.toplam_tutar);
+        Utils.$(prefix + 'PaidAmount').value = toSafeAmount(app.alinan_odeme);
     };
 
     static getPatientFormData = (prefix, pId) => ({
@@ -35,8 +41,8 @@ class PatientManager {
         paket_adi: Utils.$(prefix + 'Package').value.trim(),
         toplam_seans: parseInt(Utils.$(prefix + 'TotalSession').value) || 0,
         gelinen_seans: parseInt(Utils.$(prefix + 'CurrentSession').value) || 0,
-        toplam_tutar: parseFloat(Utils.$(prefix + 'TotalAmount').value) || 0,
-        alinan_odeme: parseFloat(Utils.$(prefix + 'PaidAmount').value) || 0
+        toplam_tutar: toSafeAmount(Utils.$(prefix + 'TotalAmount').value),
+        alinan_odeme: toSafeAmount(Utils.$(prefix + 'PaidAmount').value)
     });
 
     static resetPatientForm = (prefix) => {
@@ -114,9 +120,23 @@ class NotesManager {
         sbNotes.replaceChildren(Utils.el('div', { className: 'spinner spinner-center-sm' }));
         ApiService.call(CONFIG.ENDPOINTS.GET_NOTES + '?id=' + pId, { method: 'GET', returnData: true, isText: true, customErrorMsg: null })
             .then(text => {
-                if (text === false) { sbNotes.replaceChildren(Utils.el('div', { className: 'text-danger font-11' }, CONFIG.UI.MSG_NOTES_ERROR)); return; }
+                if (text === false || text === null || text === undefined) {
+                    const errMsg = text === null
+                        ? 'Bağlantı veya oturum hatası nedeniyle notlar yüklenemedi.'
+                        : CONFIG.UI.MSG_NOTES_ERROR;
+                    sbNotes.replaceChildren(Utils.el('div', { className: 'text-danger font-11' }, errMsg));
+                    return;
+                }
                 let data = [];
-                try { data = text ? JSON.parse(text) : []; } catch (e) { }
+                if (text && typeof text === 'string') {
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        console.error('Notlar JSON parse hatası:', e);
+                        sbNotes.replaceChildren(Utils.el('div', { className: 'text-danger font-11' }, CONFIG.UI.MSG_NOTES_ERROR));
+                        return;
+                    }
+                }
                 if (data && !Array.isArray(data) && data.data) data = data.data;
                 if (data && !Array.isArray(data)) data = [data];
                 if (data && data.length > 0 && data[0].json) data = data.map(i => i.json);
@@ -370,7 +390,7 @@ class PatientUI {
             DOM.sbSessionRingText.textContent = percentage + '%';
         }
 
-        const totalF = hasta.toplam_tutar ?? 0, paidF = hasta.alinan_odeme ?? 0;
+        const totalF = toSafeAmount(hasta.toplam_tutar), paidF = toSafeAmount(hasta.alinan_odeme);
         DOM.sbTotal.textContent = totalF + ' ' + CONFIG.DEFAULTS.CURRENCY;
         DOM.sbPaid.textContent = paidF + ' ' + CONFIG.DEFAULTS.CURRENCY;
         DOM.sbDebt.textContent = (totalF - paidF) + ' ' + CONFIG.DEFAULTS.CURRENCY;
@@ -502,8 +522,8 @@ class PatientCRM {
                     paket_adi: a.paket_adi || '',
                     toplam_seans: a.toplam_seans || 0,
                     gelinen_seans: a.gelinen_seans || 0,
-                    toplam_tutar: Number(a.toplam_tutar) || 0,
-                    alinan_odeme: Number(a.alinan_odeme) || 0
+                    toplam_tutar: toSafeAmount(a.toplam_tutar),
+                    alinan_odeme: toSafeAmount(a.alinan_odeme)
                 });
             }
         });
@@ -530,8 +550,8 @@ class PatientCRM {
                             paket_adi: c.paket_adi || '',
                             toplam_seans: c.toplam_seans || 0,
                             gelinen_seans: c.gelinen_seans || 0,
-                            toplam_tutar: Number(c.toplam_tutar) || 0,
-                            alinan_odeme: Number(c.alinan_odeme) || 0
+                            toplam_tutar: toSafeAmount(c.toplam_tutar),
+                            alinan_odeme: toSafeAmount(c.alinan_odeme)
                         });
                     }
                 });
@@ -560,7 +580,7 @@ class PatientCRM {
 
             // Durum / Kategori filtresi
             if (filter.status === 'debt') {
-                const debt = (c.toplam_tutar || 0) - (c.alinan_odeme || 0);
+                const debt = toSafeAmount(c.toplam_tutar) - toSafeAmount(c.alinan_odeme);
                 if (debt <= 0) return false;
             } else if (filter.status === 'has_package') {
                 const hasPkg = c.paket_adi && c.paket_adi !== CONFIG.DEFAULTS.PACKAGE && (c.toplam_seans > 0);
@@ -584,7 +604,7 @@ class PatientCRM {
         let packageCount = 0;
 
         allList.forEach(c => {
-            const debt = (c.toplam_tutar || 0) - (c.alinan_odeme || 0);
+            const debt = toSafeAmount(c.toplam_tutar) - toSafeAmount(c.alinan_odeme);
             if (debt > 0) {
                 debtCount++;
                 totalDebt += debt;
@@ -640,7 +660,9 @@ class PatientCRM {
             const tr = document.createElement('tr');
             tr.className = 'crm-table-row';
 
-            const debt = (c.toplam_tutar || 0) - (c.alinan_odeme || 0);
+            const totalAmount = toSafeAmount(c.toplam_tutar);
+            const paidAmount = toSafeAmount(c.alinan_odeme);
+            const debt = totalAmount - paidAmount;
             const totalS = c.toplam_seans || 0;
             const currentS = c.gelinen_seans || 0;
             const sessionPerc = totalS > 0 ? Math.min(100, Math.round((currentS / totalS) * 100)) : 0;
@@ -670,10 +692,10 @@ class PatientCRM {
                     </div>
                 </td>
                 <td>
-                    <span class="crm-amount font-bold text-main">${(c.toplam_tutar || 0).toLocaleString('tr-TR')} ₺</span>
+                    <span class="crm-amount font-bold text-main">${totalAmount.toLocaleString('tr-TR')} ₺</span>
                 </td>
                 <td>
-                    <span class="crm-amount text-emerald font-bold">${(c.alinan_odeme || 0).toLocaleString('tr-TR')} ₺</span>
+                    <span class="crm-amount text-emerald font-bold">${paidAmount.toLocaleString('tr-TR')} ₺</span>
                 </td>
                 <td>
                     ${debt > 0 
@@ -729,9 +751,9 @@ class PatientCRM {
             `"${(c.paket_adi || '').replace(/"/g, '""')}"`,
             c.toplam_seans || 0,
             c.gelinen_seans || 0,
-            c.toplam_tutar || 0,
-            c.alinan_odeme || 0,
-            (c.toplam_tutar || 0) - (c.alinan_odeme || 0)
+            toSafeAmount(c.toplam_tutar),
+            toSafeAmount(c.alinan_odeme),
+            toSafeAmount(c.toplam_tutar) - toSafeAmount(c.alinan_odeme)
         ]);
 
         const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
@@ -779,8 +801,8 @@ class PatientCRM {
             paket_adi: Utils.$('addPtPackage')?.value?.trim() || null,
             toplam_seans: parseInt(Utils.$('addPtTotalSession')?.value) || 0,
             gelinen_seans: parseInt(Utils.$('addPtCurrentSession')?.value) || 0,
-            toplam_tutar: parseFloat(Utils.$('addPtTotalAmount')?.value) || 0,
-            alinan_odeme: parseFloat(Utils.$('addPtPaidAmount')?.value) || 0
+            toplam_tutar: toSafeAmount(Utils.$('addPtTotalAmount')?.value),
+            alinan_odeme: toSafeAmount(Utils.$('addPtPaidAmount')?.value)
         };
 
         // Negatif değer kontrolü

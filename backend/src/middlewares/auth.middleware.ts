@@ -30,13 +30,49 @@ export async function authMiddleware(req: AuthenticatedRequest, res: Response, n
 
     if (token) {
       // 1. Try JWT verification (standard for dashboard frontend)
+      let decoded: {
+        id: string;
+        email: string;
+        salon_adi: string;
+        tenant_id?: string;
+        tenantId?: string;
+      } | null = null;
       try {
-        const decoded = jwt.verify(token, ENV.JWT_SECRET) as { id: string; email: string; salon_adi: string; tenant_id: string };
-        req.tenantId = decoded.tenant_id || decoded.id;
-        req.user = decoded;
-        return next();
-      } catch (jwtErr) {
+        decoded = jwt.verify(token, ENV.JWT_SECRET) as {
+          id: string;
+          email: string;
+          salon_adi: string;
+          tenant_id?: string;
+          tenantId?: string;
+        };
+      } catch {
         // Not a valid JWT or expired, check if it's a valid API Key
+      }
+
+      if (decoded) {
+        const jwtTenantId = decoded.tenant_id || decoded.tenantId || decoded.id;
+        if (!jwtTenantId) {
+          res.status(403).json({ error: 'Hesabınız aktif değil veya bulunamadı', success: false });
+          return;
+        }
+
+        const tenant = await prisma.tenant.findUnique({
+          where: { id: jwtTenantId },
+          select: { id: true, durum: true },
+        });
+
+        if (!tenant || tenant.durum !== 'Aktif') {
+          res.status(403).json({ error: 'Hesabınız aktif değil veya bulunamadı', success: false });
+          return;
+        }
+
+        req.tenantId = tenant.id;
+        req.user = {
+          id: decoded.id || tenant.id,
+          email: decoded.email,
+          salon_adi: decoded.salon_adi,
+        };
+        return next();
       }
 
       // 2. Try API Key verification (for server-to-server or integration access)

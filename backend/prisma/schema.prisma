@@ -21,10 +21,11 @@ model Tenant {
   plan_bitis_tarihi DateTime?      @db.Timestamptz(6)
   created_at        DateTime?      @default(now()) @db.Timestamptz(6)
 
-  clients           Client[]
-  appointments      Appointment[]
-  hasta_notlari     HastaNotu[]
-  app_settings      AppSetting[]
+  clients             Client[]
+  appointments        Appointment[]
+  hasta_notlari       HastaNotu[]
+  app_settings        AppSetting[]
+  conversation_states ConversationState[]
 
   @@map("tenants")
 }
@@ -108,6 +109,8 @@ model ConversationState {
   retry_count     Int?           @default(0)
   tenant_id       String?        @db.Uuid
   updated_at      DateTime?      @default(now()) @updatedAt @db.Timestamptz(6)
+
+  tenant          Tenant?        @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@index([phone_number])
   @@index([tenant_id])
