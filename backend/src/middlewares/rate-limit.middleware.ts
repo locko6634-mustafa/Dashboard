@@ -5,7 +5,25 @@ interface RateLimitStore {
   resetAt: number;
 }
 
+export const MAX_STORE_SIZE = 10000;
+
 const store = new Map<string, RateLimitStore>();
+
+function evictExpiredAndOldest(now: number, targetStore: Map<string, RateLimitStore> = store, maxSize: number = MAX_STORE_SIZE): void {
+  if (targetStore.size < maxSize) return;
+
+  for (const [k, rec] of targetStore.entries()) {
+    if (rec.resetAt <= now) {
+      targetStore.delete(k);
+    }
+  }
+
+  while (targetStore.size >= maxSize) {
+    const oldestKey = targetStore.keys().next().value;
+    if (oldestKey === undefined) break;
+    targetStore.delete(oldestKey);
+  }
+}
 
 // Periodic cleanup of expired rate limit entries every 60 seconds
 setInterval(() => {
@@ -41,6 +59,9 @@ export function createRateLimiter(options: RateLimitOptions) {
     const record = store.get(key);
 
     if (!record || record.resetAt <= now) {
+      if (!record) {
+        evictExpiredAndOldest(now);
+      }
       store.set(key, { count: 1, resetAt: now + windowMs });
       res.setHeader('X-RateLimit-Limit', max);
       res.setHeader('X-RateLimit-Remaining', max - 1);

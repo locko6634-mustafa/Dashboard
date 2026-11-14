@@ -6,14 +6,25 @@ function resolveApiBase() {
     const isLocal = ['localhost', '127.0.0.1', ''].includes(host);
 
     if (isLocal) {
-        // Geliştirici ortamı için özel override imkanı (yalnızca yerelde)
+        // Geliştirici ortamı için özel override imkanı (yalnızca yerelde localhost/127.0.0.1)
         try {
             const customApi = window.localStorage ? window.localStorage.getItem('SZ_API_URL') : null;
-            if (customApi && customApi.startsWith('http')) {
-                return customApi.endsWith('/') ? customApi : `${customApi}/`;
+            const trimmed = typeof customApi === 'string' ? customApi.trim() : '';
+            if (trimmed) {
+                let isValidLocalOverride = false;
+                try {
+                    const parsed = new URL(trimmed);
+                    isValidLocalOverride = parsed.protocol === 'http:' && (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1');
+                } catch {
+                    isValidLocalOverride = false;
+                }
+                if (isValidLocalOverride) {
+                    return trimmed.endsWith('/') ? trimmed : `${trimmed}/`;
+                }
+                console.warn('Geçersiz SZ_API_URL override yoksayıldı (yalnızca http://localhost veya http://127.0.0.1 kabul edilir):', trimmed);
             }
-        } catch {
-            // localStorage erişim kısıtlaması koruması
+        } catch (err) {
+            console.warn('SZ_API_URL localStorage okunamadı:', err);
         }
 
         // Yerelde doğrudan backend portunda (3000) çalışıyorsa

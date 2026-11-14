@@ -1,4 +1,5 @@
 import { prisma } from '../config/prisma.js';
+import { isValidDateString } from '../utils/dateTime.util.js';
 
 export class StatsService {
   static async getOverview(tenantId: string) {
@@ -83,17 +84,19 @@ export class StatsService {
         serviceCounts[s] = (serviceCounts[s] || 0) + 1;
       }
 
-      if (a.tarih >= sevenDaysAgoStr) {
-        current_apps++;
-        if (a.durum === 'Tamamlandı' || a.durum === 'İptal') {
-          current_closed++;
-          if (a.durum === 'Tamamlandı') current_completed++;
-        }
-      } else if (a.tarih >= fourteenDaysAgoStr) {
-        last_apps++;
-        if (a.durum === 'Tamamlandı' || a.durum === 'İptal') {
-          last_closed++;
-          if (a.durum === 'Tamamlandı') last_completed++;
+      if (isValidDateString(a.tarih)) {
+        if (a.tarih >= sevenDaysAgoStr) {
+          current_apps++;
+          if (a.durum === 'Tamamlandı' || a.durum === 'İptal') {
+            current_closed++;
+            if (a.durum === 'Tamamlandı') current_completed++;
+          }
+        } else if (a.tarih >= fourteenDaysAgoStr) {
+          last_apps++;
+          if (a.durum === 'Tamamlandı' || a.durum === 'İptal') {
+            last_closed++;
+            if (a.durum === 'Tamamlandı') last_completed++;
+          }
         }
       }
     }

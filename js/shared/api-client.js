@@ -6,8 +6,41 @@ import { CONFIG } from './config.js';
 import { showToast } from './toast.js';
 import { getTenantId, clearSession } from './auth-session.js';
 
+let isRedirectingToLogin = false;
+
+function hideLoadingElement(loadingId) {
+    if (!loadingId || typeof document === 'undefined') return;
+    const el = document.getElementById(loadingId);
+    if (el) el.classList.add('hidden');
+}
+
+function redirectToLoginOnce(message, shouldClearSession = false) {
+    if (isRedirectingToLogin) return;
+    isRedirectingToLogin = true;
+    if (shouldClearSession) {
+        clearSession();
+    }
+    showToast(message, 'error', 8000);
+    setTimeout(() => {
+        if (typeof window !== 'undefined') {
+            window.location.href = 'login.html';
+        }
+    }, 1000);
+}
+
 export class ApiService {
+    /**
+     * Merkezi API istemcisi.
+     * Sözleşme:
+     * - `returnData: true` iken başarıda `string` (`isText: true`) veya JSON `object|Array` döner.
+     * - `returnData: false` iken başarıda `true` döner.
+     * - Tüm hata, zaman aşımı, iptal ve yetkisiz (401/403) durumlarında tutarlı olarak `null` döner.
+     */
     static call = async (endpoint, options = {}) => {
+        if (isRedirectingToLogin) {
+            return null;
+        }
+
         const {
             payload = null,
             method = 'POST',
@@ -23,12 +56,11 @@ export class ApiService {
         const tenantId = getTenantId();
 
         if (!tenantId) {
-            showToast('Oturum bulunamadı! Lütfen giriş yapın.', 'error', 8000);
-            setTimeout(() => window.location.href = 'login.html', 1000);
+            redirectToLoginOnce('Oturum bulunamadı! Lütfen giriş yapın.');
             return null;
         }
 
-        if (loadingId) {
+        if (loadingId && typeof document !== 'undefined') {
             const el = document.getElementById(loadingId);
             if (el) el.classList.remove('hidden');
         }
@@ -55,7 +87,7 @@ export class ApiService {
                 fetchOpts.body = JSON.stringify(payload);
             }
 
-            if (signal && window.AbortSignal && AbortSignal.any) {
+            if (signal && typeof AbortSignal !== 'undefined' && AbortSignal.any) {
                 fetchOpts.signal = AbortSignal.any([signal, controller.signal]);
             } else if (signal) {
                 fetchOpts.signal = signal;
@@ -70,9 +102,8 @@ export class ApiService {
 
             if (!res.ok) {
                 if (res.status === 401 || res.status === 403 || resText.includes('API Token geçersiz') || resText.includes('Yetkisiz')) {
-                    showToast('Oturum süresi doldu! Güvenliğiniz için yönlendiriliyorsunuz.', 'error', 8000);
-                    clearSession();
-                    setTimeout(() => window.location.href = 'login.html', 1000);
+                    hideLoadingElement(loadingId);
+                    redirectToLoginOnce('Oturum süresi doldu! Güvenliğiniz için yönlendiriliyorsunuz.', true);
                     return null;
                 }
                 let serverMsg = '';
@@ -106,22 +137,21 @@ export class ApiService {
                 throw new Error(typeof parsedData.error === 'string' ? parsedData.error : 'Backend Hatası');
             }
 
+            hideLoadingElement(loadingId);
             if (reloadOnSuccess) location.reload();
             if (returnData) return isText ? resText : (parsedData || {});
             return true;
         } catch (e) {
             clearTimeout(timeoutId);
-            if (e.name === 'AbortError') {
-                if (loadingId) {
-                    const el = document.getElementById(loadingId);
-                    if (el) el.classList.add('hidden');
-                }
-                if (customErrorMsg) showToast('Bağlantı zaman aşımına uğradı. Lütfen internetinizi kontrol edin.', 'error');
+            hideLoadingElement(loadingId);
+
+            if (isRedirectingToLogin) {
                 return null;
             }
-            if (loadingId) {
-                const el = document.getElementById(loadingId);
-                if (el) el.classList.add('hidden');
+
+            if (e.name === 'AbortError') {
+                if (customErrorMsg) showToast('Bağlantı zaman aşımına uğradı. Lütfen internetinizi kontrol edin.', 'error');
+                return null;
             }
 
             const errorMsg = (e.message && e.message !== 'Failed to fetch')
@@ -129,7 +159,7 @@ export class ApiService {
                 : customErrorMsg;
 
             if (errorMsg) showToast(errorMsg, 'error');
-            return false;
+            return null;
         }
     };
 }

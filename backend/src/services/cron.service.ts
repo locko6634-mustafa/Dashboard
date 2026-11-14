@@ -1,4 +1,5 @@
 import { prisma } from '../config/prisma.js';
+import { isValidDateString, parseTimeToMinutes } from '../utils/dateTime.util.js';
 
 export class CronService {
   private static timer: NodeJS.Timeout | null = null;
@@ -38,6 +39,7 @@ export class CronService {
       const expiredIds: string[] = [];
 
       for (const app of candidates) {
+        if (!isValidDateString(app.tarih)) continue;
         if (app.tarih < istanbulTodayStr) {
           expiredIds.push(app.id);
           continue;
@@ -45,13 +47,9 @@ export class CronService {
 
         // On the same day: check start time + duration
         if (!app.baslangic_saati) continue;
-        const timeParts = app.baslangic_saati.split(':');
-        if (timeParts.length < 2) continue;
-        const h = parseInt(timeParts[0], 10);
-        const m = parseInt(timeParts[1], 10);
-        if (isNaN(h) || isNaN(m)) continue;
+        const startMins = parseTimeToMinutes(app.baslangic_saati);
+        if (startMins === null) continue;
 
-        const startMins = h * 60 + m;
         const duration = app.sure || 30;
         const endMins = startMins + duration;
 

@@ -7,6 +7,13 @@ import { prisma } from '../config/prisma.js';
 
 const IDEMPOTENT_PG_CODES = new Set(['42P07', '42710', '42701']);
 
+/**
+ * API anahtarının SHA-256 özetini (hex) üretir.
+ */
+export function hashApiKey(rawKey: string): string {
+  return crypto.createHash('sha256').update(rawKey).digest('hex');
+}
+
 export interface TenantSettingsInput {
   calendar?: Prisma.InputJsonValue;
   services?: Prisma.InputJsonValue;
@@ -48,6 +55,7 @@ export class AdminService {
         n8n_webhook_url VARCHAR(500),
         chatwoot_inbox_id VARCHAR(100),
         api_key VARCHAR(100) UNIQUE,
+        api_key_hash VARCHAR(64) UNIQUE,
         durum VARCHAR(20) DEFAULT 'Aktif',
         plan_tipi VARCHAR(50) DEFAULT 'Standart',
         plan_bitis_tarihi TIMESTAMPTZ(6),
@@ -95,14 +103,15 @@ export class AdminService {
         PRIMARY KEY (setting_key, tenant_id)
       )`,
       () => prisma.$executeRaw`CREATE TABLE IF NOT EXISTS public.conversation_states (
-        conversation_id VARCHAR(255) PRIMARY KEY,
+        conversation_id VARCHAR(255) NOT NULL,
         phone_number VARCHAR(50) NOT NULL,
         current_intent VARCHAR(100),
         current_stage VARCHAR(100),
         context_data JSONB DEFAULT '{}',
         retry_count INT DEFAULT 0,
         tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
-        updated_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP
+        updated_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (conversation_id, tenant_id)
       )`,
       () => prisma.$executeRaw`CREATE TABLE IF NOT EXISTS public.super_admins (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -115,10 +124,33 @@ export class AdminService {
       () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS n8n_webhook_url VARCHAR(500)`,
       () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS chatwoot_inbox_id VARCHAR(100)`,
       () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS api_key VARCHAR(100)`,
+      () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS api_key_hash VARCHAR(64)`,
+      () => prisma.$executeRaw`CREATE UNIQUE INDEX IF NOT EXISTS idx_tenants_api_key_hash ON public.tenants(api_key_hash)`,
       () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS durum VARCHAR(20) DEFAULT 'Aktif'`,
       () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_tipi VARCHAR(50) DEFAULT 'Standart'`,
       () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_bitis_tarihi TIMESTAMPTZ(6)`,
       () => prisma.$executeRaw`ALTER TABLE public.conversation_states ADD COLUMN IF NOT EXISTS tenant_id UUID`,
+      () => prisma.$executeRaw`
+        DO $$
+        DECLARE
+          pk_name text;
+          pk_cols int;
+        BEGIN
+          SELECT c.conname, array_length(c.conkey, 1)
+          INTO pk_name, pk_cols
+          FROM pg_constraint c
+          JOIN pg_class t ON t.oid = c.conrelid
+          JOIN pg_namespace n ON n.oid = t.relnamespace
+          WHERE n.nspname = 'public'
+            AND t.relname = 'conversation_states'
+            AND c.contype = 'p';
+
+          IF pk_name IS NOT NULL AND pk_cols = 1 THEN
+            EXECUTE format('ALTER TABLE public.conversation_states DROP CONSTRAINT %I', pk_name);
+            EXECUTE 'ALTER TABLE public.conversation_states ADD PRIMARY KEY (conversation_id, tenant_id)';
+          END IF;
+        END $$
+      `,
       () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_clients_tenant ON public.clients(tenant_id)`,
       () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_clients_tenant_telefon ON public.clients(tenant_id, telefon)`,
       () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_appointments_tenant_tarih ON public.appointments(tenant_id, tarih)`,
@@ -141,18 +173,30 @@ export class AdminService {
     }
 
 
-    // Auto-generate api_key for tenants missing one
+    // Auto-generate api_key & api_key_hash for tenants missing one, and backfill api_key_hash
     try {
-      const tenantsWithoutKey = await prisma.tenant.findMany({
+      const tenantsNeedingKeys = await prisma.tenant.findMany({
         where: {
-          OR: [{ api_key: null }, { api_key: '' }],
+          OR: [
+            { api_key: null },
+            { api_key: '' },
+            { api_key_hash: null },
+            { api_key_hash: '' },
+          ],
         },
+        select: { id: true, api_key: true, api_key_hash: true },
       });
-      for (const t of tenantsWithoutKey) {
-        const generatedKey = 'sk_live_' + crypto.randomBytes(20).toString('hex');
+      for (const t of tenantsNeedingKeys) {
+        const rawKey = t.api_key && t.api_key.trim()
+          ? t.api_key
+          : 'sk_live_' + crypto.randomBytes(20).toString('hex');
+        const keyHash = hashApiKey(rawKey);
         await prisma.tenant.update({
           where: { id: t.id },
-          data: { api_key: generatedKey },
+          data: {
+            api_key: rawKey,
+            api_key_hash: keyHash,
+          },
         });
       }
     } catch (keyErr) {
@@ -416,6 +460,7 @@ export class AdminService {
           n8n_webhook_url: data.n8n_webhook_url ? data.n8n_webhook_url.trim() : null,
           chatwoot_inbox_id: data.chatwoot_inbox_id ? data.chatwoot_inbox_id.trim() : null,
           api_key: apiKey,
+          api_key_hash: hashApiKey(apiKey),
           durum: data.durum || 'Aktif',
         },
       });
@@ -588,7 +633,10 @@ export class AdminService {
     const newKey = 'sk_live_' + crypto.randomBytes(20).toString('hex');
     const updated = await prisma.tenant.update({
       where: { id },
-      data: { api_key: newKey },
+      data: {
+        api_key: newKey,
+        api_key_hash: hashApiKey(newKey),
+      },
       select: { id: true, api_key: true },
     });
 

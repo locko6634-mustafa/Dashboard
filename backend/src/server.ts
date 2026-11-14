@@ -15,27 +15,45 @@ const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`===============================================`);
 
   // Auto-migrate schema
-  await AdminService.ensureSchema();
+  try {
+    await AdminService.ensureSchema();
+  } catch (err) {
+    console.error('Failed to ensure database schema on startup:', err);
+  }
 
   // Start appointment sweep cron (15 minutes)
   CronService.start(15);
 });
 
 // Graceful shutdown
+let isShuttingDown = false;
 async function gracefulShutdown(signal: string) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
   console.log(`Received ${signal}. Shutting down gracefully...`);
   CronService.stop();
-  server.close(async () => {
-    console.log('HTTP server closed.');
-    await prisma.$disconnect();
-    console.log('Prisma disconnected. Exiting.');
-    process.exit(0);
-  });
 
-  setTimeout(() => {
+  const forceTimer = setTimeout(() => {
     console.error('Force shutdown after timeout.');
     process.exit(1);
   }, 10000);
+  forceTimer.unref();
+
+  server.close(async () => {
+    console.log('HTTP server closed.');
+    let exitCode = 0;
+    try {
+      await prisma.$disconnect();
+      console.log('Prisma disconnected. Exiting.');
+    } catch (err) {
+      exitCode = 1;
+      console.error('Error during Prisma disconnect:', err);
+    } finally {
+      clearTimeout(forceTimer);
+      process.exit(exitCode);
+    }
+  });
 }
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));

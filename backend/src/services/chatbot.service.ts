@@ -1,6 +1,12 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma.js';
 import { calculateDefaultDuration, calculateEndTime, hasAppointmentConflict } from './appointment.service.js';
+import {
+  formatMinutesToTime,
+  isValidDateString,
+  isValidTimeString,
+  parseTimeToMinutes,
+} from '../utils/dateTime.util.js';
 
 export class ChatbotService {
   static async getClientByPhone(phone: string, tenantId?: string) {
@@ -70,6 +76,9 @@ export class ChatbotService {
     if (!tenantId || !tenantId.trim()) {
       throw { status: 400, message: 'tenant_id zorunludur' };
     }
+    if (!isValidDateString(date)) {
+      throw { status: 400, message: 'Geçersiz tarih formatı (YYYY-MM-DD bekleniyor)' };
+    }
 
     // Salon çalışma saatleri (varsayılan: 09:00 - 19:00)
     let startHour = 9;
@@ -111,24 +120,17 @@ export class ChatbotService {
     });
 
     // Busy ranges in minutes from 00:00
-    const busyRanges = existing.map((a) => {
-      const [sh, sm] = a.baslangic_saati.split(':').map(Number);
-      const startMins = sh * 60 + sm;
-      let endMins: number;
-      if (a.bitis_saati) {
-        const [eh, em] = a.bitis_saati.split(':').map(Number);
-        endMins = eh * 60 + em;
-      } else {
-        endMins = startMins + (a.sure || 30);
-      }
-      return { start: startMins, end: endMins };
+    const busyRanges = existing.flatMap((a) => {
+      const startMins = parseTimeToMinutes(a.baslangic_saati);
+      if (startMins === null) return [];
+      const parsedEnd = a.bitis_saati ? parseTimeToMinutes(a.bitis_saati) : null;
+      const endMins = parsedEnd !== null && parsedEnd > startMins ? parsedEnd : startMins + (a.sure || 30);
+      return [{ start: startMins, end: endMins }];
     });
 
     const openMins = startHour * 60;
     const closeMins = endHour * 60;
     const availableSlots: string[] = [];
-
-    const pad = (n: number) => n.toString().padStart(2, '0');
 
     for (let m = openMins; m + durationMinutes <= closeMins; m += slotStep) {
       const slotEnd = m + durationMinutes;
@@ -139,9 +141,7 @@ export class ChatbotService {
       );
 
       if (!hasConflict) {
-        const slotH = Math.floor(m / 60);
-        const slotM = m % 60;
-        availableSlots.push(`${pad(slotH)}:${pad(slotM)}`);
+        availableSlots.push(formatMinutesToTime(m));
       }
     }
 
@@ -165,6 +165,12 @@ export class ChatbotService {
     const tenantId = data.tenant_id;
     if (!tenantId) {
       throw { status: 400, message: 'tenant_id zorunludur' };
+    }
+    if (!isValidDateString(data.tarih)) {
+      throw { status: 400, message: 'Geçersiz tarih formatı (YYYY-MM-DD bekleniyor)' };
+    }
+    if (!isValidTimeString(data.saat)) {
+      throw { status: 400, message: 'Geçersiz saat formatı (HH:mm bekleniyor)' };
     }
 
     const cleanedPhone = data.telefon.replace(/\D/g, '');
@@ -289,6 +295,12 @@ export class ChatbotService {
   ) {
     if (!tenantId || !tenantId.trim()) {
       throw { status: 400, message: 'tenant_id zorunludur' };
+    }
+    if (!isValidDateString(newDate)) {
+      throw { status: 400, message: 'Geçersiz tarih formatı (YYYY-MM-DD bekleniyor)' };
+    }
+    if (!isValidTimeString(newTime)) {
+      throw { status: 400, message: 'Geçersiz saat formatı (HH:mm bekleniyor)' };
     }
 
     let clientId: string | undefined;

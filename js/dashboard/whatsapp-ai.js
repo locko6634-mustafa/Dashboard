@@ -59,8 +59,19 @@ export class WhatsappAiInbox {
     }
 
     static loadState() {
+        const key = WhatsappAiInbox.getStorageKey();
+
+        // Eski kalıcı localStorage kaydı varsa temizle (hassas veriyi oturumla sınırla)
         try {
-            const raw = localStorage.getItem(WhatsappAiInbox.getStorageKey());
+            if (typeof localStorage !== 'undefined') {
+                localStorage.removeItem(key);
+            }
+        } catch (err) {
+            console.warn('Eski WhatsApp AI localStorage verisi temizlenemedi:', err);
+        }
+
+        try {
+            const raw = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(key) : null;
             if (raw) {
                 const parsed = JSON.parse(raw);
                 if (Array.isArray(parsed) && parsed.length > 0) {
@@ -70,8 +81,20 @@ export class WhatsappAiInbox {
                     }
                     return;
                 }
+                if (typeof sessionStorage !== 'undefined') {
+                    sessionStorage.removeItem(key);
+                }
             }
-        } catch { /* güvenli fallback */ }
+        } catch (err) {
+            console.warn('WhatsApp AI konuşma geçmişi okunamadı, bozuk veri temizleniyor:', err);
+            try {
+                if (typeof sessionStorage !== 'undefined') {
+                    sessionStorage.removeItem(key);
+                }
+            } catch (removeErr) {
+                console.warn('Bozuk WhatsApp AI oturum verisi silinemedi:', removeErr);
+            }
+        }
 
         const cloned = JSON.parse(JSON.stringify(DEFAULT_CONVERSATIONS));
         Store.state.whatsappAi.conversations = cloned;
@@ -81,11 +104,15 @@ export class WhatsappAiInbox {
 
     static saveState() {
         try {
-            localStorage.setItem(
-                WhatsappAiInbox.getStorageKey(),
-                JSON.stringify(Store.state.whatsappAi.conversations || [])
-            );
-        } catch { /* storage doluysa yoksay */ }
+            if (typeof sessionStorage !== 'undefined') {
+                sessionStorage.setItem(
+                    WhatsappAiInbox.getStorageKey(),
+                    JSON.stringify(Store.state.whatsappAi.conversations || [])
+                );
+            }
+        } catch (err) {
+            console.warn('WhatsApp AI konuşma geçmişi kaydedilemedi:', err);
+        }
     }
 
     static async init() {
@@ -108,7 +135,9 @@ export class WhatsappAiInbox {
                 Store.state.whatsappAi.activeId = res[0].id;
                 WhatsappAiInbox.saveState();
             }
-        } catch { /* yerel durum korunur */ }
+        } catch (err) {
+            console.warn('WhatsApp AI konuşmaları senkronize edilemedi, yerel durum korunuyor:', err);
+        }
 
         WhatsappAiInbox.render();
     }

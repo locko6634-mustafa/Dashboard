@@ -480,6 +480,11 @@ class App {
             ]);
         } catch (error) {
             console.error('Bootstrap error:', error);
+            showToast(
+                error?.message || CONFIG.UI.MSG_API_ERROR || 'Panel başlatılırken bir hata oluştu. Lütfen sayfayı yenileyin.',
+                'error',
+                8000
+            );
         } finally {
             App.hideLoader();
         }

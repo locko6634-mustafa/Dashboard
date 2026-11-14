@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
 import { ChatbotService } from '../services/chatbot.service.js';
 import { extractQueryString } from './appointment.controller.js';
+import { isValidDateString, isValidTimeString } from '../utils/dateTime.util.js';
 
 const optionalPositiveIntSchema = z
   .union([z.number(), z.string(), z.null(), z.undefined()])
@@ -55,11 +56,27 @@ const jsonValueSchema = z.custom<Prisma.InputJsonValue>(
   { message: 'Geçersiz JSON değeri' }
 );
 
+const optionalDateStringSchema = z
+  .string({ invalid_type_error: 'Tarih metin olmalıdır' })
+  .trim()
+  .refine((val) => !val || isValidDateString(val), {
+    message: 'Tarih YYYY-MM-DD formatında ve geçerli olmalıdır',
+  })
+  .optional();
+
+const optionalTimeStringSchema = z
+  .string({ invalid_type_error: 'Saat metin olmalıdır' })
+  .trim()
+  .refine((val) => !val || isValidTimeString(val), {
+    message: 'Saat HH:mm formatında ve geçerli olmalıdır',
+  })
+  .optional();
+
 export const chatbotBookSchema = z.object({
   ad_soyad: z.string({ invalid_type_error: 'Ad soyad metin olmalıdır' }).optional(),
   telefon: z.string({ invalid_type_error: 'Telefon metin olmalıdır' }).trim().optional(),
-  tarih: z.string({ invalid_type_error: 'Tarih metin olmalıdır' }).trim().optional(),
-  saat: z.string({ invalid_type_error: 'Saat metin olmalıdır' }).trim().optional(),
+  tarih: optionalDateStringSchema,
+  saat: optionalTimeStringSchema,
   hizmet: z.string({ invalid_type_error: 'Hizmet metin olmalıdır' }).optional(),
   sure: optionalPositiveIntSchema.optional(),
   tenant_id: z.string().optional(),
@@ -76,10 +93,10 @@ export const chatbotCancelSchema = z.object({
 export const chatbotRescheduleSchema = z.object({
   appointment_id: z.string({ invalid_type_error: 'Randevu ID metin olmalıdır' }).trim().optional(),
   id: z.string({ invalid_type_error: 'Randevu ID metin olmalıdır' }).trim().optional(),
-  tarih: z.string({ invalid_type_error: 'Tarih metin olmalıdır' }).trim().optional(),
-  date: z.string({ invalid_type_error: 'Tarih metin olmalıdır' }).trim().optional(),
-  saat: z.string({ invalid_type_error: 'Saat metin olmalıdır' }).trim().optional(),
-  time: z.string({ invalid_type_error: 'Saat metin olmalıdır' }).trim().optional(),
+  tarih: optionalDateStringSchema,
+  date: optionalDateStringSchema,
+  saat: optionalTimeStringSchema,
+  time: optionalTimeStringSchema,
   telefon: z.string({ invalid_type_error: 'Telefon metin olmalıdır' }).trim().optional(),
   phone: z.string({ invalid_type_error: 'Telefon metin olmalıdır' }).trim().optional(),
   tenant_id: z.string().optional(),

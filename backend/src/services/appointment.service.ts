@@ -1,6 +1,19 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../config/prisma.js';
+import {
+  formatMinutesToTime,
+  isValidDateString,
+  isValidTimeString,
+  parseTimeToMinutes,
+} from '../utils/dateTime.util.js';
+
+const optionalTimeSchema = z
+  .string()
+  .refine((val) => !val.trim() || isValidTimeString(val), {
+    message: 'Saat HH:mm formatında ve geçerli olmalıdır (00:00-23:59)',
+  })
+  .optional();
 
 export const createAppointmentSchema = z
   .object({
@@ -14,10 +27,15 @@ export const createAppointmentSchema = z
     gelinen_seans: z.coerce.number().int().min(0).optional(),
     toplam_tutar: z.coerce.number().min(0).optional(),
     alinan_odeme: z.coerce.number().min(0).optional(),
-    tarih: z.string().min(1, 'Tarih zorunludur'),
-    saat: z.string().optional(),
-    baslangic_saati: z.string().optional(),
-    bitis_saati: z.string().optional(),
+    tarih: z
+      .string()
+      .min(1, 'Tarih zorunludur')
+      .refine((val) => isValidDateString(val), {
+        message: 'Tarih YYYY-MM-DD formatında ve geçerli olmalıdır',
+      }),
+    saat: optionalTimeSchema,
+    baslangic_saati: optionalTimeSchema,
+    bitis_saati: optionalTimeSchema,
     sure: z.coerce.number().int().positive().optional(),
     durum: z.string().optional(),
     hizmet: z.string().optional(),
@@ -30,10 +48,16 @@ export const updateAppointmentSchema = z
     randevu_id: z.string().optional(),
     hasta_id: z.string().optional().nullable(),
     durum: z.string().optional(),
-    tarih: z.string().min(1).optional(),
-    saat: z.string().optional(),
-    baslangic_saati: z.string().optional(),
-    bitis_saati: z.string().optional(),
+    tarih: z
+      .string()
+      .min(1)
+      .refine((val) => isValidDateString(val), {
+        message: 'Tarih YYYY-MM-DD formatında ve geçerli olmalıdır',
+      })
+      .optional(),
+    saat: optionalTimeSchema,
+    baslangic_saati: optionalTimeSchema,
+    bitis_saati: optionalTimeSchema,
     sure: z.coerce.number().int().positive().optional(),
     hizmet: z.string().optional(),
   })
@@ -62,28 +86,12 @@ export function calculateDefaultDuration(hizmet?: string | null): number {
 
 export function calculateEndTime(startTime: string, durationMinutes: number): string {
   if (!startTime) return '';
-  const parts = startTime.split(':');
-  if (parts.length < 2) return startTime;
-  const h = parseInt(parts[0], 10);
-  const m = parseInt(parts[1], 10);
-  if (isNaN(h) || isNaN(m)) return startTime;
+  const startMins = parseTimeToMinutes(startTime);
+  if (startMins === null) return startTime;
 
-  const totalMinutes = h * 60 + m + durationMinutes;
-  const endH = Math.floor(totalMinutes / 60) % 24;
-  const endM = totalMinutes % 60;
-
-  const pad = (n: number) => n.toString().padStart(2, '0');
+  const parts = startTime.trim().split(':');
   const sec = parts[2] ? `:${parts[2]}` : ':00';
-  return `${pad(endH)}:${pad(endM)}${sec}`;
-}
-
-function parseTimeToMinutes(timeStr: string): number | null {
-  const parts = timeStr.trim().split(':');
-  if (parts.length < 2) return null;
-  const h = parseInt(parts[0], 10);
-  const m = parseInt(parts[1], 10);
-  if (isNaN(h) || isNaN(m)) return null;
-  return h * 60 + m;
+  return formatMinutesToTime(startMins + durationMinutes, sec);
 }
 
 export interface ConflictCheckParams {

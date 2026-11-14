@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
+import { AuthenticatedRequest, requireTenantId } from '../middlewares/auth.middleware.js';
 import {
   AppointmentService,
   batchUpdateAppointmentSchema,
@@ -14,7 +14,7 @@ export function extractQueryString(value: unknown): string | undefined {
 export class AppointmentController {
   static async getAppointments(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const body = req.body?.payload || req.body || {};
       const dateStr =
         extractQueryString(req.query.date) ||
@@ -52,7 +52,7 @@ export class AppointmentController {
 
   static async createAppointment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const rawData = req.body?.payload ? req.body.payload : req.body;
       const data = createAppointmentSchema.parse(rawData);
 
@@ -65,7 +65,7 @@ export class AppointmentController {
 
   static async updateAppointment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const rawData = req.body?.payload ? req.body.payload : req.body;
       const data = updateAppointmentSchema.parse(rawData);
       const id = req.params.id || data.id || data.randevu_id;
@@ -84,7 +84,7 @@ export class AppointmentController {
 
   static async batchUpdate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const rawData = req.body?.payload ? req.body.payload : req.body;
       const parsed = batchUpdateAppointmentSchema.parse({
         ...rawData,
@@ -100,7 +100,7 @@ export class AppointmentController {
 
   static async deleteAppointment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const data = req.body?.payload ? req.body.payload : req.body;
       const id = req.params.id || data.randevu_id || data.id;
 
@@ -118,7 +118,7 @@ export class AppointmentController {
 
   static async getClientAppointments(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const clientId = extractQueryString(req.query.id) || extractQueryString(req.query.hasta_id) || req.params.id;
 
       if (!clientId) {

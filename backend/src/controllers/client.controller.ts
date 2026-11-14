@@ -1,12 +1,12 @@
 import { Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
+import { AuthenticatedRequest, requireTenantId } from '../middlewares/auth.middleware.js';
 import { ClientService, createClientSchema, updateClientSchema } from '../services/client.service.js';
 import { extractQueryString } from './appointment.controller.js';
 
 export class ClientController {
   static async searchClients(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const query =
         extractQueryString(req.query.q) ||
         extractQueryString(req.query.ad_soyad) ||
@@ -22,7 +22,7 @@ export class ClientController {
 
   static async createClient(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const rawData = req.body?.payload ? req.body.payload : req.body;
       const data = createClientSchema.parse(rawData);
       const result = await ClientService.createClient(tenantId, data);
@@ -34,7 +34,7 @@ export class ClientController {
 
   static async updateClient(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const rawData = req.body?.payload ? req.body.payload : req.body;
       const data = updateClientSchema.parse(rawData);
       const id = req.params.id || data.hasta_id || data.id;
@@ -53,7 +53,7 @@ export class ClientController {
 
   static async getClientById(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const id = req.params.id;
 
       const client = await ClientService.getClientById(tenantId, id);

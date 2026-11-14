@@ -15,24 +15,8 @@ export class AuthService {
 
     let isPasswordValid = false;
 
-    // Check if password hash is argon2 or plain text legacy
     if (tenant.password_hash.startsWith('$argon2')) {
       isPasswordValid = await argon2.verify(tenant.password_hash, password);
-    } else {
-      // Legacy plaintext comparison
-      isPasswordValid = tenant.password_hash === password;
-      if (isPasswordValid) {
-        // Transparent upgrade to Argon2
-        try {
-          const hashed = await argon2.hash(password);
-          await prisma.tenant.update({
-            where: { id: tenant.id },
-            data: { password_hash: hashed },
-          });
-        } catch (hashErr) {
-          console.warn('Failed to upgrade password hash:', hashErr);
-        }
-      }
     }
 
     if (!isPasswordValid) {

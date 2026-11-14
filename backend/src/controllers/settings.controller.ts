@@ -1,11 +1,11 @@
 import { Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
+import { AuthenticatedRequest, requireTenantId } from '../middlewares/auth.middleware.js';
 import { SettingsService, updateSettingsSchema } from '../services/settings.service.js';
 
 export class SettingsController {
   static async getSettings(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const settings = await SettingsService.getSettings(tenantId);
       res.json(settings);
     } catch (err) {
@@ -15,7 +15,7 @@ export class SettingsController {
 
   static async updateSettings(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const rawPayload = req.body?.payload ? req.body.payload : req.body;
       const payload = updateSettingsSchema.parse(rawPayload);
 

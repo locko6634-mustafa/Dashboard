@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
+import { AuthenticatedRequest, requireTenantId } from '../middlewares/auth.middleware.js';
 import { NotesService } from '../services/notes.service.js';
 
 export const addNoteSchema = z
@@ -35,7 +35,7 @@ export const addNoteSchema = z
 export class NotesController {
   static async getNotes(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const hastaId = (req.query.id as string) || (req.query.hasta_id as string);
 
       const notes = await NotesService.getNotes(tenantId, hastaId);
@@ -47,7 +47,7 @@ export class NotesController {
 
   static async addNote(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const rawData =
         req.body && typeof req.body === 'object' && 'payload' in req.body
           ? req.body.payload
@@ -66,7 +66,7 @@ export class NotesController {
 
   static async deleteNote(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const tenantId = req.tenantId!;
+      const tenantId = requireTenantId(req);
       const data = req.body?.payload ? req.body.payload : req.body;
       const noteId = req.params.id || data.note_id || data.id;
 

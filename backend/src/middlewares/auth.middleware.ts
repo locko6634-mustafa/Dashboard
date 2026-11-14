@@ -1,7 +1,9 @@
+import crypto from 'crypto';
 import { CookieOptions, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.config.js';
 import { prisma } from '../config/prisma.js';
+import { hashApiKey } from '../services/admin.service.js';
 
 export const USER_AUTH_COOKIE_NAME = 'rp_user_token';
 export const ADMIN_AUTH_COOKIE_NAME = 'rp_admin_token';
@@ -55,6 +57,19 @@ export interface AuthenticatedRequest extends Request {
     email: string;
     salon_adi: string;
   };
+}
+
+/**
+ * Doğrulanmış istekten tenantId döndürür; eksik veya boşsa 401 hatası fırlatır.
+ */
+export function requireTenantId(req: AuthenticatedRequest): string {
+  const tenantId = typeof req.tenantId === 'string' ? req.tenantId.trim() : '';
+  if (!tenantId) {
+    throw Object.assign(new Error('Yetkisiz erişim: Geçerli bir işletme oturumu zorunludur'), {
+      status: 401,
+    });
+  }
+  return tenantId;
 }
 
 export async function authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -131,13 +146,52 @@ export async function authMiddleware(req: AuthenticatedRequest, res: Response, n
       }
 
       // 2. Try API Key verification (for server-to-server or integration access)
-      const tenantByKey = await prisma.tenant.findFirst({
+      const tokenHash = hashApiKey(token);
+      const tokenHashBuf = Buffer.from(tokenHash, 'hex');
+
+      let tenantByKey = await prisma.tenant.findFirst({
         where: {
-          api_key: token,
+          api_key_hash: tokenHash,
           durum: 'Aktif',
           ...(tenantId ? { id: tenantId } : {}),
         },
+        select: { id: true, email: true, salon_adi: true },
       });
+
+      // Legacy fallback: hashlenmemiş eski api_key kayıtları için timing-safe karşılaştırma + lazy migration
+      if (!tenantByKey) {
+        const legacyTenants = await prisma.tenant.findMany({
+          where: {
+            api_key_hash: null,
+            api_key: { not: null },
+            durum: 'Aktif',
+            ...(tenantId ? { id: tenantId } : {}),
+          },
+          select: { id: true, email: true, salon_adi: true, api_key: true },
+        });
+
+        for (const candidate of legacyTenants) {
+          if (!candidate.api_key) continue;
+          const candidateHashBuf = Buffer.from(hashApiKey(candidate.api_key), 'hex');
+          if (
+            candidateHashBuf.length === tokenHashBuf.length &&
+            crypto.timingSafeEqual(candidateHashBuf, tokenHashBuf)
+          ) {
+            tenantByKey = {
+              id: candidate.id,
+              email: candidate.email,
+              salon_adi: candidate.salon_adi,
+            };
+            prisma.tenant
+              .update({
+                where: { id: candidate.id },
+                data: { api_key_hash: tokenHash },
+              })
+              .catch((err) => console.warn('Lazy api_key_hash migration failed:', err));
+            break;
+          }
+        }
+      }
 
       if (tenantByKey) {
         req.tenantId = tenantByKey.id;

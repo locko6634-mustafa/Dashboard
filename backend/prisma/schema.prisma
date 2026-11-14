@@ -16,6 +16,7 @@ model Tenant {
   n8n_webhook_url   String?        @db.VarChar(500)
   chatwoot_inbox_id String?        @db.VarChar(100)
   api_key           String?        @unique @db.VarChar(100)
+  api_key_hash      String?        @unique @db.VarChar(64)
   durum             String?        @default("Aktif") @db.VarChar(20)
   plan_tipi         String?        @default("Standart") @db.VarChar(50)
   plan_bitis_tarihi DateTime?      @db.Timestamptz(6)
