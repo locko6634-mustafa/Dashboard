@@ -27,6 +27,12 @@ export function validateEnv(rawEnv: Record<string, string | undefined>) {
     if (!data.JWT_SECRET || data.JWT_SECRET.length < 32) {
       throw new Error('JWT_SECRET must be set and at least 32 characters long in production');
     }
+    const corsOrigins = data.CORS_ORIGIN.split(',')
+      .map((o) => o.trim())
+      .filter(Boolean);
+    if (corsOrigins.length === 0 || corsOrigins.includes('*')) {
+      throw new Error('CORS_ORIGIN must be an explicit allowlist (cannot be "*" or empty) in production');
+    }
   } else if (data.JWT_SECRET !== undefined && data.JWT_SECRET.length < 8) {
     throw new Error('JWT_SECRET must be at least 8 characters long when provided');
   }

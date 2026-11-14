@@ -26,15 +26,46 @@ app.use(
   })
 );
 
+const apiCsp = helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'none'"],
+    frameAncestors: ["'none'"],
+  },
+});
+
+const staticCsp = helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'"],
+    styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+    fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+    imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+    connectSrc: ["'self'", 'https://server.n8n-mustafa.me', 'https://randevu.n8n-mustafa.me'],
+    objectSrc: ["'none'"],
+    frameAncestors: ["'self'"],
+  },
+});
+
+// Strict CSP for API, webhook, and health endpoints
+app.use(['/health', '/api', '/webhook', '/randevu-api', '/randevu/api', '/randevu/webhook'], apiCsp);
+
+export function resolveCorsConfig(corsOrigin: string, nodeEnv: string) {
+  const allowedOrigins = corsOrigin
+    .trim()
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  const isWildcardCors = allowedOrigins.length === 0 || allowedOrigins.includes('*');
+
+  if (nodeEnv === 'production' && isWildcardCors) {
+    throw new Error('CORS_ORIGIN cannot be "*" or empty in production; explicit origin allowlist is required');
+  }
+
+  return { isWildcardCors, allowedOrigins };
+}
+
 // CORS configuration (wildcard disables credentials; explicit allowlist enables credentials)
-const rawCorsOrigin = ENV.CORS_ORIGIN.trim();
-const isWildcardCors = !rawCorsOrigin || rawCorsOrigin === '*';
-const allowedOrigins = isWildcardCors
-  ? []
-  : rawCorsOrigin
-      .split(',')
-      .map((o) => o.trim())
-      .filter(Boolean);
+const { isWildcardCors, allowedOrigins } = resolveCorsConfig(ENV.CORS_ORIGIN, ENV.NODE_ENV);
 
 app.use(
   cors(
@@ -134,8 +165,14 @@ const frontendCandidates = [
 
 for (const dir of frontendCandidates) {
   if (fs.existsSync(dir) && fs.existsSync(path.join(dir, 'index.html'))) {
-    app.use(express.static(dir, { dotfiles: 'deny', index: ['index.html'] }));
-    app.use('/randevu', express.static(dir, { dotfiles: 'deny', index: ['index.html'] }));
+    const applyStaticCsp: express.RequestHandler = (req, res, next) => {
+      if (!res.getHeader('Content-Security-Policy')) {
+        return staticCsp(req, res, next);
+      }
+      next();
+    };
+    app.use(applyStaticCsp, express.static(dir, { dotfiles: 'deny', index: ['index.html'] }));
+    app.use('/randevu', applyStaticCsp, express.static(dir, { dotfiles: 'deny', index: ['index.html'] }));
     break;
   }
 }

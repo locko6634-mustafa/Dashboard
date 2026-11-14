@@ -290,6 +290,7 @@ describe('Security, Env, Validation and Error Handling Regression Tests', () => 
       NODE_ENV: 'production',
       DATABASE_URL: 'postgresql://localhost/db',
       JWT_SECRET: 'a-very-secure-production-secret-at-least-32-chars',
+      CORS_ORIGIN: 'https://app.example.com',
     });
     assert.equal(validProd.JWT_SECRET, 'a-very-secure-production-secret-at-least-32-chars');
   });

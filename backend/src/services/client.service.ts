@@ -1,5 +1,14 @@
 import { z } from 'zod';
 import { prisma } from '../config/prisma.js';
+import { MoneyInput, toMoneyNumber } from '../utils/decimal.util.js';
+
+function withMoneyNumbers<T extends { toplam_tutar: MoneyInput; alinan_odeme: MoneyInput }>(client: T) {
+  return {
+    ...client,
+    toplam_tutar: toMoneyNumber(client.toplam_tutar),
+    alinan_odeme: toMoneyNumber(client.alinan_odeme),
+  };
+}
 
 export const createClientSchema = z
   .object({
@@ -39,11 +48,7 @@ export class ClientService {
       take: q ? 50 : 200,
     });
 
-    return clients.map((c) => ({
-      ...c,
-      toplam_tutar: c.toplam_tutar ? Number(c.toplam_tutar) : 0,
-      alinan_odeme: c.alinan_odeme ? Number(c.alinan_odeme) : 0,
-    }));
+    return clients.map(withMoneyNumbers);
   }
 
   static async createClient(tenantId: string, data: CreateClientInput) {
@@ -64,11 +69,7 @@ export class ClientService {
     return {
       success: true,
       message: 'Müşteri başarıyla eklendi',
-      data: {
-        ...created,
-        toplam_tutar: created.toplam_tutar ? Number(created.toplam_tutar) : 0,
-        alinan_odeme: created.alinan_odeme ? Number(created.alinan_odeme) : 0,
-      },
+      data: withMoneyNumbers(created),
     };
   }
 
@@ -97,11 +98,7 @@ export class ClientService {
 
     return {
       success: true,
-      data: {
-        ...updated,
-        toplam_tutar: updated.toplam_tutar ? Number(updated.toplam_tutar) : 0,
-        alinan_odeme: updated.alinan_odeme ? Number(updated.alinan_odeme) : 0,
-      },
+      data: withMoneyNumbers(updated),
     };
   }
 
@@ -123,10 +120,6 @@ export class ClientService {
       throw { status: 404, message: 'Müşteri bulunamadı' };
     }
 
-    return {
-      ...client,
-      toplam_tutar: client.toplam_tutar ? Number(client.toplam_tutar) : 0,
-      alinan_odeme: client.alinan_odeme ? Number(client.alinan_odeme) : 0,
-    };
+    return withMoneyNumbers(client);
   }
 }

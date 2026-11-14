@@ -2,6 +2,7 @@ import { CONFIG } from '../shared/config.js';
 import { Utils, DateUtils } from '../shared/utils.js';
 import { showToast } from '../shared/toast.js';
 import { ApiService } from '../shared/api-client.js';
+import { unwrapApiData, normalizeAppointment } from '../shared/normalizers.js';
 import { Store } from './store.js';
 import { DOM } from './dom.js';
 import { AppointmentManager } from './appointment.js';
@@ -132,9 +133,12 @@ class ReportsManager {
 
             // Bellekte takvimden kalan randevuları da dahil et
             const localApts = Object.values(Store.state.appointments || {});
-            if (localApts.length) {
-                allAppointments.push(...localApts);
-            }
+            localApts.forEach(item => {
+                const normalized = normalizeAppointment(item);
+                if (normalized && normalized.id) {
+                    allAppointments.push(normalized);
+                }
+            });
 
             // Yıl ve ay sınırlarını alarak güvenli tam sayı döngüsü kur
             const [sYear, sMonth] = startDateStr.split('-').map(Number);
@@ -165,16 +169,13 @@ class ReportsManager {
                     }
                 );
 
-                // API yanıtı dizi veya {data: [...]} olabilir
-                const rawItems = Array.isArray(response) ? response : (response?.data || response?.appointments || []);
-                if (Array.isArray(rawItems)) {
-                    rawItems.forEach(item => {
-                        const j = item.json || item;
-                        if (j && (j.id || j.randevu_id)) {
-                            allAppointments.push(j);
-                        }
-                    });
-                }
+                // API yanıtı dizi, tekil obje veya {data: [...]} olabilir
+                unwrapApiData(response).forEach(item => {
+                    const normalized = normalizeAppointment(item);
+                    if (normalized && normalized.id) {
+                        allAppointments.push(normalized);
+                    }
+                });
 
                 // Sonraki aya geç
                 curM++;
@@ -187,7 +188,7 @@ class ReportsManager {
             // Mükerrerleri ID bazında temizle
             const uniqueMap = new Map();
             allAppointments.forEach(item => {
-                const key = item.id || item.randevu_id;
+                const key = item.randevu_id || item.id;
                 if (key) {
                     uniqueMap.set(String(key), item);
                 }
@@ -240,8 +241,8 @@ class ReportsManager {
         filtered.sort((a, b) => {
             const comp = (b.tarih || '').localeCompare(a.tarih || '');
             if (comp !== 0) return comp;
-            const timeA = a.saat || a.baslangic_saati || '00:00';
-            const timeB = b.saat || b.baslangic_saati || '00:00';
+            const timeA = a.saat || '00:00';
+            const timeB = b.saat || '00:00';
             return timeB.localeCompare(timeA);
         });
 
@@ -300,7 +301,7 @@ class ReportsManager {
                 dotClass = 'dot-canceled';
             }
 
-            const startH = (apt.saat || apt.baslangic_saati || '').substring(0, 5);
+            const startH = (apt.saat || '').substring(0, 5);
             let endH = (apt.bitis_saati || '').substring(0, 5);
             if (!endH && startH && apt.sure) {
                 endH = Utils.calcBitisSaati(startH, apt.sure);
@@ -358,7 +359,7 @@ class ReportsManager {
                         hizmet: apt.hizmet || '',
                         durum: apt.durum || CONFIG.STATUS.WAITING,
                         tarih: apt.tarih,
-                        saat: (apt.saat || apt.baslangic_saati || '').substring(0, 5),
+                        saat: (apt.saat || '').substring(0, 5),
                         sure: parseInt(apt.sure, 10) || 30,
                         kronik_rahatsizlik: apt.kronik_rahatsizlik || '',
                         paket_adi: apt.paket_adi || CONFIG.DEFAULTS.PACKAGE,
@@ -487,7 +488,7 @@ class ReportsManager {
                 }
             }
 
-            const startH = (apt.saat || apt.baslangic_saati || '').substring(0, 5);
+            const startH = (apt.saat || '').substring(0, 5);
             let endH = (apt.bitis_saati || '').substring(0, 5);
             if (!endH && startH && apt.sure) {
                 endH = Utils.calcBitisSaati(startH, apt.sure);

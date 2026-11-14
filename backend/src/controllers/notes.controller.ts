@@ -1,6 +1,36 @@
 import { Response, NextFunction } from 'express';
+import { z } from 'zod';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
 import { NotesService } from '../services/notes.service.js';
+
+export const addNoteSchema = z
+  .object({
+    hasta_id: z
+      .union([z.string().trim().uuid('Geçersiz hasta_id formatı'), z.literal('')])
+      .optional()
+      .nullable(),
+    not: z.string().optional(),
+    not_metni: z.string().optional(),
+    note: z.string().optional(),
+    tarih: z
+      .string()
+      .refine((val) => !val.trim() || !Number.isNaN(Date.parse(val)), {
+        message: 'Geçersiz tarih formatı',
+      })
+      .optional()
+      .nullable(),
+  })
+  .passthrough()
+  .superRefine((data, ctx) => {
+    const text = (data.not_metni ?? data.not ?? data.note ?? '').trim();
+    if (!text) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['not_metni'],
+        message: 'Not metni zorunludur',
+      });
+    }
+  });
 
 export class NotesController {
   static async getNotes(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -18,10 +48,14 @@ export class NotesController {
   static async addNote(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = req.tenantId!;
-      const data = req.body?.payload ? req.body.payload : req.body;
-      const hastaId = data.hasta_id;
-      const notMetni = data.not || data.not_metni || data.note;
-      const tarih = data.tarih;
+      const rawData =
+        req.body && typeof req.body === 'object' && 'payload' in req.body
+          ? req.body.payload
+          : req.body;
+      const data = addNoteSchema.parse(rawData);
+      const hastaId = data.hasta_id || undefined;
+      const notMetni = (data.not_metni ?? data.not ?? data.note ?? '').trim();
+      const tarih = data.tarih || undefined;
 
       const result = await NotesService.addNote(tenantId, hastaId, notMetni, tarih);
       res.status(201).json(result);

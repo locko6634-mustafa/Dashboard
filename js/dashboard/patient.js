@@ -8,6 +8,7 @@ import { showToast, showUndoToast } from '../shared/toast.js';
 import { ThemeUtils } from '../shared/theme.js';
 import { ApiService, apiRequest } from '../shared/api-client.js';
 import { getToken, getTenantId, clearSession, logoutUser } from '../shared/auth-session.js';
+import { unwrapApiData, normalizeAppointment, normalizeNote } from '../shared/normalizers.js';
 import { Store } from './store.js';
 import { DOM } from './dom.js';
 import { UndoManager } from './undo-manager.js';
@@ -62,10 +63,11 @@ class NotesManager {
             const fragment = document.createDocumentFragment();
             const visibleNotes = Store.state.patientNotes.slice(0, Store.state.visibleNotesCount);
             
-            visibleNotes.forEach(n => {
-                const metin = n.not_metni || n.not || '';
+            visibleNotes.forEach(rawNote => {
+                const n = normalizeNote(rawNote) || {};
+                const metin = n.not_metni || '';
                 const rawTarih = n.tarih || '';
-                const noteId = (n.id || '').toString();
+                const noteId = n.id || '';
                 let tarihStr = '';
                 if (rawTarih) {
                     const d = new Date(rawTarih);
@@ -127,21 +129,19 @@ class NotesManager {
                     sbNotes.replaceChildren(Utils.el('div', { className: 'text-danger font-11' }, errMsg));
                     return;
                 }
-                let data = [];
+                let parsed = [];
                 if (text && typeof text === 'string') {
                     try {
-                        data = JSON.parse(text);
+                        parsed = JSON.parse(text);
                     } catch (e) {
                         console.error('Notlar JSON parse hatası:', e);
                         sbNotes.replaceChildren(Utils.el('div', { className: 'text-danger font-11' }, CONFIG.UI.MSG_NOTES_ERROR));
                         return;
                     }
                 }
-                if (data && !Array.isArray(data) && data.data) data = data.data;
-                if (data && !Array.isArray(data)) data = [data];
-                if (data && data.length > 0 && data[0].json) data = data.map(i => i.json);
-
-                data = data.filter(n => n && (n.not_metni || n.not || n.tarih));
+                const data = unwrapApiData(parsed)
+                    .map(normalizeNote)
+                    .filter(n => n && (n.not_metni || n.tarih));
 
                 if (data.length > 0) {
                     data.sort((a, b) => new Date(b.tarih || 0) - new Date(a.tarih || 0));
@@ -232,7 +232,10 @@ class PatientUI {
         if (!pId) return;
         
         // 1. Yerel Store'daki randevulardan anında doldur
-        const localApps = Object.values(Store.state.appointments).filter(a => (a.hasta_id === pId || a.id === pId));
+        const localApps = Object.values(Store.state.appointments)
+            .filter(a => (a.hasta_id === pId || a.id === pId))
+            .map(normalizeAppointment)
+            .filter(Boolean);
         Store.state.patientAppointments = [...localApps];
         PatientUI.renderPatientAppointments();
         PatientUI.updateOverviewAptLink();
@@ -246,16 +249,18 @@ class PatientUI {
                 customErrorMsg: null
             });
 
-            if (Array.isArray(data)) {
+            const remoteApps = unwrapApiData(data)
+                .map(normalizeAppointment)
+                .filter(a => a && a.id);
+
+            if (remoteApps.length > 0 || Array.isArray(data)) {
                 const mergedMap = new Map();
-                data.forEach(a => {
-                    const id = a.id || a.randevu_id;
-                    if (id) mergedMap.set(id, a);
+                remoteApps.forEach(a => {
+                    mergedMap.set(a.id, a);
                 });
                 localApps.forEach(a => {
-                    const id = a.id || a.randevu_id;
-                    if (id && !mergedMap.has(id)) {
-                        mergedMap.set(id, a);
+                    if (a.id && !mergedMap.has(a.id)) {
+                        mergedMap.set(a.id, a);
                     }
                 });
                 Store.state.patientAppointments = Array.from(mergedMap.values());
@@ -351,7 +356,7 @@ class PatientUI {
                 className: `sb-apt-card ${isUpcoming ? 'is-upcoming' : 'is-past'}`,
                 title: 'Randevu detayını açmak için tıklayın',
                 onclick: () => {
-                    const aptId = a.id || a.randevu_id;
+                    const aptId = a.randevu_id || a.id;
                     if (aptId) AppointmentManager.openAptModal(aptId);
                 }
             }, cardHeader, cardBody);

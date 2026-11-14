@@ -107,10 +107,10 @@ model ConversationState {
   current_stage   String?        @db.VarChar(100)
   context_data    Json?          @default("{}")
   retry_count     Int?           @default(0)
-  tenant_id       String?        @db.Uuid
+  tenant_id       String         @db.Uuid
   updated_at      DateTime?      @default(now()) @updatedAt @db.Timestamptz(6)
 
-  tenant          Tenant?        @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  tenant          Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@index([phone_number])
   @@index([tenant_id])

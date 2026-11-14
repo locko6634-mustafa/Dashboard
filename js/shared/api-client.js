@@ -8,20 +8,21 @@ import { getToken, getTenantId, clearSession } from './auth-session.js';
 
 export class ApiService {
     static call = async (endpoint, options = {}) => {
-        const { 
-            payload = null, 
-            method = 'POST', 
-            loadingId = null, 
-            reloadOnSuccess = false, 
-            returnData = false, 
-            isText = false, 
-            signal = null, 
-            customErrorMsg = CONFIG.UI.MSG_API_ERROR 
+        const {
+            payload = null,
+            method = 'POST',
+            loadingId = null,
+            reloadOnSuccess = false,
+            returnData = false,
+            isText = false,
+            signal = null,
+            apiKey = null,
+            customErrorMsg = CONFIG.UI.MSG_API_ERROR
         } = options;
-        
+
         const currentToken = getToken();
         const tenantId = getTenantId();
-        
+
         if (!currentToken || !tenantId) {
             showToast('Oturum bulunamadı! Lütfen giriş yapın.', 'error', 8000);
             setTimeout(() => window.location.href = 'login.html', 1000);
@@ -38,19 +39,23 @@ export class ApiService {
         const timeoutId = setTimeout(() => controller.abort(), timeoutTime);
 
         try {
-            const fetchOpts = { 
-                method, 
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'x-api-key': currentToken, 
-                    'Authorization': 'Bearer ' + currentToken,
-                    'x-tenant-id': tenantId
-                } 
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + currentToken,
+                'x-tenant-id': tenantId
+            };
+            if (apiKey) {
+                headers['x-api-key'] = apiKey;
+            }
+
+            const fetchOpts = {
+                method,
+                headers
             };
             if (payload && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
                 fetchOpts.body = JSON.stringify(payload);
             }
-            
+
             if (signal && window.AbortSignal && AbortSignal.any) {
                 fetchOpts.signal = AbortSignal.any([signal, controller.signal]);
             } else if (signal) {
@@ -71,9 +76,20 @@ export class ApiService {
                     setTimeout(() => window.location.href = 'login.html', 1000);
                     return null;
                 }
-                throw new Error('HTTP_ERROR');
+                let serverMsg = '';
+                if (resText) {
+                    try {
+                        const parsedErr = JSON.parse(resText);
+                        serverMsg = parsedErr?.error || parsedErr?.message || '';
+                    } catch {
+                        serverMsg = resText.trim();
+                    }
+                }
+                const err = new Error(serverMsg || `HTTP ${res.status}`);
+                err.status = res.status;
+                throw err;
             }
-            
+
             let parsedData = null;
             if (resText) {
                 try {
@@ -85,7 +101,7 @@ export class ApiService {
                     }
                 }
             }
-            
+
             if (parsedData && typeof parsedData === 'object' && parsedData.error) {
                 console.error('Backend Error:', parsedData.error);
                 throw new Error(typeof parsedData.error === 'string' ? parsedData.error : 'Backend Hatası');
@@ -108,11 +124,11 @@ export class ApiService {
                 const el = document.getElementById(loadingId);
                 if (el) el.classList.add('hidden');
             }
-            
-            const errorMsg = (e.message && e.message !== 'HTTP_ERROR' && e.message !== 'Failed to fetch') 
-                ? e.message 
+
+            const errorMsg = (e.message && e.message !== 'Failed to fetch')
+                ? e.message
                 : customErrorMsg;
-                
+
             if (errorMsg) showToast(errorMsg, 'error');
             return false;
         }

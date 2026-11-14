@@ -235,7 +235,11 @@ export class ChatbotService {
     );
   }
 
-  static async cancelAppointment(appointmentId: string, phone: string, tenantId?: string) {
+  static async cancelAppointment(appointmentId: string, phone: string, tenantId: string) {
+    if (!tenantId || !tenantId.trim()) {
+      throw { status: 400, message: 'tenant_id zorunludur' };
+    }
+
     const client = await this.getClientByPhone(phone, tenantId);
     if (!client) {
       return { success: false, message: 'Bu telefon numarasına ait müşteri bulunamadı' };
@@ -245,8 +249,8 @@ export class ChatbotService {
       where: {
         id: appointmentId,
         hasta_id: client.id,
+        tenant_id: tenantId,
         deleted_at: null,
-        ...(tenantId ? { tenant_id: tenantId } : {}),
       },
     });
 
@@ -254,19 +258,33 @@ export class ChatbotService {
       return { success: false, message: 'İlgili randevu bulunamadı veya müşteriye ait değil' };
     }
 
-    await prisma.appointment.update({
-      where: { id: appointmentId },
+    const updated = await prisma.appointment.updateMany({
+      where: { id: appointmentId, tenant_id: tenantId, deleted_at: null },
       data: { durum: 'İptal' },
     });
+
+    if (updated.count === 0) {
+      return { success: false, message: 'İlgili randevu bulunamadı veya müşteriye ait değil' };
+    }
 
     return { success: true, message: 'Randevunuz başarıyla iptal edildi.' };
   }
 
-  static async rescheduleAppointment(appointmentId: string, newDate: string, newTime: string, phone?: string, tenantId?: string) {
-    let whereClause: any = {
+  static async rescheduleAppointment(
+    appointmentId: string,
+    newDate: string,
+    newTime: string,
+    phone: string | undefined,
+    tenantId: string
+  ) {
+    if (!tenantId || !tenantId.trim()) {
+      throw { status: 400, message: 'tenant_id zorunludur' };
+    }
+
+    const whereClause: Prisma.AppointmentWhereInput = {
       id: appointmentId,
+      tenant_id: tenantId,
       deleted_at: null,
-      ...(tenantId ? { tenant_id: tenantId } : {}),
     };
     if (phone) {
       const client = await this.getClientByPhone(phone, tenantId);
@@ -282,8 +300,8 @@ export class ChatbotService {
     const duration = appointment.sure || calculateDefaultDuration(appointment.hizmet);
     const newEndTime = calculateEndTime(newTime, duration);
 
-    await prisma.appointment.update({
-      where: { id: appointmentId },
+    const updated = await prisma.appointment.updateMany({
+      where: { id: appointmentId, tenant_id: tenantId, deleted_at: null },
       data: {
         tarih: newDate,
         baslangic_saati: newTime,
@@ -291,6 +309,10 @@ export class ChatbotService {
         durum: 'Bekliyor',
       },
     });
+
+    if (updated.count === 0) {
+      return { success: false, message: 'Randevu bulunamadı' };
+    }
 
     return {
       success: true,
@@ -332,7 +354,7 @@ export class ChatbotService {
     },
     tenantId: string
   ) {
-    if (!tenantId) {
+    if (!tenantId || !tenantId.trim()) {
       throw { status: 400, message: 'tenant_id zorunludur' };
     }
     const convId = String(identifier || (data.phone ? `conv_${data.phone}` : `conv_${Date.now()}`));
@@ -346,7 +368,7 @@ export class ChatbotService {
       select: { tenant_id: true },
     });
 
-    if (existing && existing.tenant_id && existing.tenant_id !== tenantId) {
+    if (existing && existing.tenant_id !== tenantId) {
       throw { status: 403, message: 'Bu konuşma durumuna erişim yetkiniz yok' };
     }
 

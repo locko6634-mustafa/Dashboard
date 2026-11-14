@@ -4,6 +4,21 @@ import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.config.js';
 import { prisma } from '../config/prisma.js';
 
+const IDEMPOTENT_PG_CODES = new Set(['42P07', '42710', '42701']);
+
+/**
+ * Postgres DDL sorgularında yalnızca "zaten var" (duplicate_table, duplicate_object, duplicate_column)
+ * hatalarının idempotent olarak yutulup yutulamayacağını kontrol eder.
+ */
+export function isIdempotentDdlError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') {
+    return false;
+  }
+  const e = err as Record<string, any>;
+  const candidates = [e.meta?.code, e.cause?.code, e.code];
+  return candidates.some((code) => typeof code === 'string' && IDEMPOTENT_PG_CODES.has(code));
+}
+
 export class AdminService {
   /**
    * Süper Admin ve Multi-tenant tablolarının/kolonlarının varlığını garantiye alır.
@@ -73,7 +88,7 @@ export class AdminService {
         current_stage VARCHAR(100),
         context_data JSONB DEFAULT '{}',
         retry_count INT DEFAULT 0,
-        tenant_id UUID,
+        tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
         updated_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP
       )`,
       `CREATE TABLE IF NOT EXISTS public.super_admins (
@@ -104,7 +119,11 @@ export class AdminService {
       try {
         await prisma.$executeRawUnsafe(sql);
       } catch (e) {
-        console.warn('SQL execution note:', e);
+        if (isIdempotentDdlError(e)) {
+          continue;
+        }
+        console.error('Schema DDL execution failed:', e);
+        throw e;
       }
     }
 

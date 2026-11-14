@@ -4,6 +4,7 @@
 
 import { SECTOR_PRESETS } from '../shared/terminology.js';
 import { Utils } from '../shared/utils.js';
+import { setSession } from '../shared/auth-session.js';
 
 const isLocal = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
 const API_BASE = isLocal 
@@ -684,18 +685,12 @@ window.impersonateTenant = async function(id) {
   try {
     const data = await adminFetch(`/admin/tenants/${id}/impersonate`, { method: 'POST' });
     if (data.success && data.token) {
-      // Normal salon oturumu olarak kaydet (auth-session.js tam uyumlu)
-      localStorage.setItem('user_token', data.token);
-      localStorage.setItem('tenant_id', data.tenant_id);
-      localStorage.setItem('salon_adi', data.salon_adi || '');
-      localStorage.setItem('auth_token', data.token);
-      localStorage.setItem('auth_session', JSON.stringify({
+      // Normal salon oturumu olarak kaydet (auth-session.js üzerinden tekilleştirilmiş)
+      setSession({
         token: data.token,
-        tenant_id: data.tenant_id,
-        salon_adi: data.salon_adi,
-        email: data.email,
-        login_time: new Date().toISOString(),
-      }));
+        tenantId: data.tenant_id,
+        salonAdi: data.salon_adi || '',
+      });
 
       // Yeni sekmede salon dashboard'unu aç
       window.open('dashboard.html', '_blank');
@@ -746,10 +741,14 @@ window.deleteTenant = async function(id, salonAdi) {
 
 // 9. API KEY KOPYALAMA
 window.copyApiKey = function(apiKey) {
+  if (!apiKey || !navigator.clipboard?.writeText) {
+    alert('Pano erişimi desteklenmiyor. API Key kopyalanamadı.');
+    return;
+  }
   navigator.clipboard.writeText(apiKey).then(() => {
-    alert('API Key panoya kopyalandı:\n' + apiKey);
+    alert('API Key panoya kopyalandı.');
   }).catch(() => {
-    prompt('API Key:', apiKey);
+    alert('Pano erişimi engellendi. API Key kopyalanamadı.');
   });
 };
 
