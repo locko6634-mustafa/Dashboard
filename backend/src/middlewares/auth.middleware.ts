@@ -91,7 +91,8 @@ export async function authMiddleware(req: AuthenticatedRequest, res: Response, n
     }
 
     // Tenant ID detection
-    let tenantId = tenantIdHeader || (req.body?.tenant_id as string) || (req.query?.tenant_id as string);
+    const rawTenantId = tenantIdHeader || (req.body?.tenant_id as string) || (req.query?.tenant_id as string);
+    const tenantId = typeof rawTenantId === 'string' && rawTenantId.trim() ? rawTenantId.trim() : undefined;
 
     if (token) {
       // 1. Try JWT verification (standard for dashboard frontend)
@@ -158,37 +159,35 @@ export async function authMiddleware(req: AuthenticatedRequest, res: Response, n
         select: { id: true, email: true, salon_adi: true },
       });
 
-      // Legacy fallback: hashlenmemiş eski api_key kayıtları için timing-safe karşılaştırma + lazy migration
-      if (!tenantByKey) {
-        const legacyTenants = await prisma.tenant.findMany({
+      // Legacy fallback: hashlenmemiş eski api_key kayıtları için yalnızca tenantId varsa tek kayıt kontrolü + lazy migration
+      if (!tenantByKey && tenantId) {
+        const legacyCandidate = await prisma.tenant.findFirst({
           where: {
+            id: tenantId,
             api_key_hash: null,
             api_key: { not: null },
             durum: 'Aktif',
-            ...(tenantId ? { id: tenantId } : {}),
           },
           select: { id: true, email: true, salon_adi: true, api_key: true },
         });
 
-        for (const candidate of legacyTenants) {
-          if (!candidate.api_key) continue;
-          const candidateHashBuf = Buffer.from(hashApiKey(candidate.api_key), 'hex');
+        if (legacyCandidate?.api_key) {
+          const candidateHashBuf = Buffer.from(hashApiKey(legacyCandidate.api_key), 'hex');
           if (
             candidateHashBuf.length === tokenHashBuf.length &&
             crypto.timingSafeEqual(candidateHashBuf, tokenHashBuf)
           ) {
             tenantByKey = {
-              id: candidate.id,
-              email: candidate.email,
-              salon_adi: candidate.salon_adi,
+              id: legacyCandidate.id,
+              email: legacyCandidate.email,
+              salon_adi: legacyCandidate.salon_adi,
             };
             prisma.tenant
               .update({
-                where: { id: candidate.id },
+                where: { id: legacyCandidate.id },
                 data: { api_key_hash: tokenHash },
               })
               .catch((err) => console.warn('Lazy api_key_hash migration failed:', err));
-            break;
           }
         }
       }

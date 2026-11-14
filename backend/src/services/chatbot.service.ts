@@ -9,7 +9,12 @@ import {
 } from '../utils/dateTime.util.js';
 
 export class ChatbotService {
-  static async getClientByPhone(phone: string, tenantId?: string) {
+  static async getClientByPhone(phone: string, tenantId: string) {
+    const normalizedTenantId = typeof tenantId === 'string' ? tenantId.trim() : '';
+    if (!normalizedTenantId) {
+      throw { status: 400, message: 'tenant_id zorunludur' };
+    }
+
     const cleaned = phone.replace(/\D/g, '');
     if (cleaned.length < 10) {
       return null;
@@ -17,15 +22,20 @@ export class ChatbotService {
     const targetDigits = cleaned.slice(-10);
     const client = await prisma.client.findFirst({
       where: {
-        ...(tenantId ? { tenant_id: tenantId } : {}),
+        tenant_id: normalizedTenantId,
         telefon: { contains: targetDigits },
       },
     });
     return client;
   }
 
-  static async getAppointmentsByPhone(phone: string, activeOnly: boolean = true, tenantId?: string) {
-    const client = await this.getClientByPhone(phone, tenantId);
+  static async getAppointmentsByPhone(phone: string, activeOnly: boolean = true, tenantId: string) {
+    const normalizedTenantId = typeof tenantId === 'string' ? tenantId.trim() : '';
+    if (!normalizedTenantId) {
+      throw { status: 400, message: 'tenant_id zorunludur' };
+    }
+
+    const client = await this.getClientByPhone(phone, normalizedTenantId);
     if (!client) {
       return { success: false, message: 'Bu telefon numarasına ait müşteri kaydı bulunamadı', appointments: [] };
     }
@@ -40,7 +50,7 @@ export class ChatbotService {
     const whereClause: Prisma.AppointmentWhereInput = {
       hasta_id: client.id,
       deleted_at: null,
-      ...(tenantId ? { tenant_id: tenantId } : {}),
+      tenant_id: normalizedTenantId,
     };
 
     if (activeOnly) {

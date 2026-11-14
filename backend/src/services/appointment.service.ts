@@ -155,15 +155,29 @@ export class AppointmentService {
     let minDate: string;
     let maxDate: string;
 
-    if (startDate && endDate) {
-      minDate = startDate <= endDate ? startDate : endDate;
-      maxDate = startDate <= endDate ? endDate : startDate;
-    } else if (startDate && !endDate) {
-      minDate = startDate;
+    const normalizedDateStr = dateStr?.trim() || undefined;
+    const normalizedStartDate = startDate?.trim() || undefined;
+    const normalizedEndDate = endDate?.trim() || undefined;
+
+    if (normalizedDateStr && !isValidDateString(normalizedDateStr)) {
+      throw { status: 400, message: 'Geçersiz tarih formatı (YYYY-MM-DD bekleniyor)' };
+    }
+    if (normalizedStartDate && !isValidDateString(normalizedStartDate)) {
+      throw { status: 400, message: 'Geçersiz başlangıç tarihi formatı (YYYY-MM-DD bekleniyor)' };
+    }
+    if (normalizedEndDate && !isValidDateString(normalizedEndDate)) {
+      throw { status: 400, message: 'Geçersiz bitiş tarihi formatı (YYYY-MM-DD bekleniyor)' };
+    }
+
+    if (normalizedStartDate && normalizedEndDate) {
+      minDate = normalizedStartDate <= normalizedEndDate ? normalizedStartDate : normalizedEndDate;
+      maxDate = normalizedStartDate <= normalizedEndDate ? normalizedEndDate : normalizedStartDate;
+    } else if (normalizedStartDate && !normalizedEndDate) {
+      minDate = normalizedStartDate;
       maxDate = '2099-12-31';
-    } else if (!startDate && endDate) {
+    } else if (!normalizedStartDate && normalizedEndDate) {
       minDate = '1970-01-01';
-      maxDate = endDate;
+      maxDate = normalizedEndDate;
     } else if (viewMode === 'all') {
       minDate = '1970-01-01';
       maxDate = '2099-12-31';
@@ -176,7 +190,7 @@ export class AppointmentService {
         day: '2-digit',
       }).format(today);
 
-      const queryDateStr = dateStr || todayStr;
+      const queryDateStr = normalizedDateStr || todayStr;
       const targetDate = new Date(queryDateStr);
       const year = targetDate.getFullYear();
       const month = targetDate.getMonth();
@@ -201,7 +215,7 @@ export class AppointmentService {
         day: '2-digit',
       }).format(today);
 
-      const queryDateStr = dateStr || todayStr;
+      const queryDateStr = normalizedDateStr || todayStr;
       const targetDate = new Date(queryDateStr);
       const day = targetDate.getDay();
       const diffToMon = targetDate.getDate() - day + (day === 0 ? -6 : 1);

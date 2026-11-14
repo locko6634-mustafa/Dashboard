@@ -32,7 +32,7 @@ export class ApiService {
     /**
      * Merkezi API istemcisi.
      * Sözleşme:
-     * - `returnData: true` iken başarıda `string` (`isText: true`) veya JSON `object|Array` döner.
+     * - `returnData: true` iken başarıda `string` (`isText: true`) veya JSON `object|Array|null` (boş gövde) döner.
      * - `returnData: false` iken başarıda `true` döner.
      * - Tüm hata, zaman aşımı, iptal ve yetkisiz (401/403) durumlarında tutarlı olarak `null` döner.
      */
@@ -139,7 +139,7 @@ export class ApiService {
 
             hideLoadingElement(loadingId);
             if (reloadOnSuccess) location.reload();
-            if (returnData) return isText ? resText : (parsedData || {});
+            if (returnData) return isText ? resText : parsedData;
             return true;
         } catch (e) {
             clearTimeout(timeoutId);

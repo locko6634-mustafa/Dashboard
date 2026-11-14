@@ -457,7 +457,7 @@ function renderAdminServices() {
     chip.className = 'admin-service-chip';
     chip.innerHTML = `
       <strong>${escapeHtml(srv.name)}</strong>
-      <span>${srv.duration} dk</span>
+      <span>${escapeHtml(String(srv.duration))} dk</span>
       <button type="button" class="admin-service-del" title="Hizmeti Sil">&times;</button>
     `;
     chip.querySelector('.admin-service-del').addEventListener('click', () => {

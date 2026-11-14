@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../config/prisma.js';
+import { toInputJsonValue } from '../utils/json.util.js';
 
 export const settingItemSchema = z.object({
   setting_key: z.string().min(1),
@@ -54,7 +55,10 @@ export class SettingsService {
 
     for (const item of settingsToUpdate) {
       if (item.setting_key) {
-        const jsonValue = (item.setting_value ?? null) as Prisma.InputJsonValue;
+        const jsonValue =
+          item.setting_value === null
+            ? Prisma.JsonNull
+            : toInputJsonValue(item.setting_value, item.setting_key);
         await prisma.appSetting.upsert({
           where: {
             setting_key_tenant_id: {

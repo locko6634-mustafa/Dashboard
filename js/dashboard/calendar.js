@@ -726,6 +726,7 @@ class CalendarNav {
             Store.state.lastSync = syncTime;
         } catch (e) {
             console.warn("Veri güncelleme hatası:", e);
+            showToast('Veri senkronizasyonu başarısız oldu. Gösterilen veriler güncel olmayabilir.', 'warning');
         } finally {
             Store.state.isSilentUpdating = false;
         }

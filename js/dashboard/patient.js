@@ -120,7 +120,7 @@ class NotesManager {
         const sbNotes = Utils.$('sbNotes');
         if (!sbNotes || !pId) return;
         sbNotes.replaceChildren(Utils.el('div', { className: 'spinner spinner-center-sm' }));
-        ApiService.call(CONFIG.ENDPOINTS.GET_NOTES + '?id=' + pId, { method: 'GET', returnData: true, isText: true, customErrorMsg: null })
+        ApiService.call(CONFIG.ENDPOINTS.GET_NOTES + '?id=' + encodeURIComponent(pId), { method: 'GET', returnData: true, isText: true, customErrorMsg: null })
             .then(text => {
                 if (text === false || text === null || text === undefined) {
                     const errMsg = text === null
@@ -242,12 +242,16 @@ class PatientUI {
 
         // 2. API'den tüm randevuları asenkron getir
         try {
-            const endpoint = (CONFIG.ENDPOINTS.CLIENT_APTS || 'musteri-randevulari') + '?id=' + pId;
+            const endpoint = (CONFIG.ENDPOINTS.CLIENT_APTS || 'musteri-randevulari') + '?id=' + encodeURIComponent(pId);
             const data = await ApiService.call(endpoint, {
                 method: 'GET',
                 returnData: true,
                 customErrorMsg: null
             });
+
+            if (!data) {
+                throw new Error('Randevu geçmişi sunucudan alınamadı.');
+            }
 
             const remoteApps = unwrapApiData(data)
                 .map(normalizeAppointment)
@@ -269,6 +273,7 @@ class PatientUI {
             }
         } catch (e) {
             console.warn('Müşteri tüm randevuları API üzerinden çekilemedi, yerel veriler kullanılıyor:', e);
+            showToast('Randevu geçmişi sunucudan alınamadı. Yerel veriler gösteriliyor ve güncel olmayabilir.', 'warning');
         }
     };
 
@@ -541,28 +546,31 @@ class PatientCRM {
                 customErrorMsg: null 
             });
 
-            if (apiRes) {
-                let clients = Array.isArray(apiRes) ? apiRes : (apiRes.data || []);
-                clients.forEach(c => {
-                    const id = c.id || c.hasta_id;
-                    if (id && c.ad_soyad) {
-                        map.set(id, {
-                            id: id,
-                            hasta_id: id,
-                            ad_soyad: c.ad_soyad,
-                            telefon: c.telefon || '',
-                            kronik_rahatsizlik: c.kronik_rahatsizlik || '',
-                            paket_adi: c.paket_adi || '',
-                            toplam_seans: c.toplam_seans || 0,
-                            gelinen_seans: c.gelinen_seans || 0,
-                            toplam_tutar: toSafeAmount(c.toplam_tutar),
-                            alinan_odeme: toSafeAmount(c.alinan_odeme)
-                        });
-                    }
-                });
+            if (!apiRes) {
+                throw new Error('Müşteri listesi sunucudan alınamadı.');
             }
+
+            let clients = Array.isArray(apiRes) ? apiRes : (apiRes.data || []);
+            clients.forEach(c => {
+                const id = c.id || c.hasta_id;
+                if (id && c.ad_soyad) {
+                    map.set(id, {
+                        id: id,
+                        hasta_id: id,
+                        ad_soyad: c.ad_soyad,
+                        telefon: c.telefon || '',
+                        kronik_rahatsizlik: c.kronik_rahatsizlik || '',
+                        paket_adi: c.paket_adi || '',
+                        toplam_seans: c.toplam_seans || 0,
+                        gelinen_seans: c.gelinen_seans || 0,
+                        toplam_tutar: toSafeAmount(c.toplam_tutar),
+                        alinan_odeme: toSafeAmount(c.alinan_odeme)
+                    });
+                }
+            });
         } catch (e) {
             console.warn('API musteriler listesi alinamadi, yerel randevu verisi kullaniliyor:', e);
+            showToast('Müşteri listesi sunucudan alınamadı. Yerel veriler gösteriliyor ve güncel olmayabilir.', 'warning');
         }
 
         const patientList = Array.from(map.values()).sort((a, b) => (a.ad_soyad || '').localeCompare(b.ad_soyad || '', CONFIG.LOCALE));

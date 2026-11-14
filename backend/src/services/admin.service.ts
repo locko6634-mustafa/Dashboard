@@ -4,6 +4,7 @@ import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.config.js';
 import { prisma } from '../config/prisma.js';
+import { toInputJsonValue } from '../utils/json.util.js';
 
 const IDEMPOTENT_PG_CODES = new Set(['42P07', '42710', '42701']);
 
@@ -200,7 +201,8 @@ export class AdminService {
         });
       }
     } catch (keyErr) {
-      console.warn('Failed to auto-generate tenant API keys:', keyErr);
+      console.error('Failed to auto-generate tenant API keys:', keyErr);
+      throw keyErr;
     }
   }
 
@@ -365,7 +367,7 @@ export class AdminService {
         whatsapp_phone: true,
         n8n_webhook_url: true,
         chatwoot_inbox_id: true,
-        api_key: true,
+        api_key_hash: true,
         durum: true,
         created_at: true,
         app_settings: true,
@@ -380,8 +382,9 @@ export class AdminService {
 
     return {
       success: true,
-      tenants: tenants.map((t) => ({
+      tenants: tenants.map(({ api_key_hash, ...t }) => ({
         ...t,
+        has_api_key: Boolean(api_key_hash),
         client_count: t._count.clients,
         appointment_count: t._count.appointments,
       })),
@@ -419,20 +422,21 @@ export class AdminService {
     const settingsPayload: Array<{ setting_key: string; setting_value: Prisma.InputJsonValue }> = [];
 
     if (data.settings) {
-      if (data.settings.calendar) {
-        settingsPayload.push({ setting_key: 'calendar', setting_value: data.settings.calendar as Prisma.InputJsonValue });
-      }
-      if (data.settings.services) {
-        settingsPayload.push({ setting_key: 'services', setting_value: data.settings.services as Prisma.InputJsonValue });
-      }
-      if (data.settings.sector) {
-        settingsPayload.push({ setting_key: 'sector', setting_value: data.settings.sector as Prisma.InputJsonValue });
-      }
-      if (data.settings.terminology) {
-        settingsPayload.push({ setting_key: 'terminology', setting_value: data.settings.terminology as Prisma.InputJsonValue });
-      }
-      if (data.settings.ui_preferences) {
-        settingsPayload.push({ setting_key: 'ui_preferences', setting_value: data.settings.ui_preferences as Prisma.InputJsonValue });
+      const settingKeys: Array<keyof TenantSettingsInput> = [
+        'calendar',
+        'services',
+        'sector',
+        'terminology',
+        'ui_preferences',
+      ];
+      for (const key of settingKeys) {
+        const val = data.settings[key];
+        if (val !== undefined) {
+          settingsPayload.push({
+            setting_key: key,
+            setting_value: toInputJsonValue(val, key),
+          });
+        }
       }
     }
 
@@ -550,14 +554,14 @@ export class AdminService {
         whatsapp_phone: true,
         n8n_webhook_url: true,
         chatwoot_inbox_id: true,
-        api_key: true,
+        api_key_hash: true,
         durum: true,
       },
     });
 
     // Eğer settings geldiyse app_settings güncelle
     if (data.settings) {
-      const settingEntries: Array<[keyof TenantSettingsInput, Prisma.InputJsonValue | undefined]> = [
+      const settingEntries: Array<[keyof TenantSettingsInput, unknown]> = [
         ['calendar', data.settings.calendar],
         ['services', data.settings.services],
         ['sector', data.settings.sector],
@@ -566,6 +570,7 @@ export class AdminService {
       ];
       for (const [k, val] of settingEntries) {
         if (val !== undefined) {
+          const jsonValue = toInputJsonValue(val, k);
           await prisma.appSetting.upsert({
             where: {
               setting_key_tenant_id: {
@@ -573,18 +578,25 @@ export class AdminService {
                 tenant_id: id,
               },
             },
-            update: { setting_value: val },
+            update: { setting_value: jsonValue },
             create: {
               setting_key: k,
               tenant_id: id,
-              setting_value: val,
+              setting_value: jsonValue,
             },
           });
         }
       }
     }
 
-    return { success: true, tenant: updated };
+    const { api_key_hash, ...updatedTenant } = updated;
+    return {
+      success: true,
+      tenant: {
+        ...updatedTenant,
+        has_api_key: Boolean(api_key_hash),
+      },
+    };
   }
 
   /**

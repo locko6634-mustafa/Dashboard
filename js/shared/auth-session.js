@@ -27,6 +27,17 @@ function getApiV1Base() {
     return '/api/v1';
 }
 
+let inFlightVerify = null;
+let lastVerifiedAt = 0;
+const VERIFY_CACHE_MS = 10000;
+
+function isSamePage(target) {
+    if (typeof window === 'undefined' || !window.location?.pathname) return false;
+    const current = window.location.pathname.split('/').pop() || '';
+    const targetFile = String(target || '').split('/').pop().split('?')[0];
+    return Boolean(targetFile) && current === targetFile;
+}
+
 export function getToken() {
     return '';
 }
@@ -37,6 +48,56 @@ export function getTenantId() {
 
 export function isAuthenticated() {
     return Boolean(getTenantId());
+}
+
+/**
+ * Yerel tenant_id ile backend HttpOnly cookie oturumunu senkronize doğrular.
+ * 401/403 yanıtında yerel oturum bilgisini temizler; geçici ağ hatalarında döngü yaratmamak için mevcut durumu korur.
+ */
+export async function verifySession({ force = false } = {}) {
+    const tenantId = getTenantId();
+    if (!tenantId) {
+        lastVerifiedAt = 0;
+        return false;
+    }
+
+    const now = Date.now();
+    if (!force && lastVerifiedAt && (now - lastVerifiedAt) < VERIFY_CACHE_MS) {
+        return true;
+    }
+
+    if (inFlightVerify) {
+        return inFlightVerify;
+    }
+
+    inFlightVerify = (async () => {
+        try {
+            const res = await fetch(`${getApiV1Base()}/settings`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: { 'x-tenant-id': tenantId },
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                clearSession();
+                return false;
+            }
+
+            if (res.ok) {
+                lastVerifiedAt = Date.now();
+                return true;
+            }
+
+            return Boolean(getTenantId());
+        } catch {
+            // Ağ hatasında sahte logout / yönlendirme döngüsü oluşturma
+            return Boolean(getTenantId());
+        } finally {
+            inFlightVerify = null;
+        }
+    })();
+
+    return inFlightVerify;
 }
 
 export function setSession({ tenantId, tenant_id, salonAdi, salon_adi } = {}) {
@@ -53,6 +114,7 @@ export function setSession({ tenantId, tenant_id, salonAdi, salon_adi } = {}) {
     if (resolvedSalonAdi !== undefined && resolvedSalonAdi !== null) {
         sessionStorage.setItem('salon_adi', String(resolvedSalonAdi));
     }
+    lastVerifiedAt = 0;
 }
 
 export function saveSession(_token, tenantId, salonAdi) {
@@ -60,6 +122,7 @@ export function saveSession(_token, tenantId, salonAdi) {
 }
 
 export function clearSession() {
+    lastVerifiedAt = 0;
     SESSION_KEYS.forEach((key) => {
         localStorage.removeItem(key);
         sessionStorage.removeItem(key);
@@ -76,21 +139,38 @@ export async function logoutUser(redirectTo = 'login.html') {
         // Ağ hatasında da yerel oturum metadata'sı temizlenir
     }
     clearSession();
-    window.location.href = redirectTo;
+    if (!isSamePage(redirectTo)) {
+        window.location.href = redirectTo;
+    }
 }
 
 export function requireAuth(redirectTo = 'login.html') {
     if (!isAuthenticated()) {
-        window.location.href = redirectTo;
+        if (!isSamePage(redirectTo)) {
+            window.location.href = redirectTo;
+        }
         return false;
     }
+
+    verifySession().then((valid) => {
+        if (!valid && !isSamePage(redirectTo)) {
+            window.location.href = redirectTo;
+        }
+    });
+
     return true;
 }
 
 export function redirectIfAuthenticated(redirectTo = 'dashboard.html') {
-    if (isAuthenticated()) {
-        window.location.href = redirectTo;
-        return true;
+    if (!isAuthenticated()) {
+        return false;
     }
-    return false;
+
+    verifySession().then((valid) => {
+        if (valid && !isSamePage(redirectTo)) {
+            window.location.href = redirectTo;
+        }
+    });
+
+    return true;
 }
