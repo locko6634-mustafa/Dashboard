@@ -27,7 +27,7 @@ const server = app.listen(PORT, '0.0.0.0', async () => {
 
 // Graceful shutdown
 let isShuttingDown = false;
-async function gracefulShutdown(signal: string) {
+async function gracefulShutdown(signal: string, initialExitCode = 0) {
   if (isShuttingDown) return;
   isShuttingDown = true;
 
@@ -42,7 +42,7 @@ async function gracefulShutdown(signal: string) {
 
   server.close(async () => {
     console.log('HTTP server closed.');
-    let exitCode = 0;
+    let exitCode = initialExitCode;
     try {
       await prisma.$disconnect();
       console.log('Prisma disconnected. Exiting.');
@@ -56,5 +56,13 @@ async function gracefulShutdown(signal: string) {
   });
 }
 
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM', 0));
+process.on('SIGINT', () => gracefulShutdown('SIGINT', 0));
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Promise Rejection:', reason);
+  void gracefulShutdown('unhandledRejection', 1);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  void gracefulShutdown('uncaughtException', 1);
+});

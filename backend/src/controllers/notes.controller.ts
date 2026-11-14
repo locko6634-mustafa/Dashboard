@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { AuthenticatedRequest, requireTenantId } from '../middlewares/auth.middleware.js';
 import { NotesService } from '../services/notes.service.js';
+import { extractQueryString } from '../utils/query.util.js';
 
 export const addNoteSchema = z
   .object({
@@ -36,7 +37,7 @@ export class NotesController {
   static async getNotes(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = requireTenantId(req);
-      const hastaId = (req.query.id as string) || (req.query.hasta_id as string);
+      const hastaId = extractQueryString(req.query.id) || extractQueryString(req.query.hasta_id);
 
       const notes = await NotesService.getNotes(tenantId, hastaId);
       res.json(notes);
@@ -67,8 +68,10 @@ export class NotesController {
   static async deleteNote(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = requireTenantId(req);
-      const data = req.body?.payload ? req.body.payload : req.body;
-      const noteId = req.params.id || data.note_id || data.id;
+      const rawBody = req.body && typeof req.body === 'object' ? req.body : undefined;
+      const data = rawBody?.payload && typeof rawBody.payload === 'object' ? rawBody.payload : rawBody;
+      const rawNoteId = req.params.id || data?.note_id || data?.id;
+      const noteId = typeof rawNoteId === 'string' ? rawNoteId.trim() : '';
 
       if (!noteId) {
         res.status(400).json({ success: false, error: 'Not ID zorunludur' });

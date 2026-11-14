@@ -71,6 +71,7 @@ model Appointment {
   client          Client?        @relation(fields: [hasta_id], references: [id], onDelete: SetNull)
 
   @@index([tenant_id, tarih])
+  @@index([tenant_id, hasta_id])
   @@index([tenant_id, deleted_at])
   @@map("appointments")
 }

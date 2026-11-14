@@ -6,10 +6,9 @@ import {
   createAppointmentSchema,
   updateAppointmentSchema,
 } from '../services/appointment.service.js';
+import { extractQueryString } from '../utils/query.util.js';
 
-export function extractQueryString(value: unknown): string | undefined {
-  return typeof value === 'string' ? value : undefined;
-}
+export { extractQueryString };
 
 export class AppointmentController {
   static async getAppointments(req: AuthenticatedRequest, res: Response, next: NextFunction) {

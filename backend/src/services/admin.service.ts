@@ -155,6 +155,7 @@ export class AdminService {
       () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_clients_tenant ON public.clients(tenant_id)`,
       () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_clients_tenant_telefon ON public.clients(tenant_id, telefon)`,
       () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_appointments_tenant_tarih ON public.appointments(tenant_id, tarih)`,
+      () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_appointments_tenant_hasta ON public.appointments(tenant_id, hasta_id)`,
       () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_appointments_tenant_deleted ON public.appointments(tenant_id, deleted_at)`,
       () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_hasta_notlari_tenant_hasta ON public.hasta_notlari(tenant_id, hasta_id)`,
       () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_conv_phone ON public.conversation_states(phone_number)`,

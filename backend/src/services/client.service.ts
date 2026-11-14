@@ -27,6 +27,8 @@ export const createClientSchema = z
 export const updateClientSchema = createClientSchema.extend({
   id: z.string().optional(),
   hasta_id: z.string().optional(),
+  gelinen_seans_delta: z.coerce.number().int().optional(),
+  alinan_odeme_delta: z.coerce.number().optional(),
 });
 
 export type CreateClientInput = z.infer<typeof createClientSchema>;
@@ -85,31 +87,84 @@ export class ClientService {
     if (data.toplam_tutar !== undefined) updateData.toplam_tutar = data.toplam_tutar;
     if (data.alinan_odeme !== undefined) updateData.alinan_odeme = data.alinan_odeme;
 
-    const updated = await prisma.$transaction(async (tx) => {
-      const result = await tx.client.updateMany({
-        where: { id, tenant_id: tenantId },
-        data: updateData,
-      });
+    try {
+      const updated = await prisma.$transaction(
+        async (tx) => {
+          // Eşzamanlı güncellemelerde lost update riskini önlemek için satır kilidi (FOR UPDATE)
+          if (typeof tx.$queryRaw === 'function') {
+            const lockedRows = await tx.$queryRaw<
+              Array<{ id: string; gelinen_seans: number | null; alinan_odeme: MoneyInput }>
+            >`SELECT id, gelinen_seans, alinan_odeme FROM public.clients WHERE id = ${id}::uuid AND tenant_id = ${tenantId}::uuid FOR UPDATE`;
 
-      if (result.count === 0) {
-        throw { status: 404, message: 'Müşteri bulunamadı' };
+            const current = lockedRows[0];
+            if (!current) {
+              throw { status: 404, message: 'Müşteri bulunamadı' };
+            }
+
+            if (data.gelinen_seans === undefined && data.gelinen_seans_delta !== undefined) {
+              const nextSeans = (current.gelinen_seans ?? 0) + data.gelinen_seans_delta;
+              if (nextSeans < 0) {
+                throw { status: 400, message: 'Gelinen seans 0’dan küçük olamaz' };
+              }
+              updateData.gelinen_seans = { increment: data.gelinen_seans_delta };
+            }
+
+            if (data.alinan_odeme === undefined && data.alinan_odeme_delta !== undefined) {
+              const nextOdeme = toMoneyNumber(current.alinan_odeme) + data.alinan_odeme_delta;
+              if (nextOdeme < 0) {
+                throw { status: 400, message: 'Alınan ödeme 0’dan küçük olamaz' };
+              }
+              updateData.alinan_odeme = { increment: data.alinan_odeme_delta };
+            }
+          } else {
+            if (data.gelinen_seans === undefined && data.gelinen_seans_delta !== undefined) {
+              updateData.gelinen_seans = { increment: data.gelinen_seans_delta };
+            }
+            if (data.alinan_odeme === undefined && data.alinan_odeme_delta !== undefined) {
+              updateData.alinan_odeme = { increment: data.alinan_odeme_delta };
+            }
+          }
+
+          const result = await tx.client.updateMany({
+            where: { id, tenant_id: tenantId },
+            data: updateData,
+          });
+
+          if (result.count === 0) {
+            throw { status: 404, message: 'Müşteri bulunamadı' };
+          }
+
+          const record = await tx.client.findFirst({
+            where: { id, tenant_id: tenantId },
+          });
+
+          if (!record) {
+            throw { status: 404, message: 'Müşteri bulunamadı' };
+          }
+
+          return record;
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+      );
+
+      return {
+        success: true,
+        data: withMoneyNumbers(updated),
+      };
+    } catch (err: unknown) {
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'code' in err &&
+        (err as { code?: string }).code === 'P2034'
+      ) {
+        throw {
+          status: 409,
+          message: 'Eşzamanlı güncelleme çakışması oluştu. Lütfen tekrar deneyiniz.',
+        };
       }
-
-      const record = await tx.client.findFirst({
-        where: { id, tenant_id: tenantId },
-      });
-
-      if (!record) {
-        throw { status: 404, message: 'Müşteri bulunamadı' };
-      }
-
-      return record;
-    });
-
-    return {
-      success: true,
-      data: withMoneyNumbers(updated),
-    };
+      throw err;
+    }
   }
 
   static async getClientById(tenantId: string, id: string) {

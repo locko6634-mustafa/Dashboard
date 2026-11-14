@@ -10,7 +10,8 @@ import {
 
 const optionalTimeSchema = z
   .string()
-  .refine((val) => !val.trim() || isValidTimeString(val), {
+  .trim()
+  .refine((val) => !val || isValidTimeString(val), {
     message: 'Saat HH:mm formatında ve geçerli olmalıdır (00:00-23:59)',
   })
   .optional();
@@ -29,6 +30,7 @@ export const createAppointmentSchema = z
     alinan_odeme: z.coerce.number().min(0).optional(),
     tarih: z
       .string()
+      .trim()
       .min(1, 'Tarih zorunludur')
       .refine((val) => isValidDateString(val), {
         message: 'Tarih YYYY-MM-DD formatında ve geçerli olmalıdır',
@@ -50,6 +52,7 @@ export const updateAppointmentSchema = z
     durum: z.string().optional(),
     tarih: z
       .string()
+      .trim()
       .min(1)
       .refine((val) => isValidDateString(val), {
         message: 'Tarih YYYY-MM-DD formatında ve geçerli olmalıdır',

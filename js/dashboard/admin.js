@@ -240,7 +240,9 @@ function renderTenantsTable(tenants) {
   tenantsTableBody.innerHTML = tenants.map(t => {
     const isActive = t.durum === 'Aktif';
     const badgeClass = isActive ? 'admin-badge-active' : 'admin-badge-suspended';
-    const apiKeyShort = t.api_key ? (t.api_key.substring(0, 12) + '...') : '-';
+    const apiKeyBadge = t.has_api_key
+      ? '<span class="admin-badge admin-badge-active">Tanımlı</span>'
+      : '<span style="color:#6b7280; font-size: 0.82rem;">Tanımsız</span>';
 
     return `
       <tr>
@@ -257,10 +259,7 @@ function renderTenantsTable(tenants) {
           </span>
         </td>
         <td>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <code style="font-size: 0.78rem; background: rgba(255,255,255,0.06); padding: 3px 6px; border-radius: 6px;">${escapeHtml(apiKeyShort)}</code>
-            ${t.api_key ? `<button class="admin-action-btn" style="padding: 2px 6px; font-size: 0.72rem;" data-action="copy-api-key" data-api-key="${escapeHtml(t.api_key)}" title="Kopyala">Kopyala</button>` : ''}
-          </div>
+          ${apiKeyBadge}
         </td>
         <td>
           <div style="font-size: 0.82rem;">👥 <strong>${escapeHtml(t.client_count ?? 0)}</strong> müşteri</div>
@@ -294,11 +293,8 @@ tenantsTableBody?.addEventListener('click', (e) => {
   const actionBtn = e.target.closest('button[data-action]');
   if (!actionBtn) return;
 
-  const { action, id, apiKey, status, salonAdi } = actionBtn.dataset;
+  const { action, id, status, salonAdi } = actionBtn.dataset;
   switch (action) {
-    case 'copy-api-key':
-      copyApiKey(apiKey);
-      break;
     case 'impersonate':
       impersonateTenant(id);
       break;
@@ -757,19 +753,6 @@ window.deleteTenant = async function(id, salonAdi) {
   } catch (err) {
     alert('Silme işlemi başarısız: ' + err.message);
   }
-};
-
-// 9. API KEY KOPYALAMA
-window.copyApiKey = function(apiKey) {
-  if (!apiKey || !navigator.clipboard?.writeText) {
-    alert('Pano erişimi desteklenmiyor. API Key kopyalanamadı.');
-    return;
-  }
-  navigator.clipboard.writeText(apiKey).then(() => {
-    alert('API Key panoya kopyalandı.');
-  }).catch(() => {
-    alert('Pano erişimi engellendi. API Key kopyalanamadı.');
-  });
 };
 
 function escapeHtml(str) {

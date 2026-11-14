@@ -3,6 +3,7 @@ import { isValidDateString, parseTimeToMinutes } from '../utils/dateTime.util.js
 
 export class CronService {
   private static timer: NodeJS.Timeout | null = null;
+  private static startupTimer: NodeJS.Timeout | null = null;
 
   static async sweepExpiredAppointments() {
     try {
@@ -73,17 +74,27 @@ export class CronService {
   static start(intervalMinutes: number = 15) {
     console.log(`[CronService] Starting periodic appointment status updater (every ${intervalMinutes} mins)...`);
     // Run once on startup after 5 seconds
-    setTimeout(() => {
-      CronService.sweepExpiredAppointments();
+    this.startupTimer = setTimeout(() => {
+      CronService.sweepExpiredAppointments().catch((err) => {
+        console.error('[CronService] Initial sweep failed:', err);
+      });
     }, 5000);
+    this.startupTimer.unref();
 
     // Schedule regular interval
     this.timer = setInterval(() => {
-      CronService.sweepExpiredAppointments();
+      CronService.sweepExpiredAppointments().catch((err) => {
+        console.error('[CronService] Periodic sweep failed:', err);
+      });
     }, intervalMinutes * 60 * 1000);
+    this.timer.unref();
   }
 
   static stop() {
+    if (this.startupTimer) {
+      clearTimeout(this.startupTimer);
+      this.startupTimer = null;
+    }
     if (this.timer) {
       clearInterval(this.timer);
       this.timer = null;

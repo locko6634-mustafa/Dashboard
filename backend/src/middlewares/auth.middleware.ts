@@ -187,7 +187,10 @@ export async function authMiddleware(req: AuthenticatedRequest, res: Response, n
                 where: { id: legacyCandidate.id },
                 data: { api_key_hash: tokenHash },
               })
-              .catch((err) => console.warn('Lazy api_key_hash migration failed:', err));
+              .catch((err: unknown) => {
+                const message = err instanceof Error ? err.message : 'Bilinmeyen hata';
+                console.warn(`Lazy api_key_hash migration failed for tenant ${legacyCandidate.id}: ${message}`);
+              });
           }
         }
       }

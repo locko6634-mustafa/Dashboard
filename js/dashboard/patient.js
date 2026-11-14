@@ -833,8 +833,8 @@ class PatientCRM {
                 showToast(Terminology.format('✅ {client} başarıyla eklendi!'), 'success');
                 PatientCRM.closeAddPatientModal();
                 await PatientCRM.loadPatients(true);
-            } else {
-                showToast(res?.message || CONFIG.UI.MSG_API_ERROR, 'error');
+            } else if (res && res.error) {
+                showToast(res.message || CONFIG.UI.MSG_API_ERROR, 'error');
             }
         } catch (err) {
             showToast(CONFIG.UI.MSG_API_ERROR, 'error');

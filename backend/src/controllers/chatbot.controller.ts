@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
 import { ChatbotService } from '../services/chatbot.service.js';
-import { extractQueryString } from './appointment.controller.js';
+import { extractQueryString } from '../utils/query.util.js';
 import { isValidDateString, isValidTimeString } from '../utils/dateTime.util.js';
 
 const optionalPositiveIntSchema = z
@@ -153,7 +153,7 @@ export class ChatbotController {
     try {
       const tenantId = resolveTenantId(req);
 
-      const phone = (req.query.phone as string) || (req.query.telefon as string);
+      const phone = extractQueryString(req.query.phone) || extractQueryString(req.query.telefon);
       if (!phone) {
         res.status(400).json({ success: false, error: 'Telefon numarası zorunludur' });
         return;
@@ -183,7 +183,7 @@ export class ChatbotController {
     try {
       const tenantId = resolveTenantId(req);
 
-      const phone = (req.query.phone as string) || (req.query.telefon as string);
+      const phone = extractQueryString(req.query.phone) || extractQueryString(req.query.telefon);
       if (!phone) {
         res.status(400).json({ success: false, error: 'Telefon numarası zorunludur' });
         return;
@@ -335,10 +335,10 @@ export class ChatbotController {
       const tenantId = resolveTenantId(req);
 
       const identifier =
-        (req.query.conversation_id as string) ||
-        (req.query.conversationId as string) ||
-        (req.query.phone as string) ||
-        (req.query.telefon as string);
+        extractQueryString(req.query.conversation_id) ||
+        extractQueryString(req.query.conversationId) ||
+        extractQueryString(req.query.phone) ||
+        extractQueryString(req.query.telefon);
 
       if (!identifier) {
         res.json({
