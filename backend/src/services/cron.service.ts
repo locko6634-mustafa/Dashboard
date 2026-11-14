@@ -62,7 +62,7 @@ export class CronService {
 
       if (expiredIds.length > 0) {
         const updateResult = await prisma.appointment.updateMany({
-          where: { id: { in: expiredIds } },
+          where: { id: { in: expiredIds }, deleted_at: null },
           data: { durum: 'Tamamlandı' },
         });
         console.log(`[CronService] Auto-completed ${updateResult.count} expired appointments at ${istanbulTodayStr} ${hour}:${minute}`);

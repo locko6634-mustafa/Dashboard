@@ -103,7 +103,19 @@ async function adminFetch(endpoint, options = {}) {
     credentials: 'include',
   });
 
-  const data = await response.json().catch(() => ({}));
+  let data;
+  try {
+    data = await response.json();
+  } catch (parseError) {
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        clearAdminSession();
+        showScreen('login');
+      }
+      throw new Error(`Sunucu hatası (${response.status}): Geçersiz JSON yanıtı`, { cause: parseError });
+    }
+    throw new Error('Sunucudan geçersiz JSON yanıtı alındı', { cause: parseError });
+  }
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
       clearAdminSession();

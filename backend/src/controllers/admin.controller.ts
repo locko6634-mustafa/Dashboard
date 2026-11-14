@@ -1,19 +1,41 @@
 import { Request, Response, NextFunction } from 'express';
+import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { AdminService } from '../services/admin.service.js';
 import { ADMIN_AUTH_COOKIE_NAME, getAuthCookieOptions } from '../middlewares/auth.middleware.js';
+import { extractQueryString } from './appointment.controller.js';
 
 const ADMIN_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
+const inputJsonValueSchema = z.custom<Prisma.InputJsonValue>((val) => val !== undefined && val !== null, {
+  message: 'Geçersiz JSON değeri',
+});
+
 const tenantSettingsSchema = z
   .object({
-    calendar: z.unknown().optional(),
-    services: z.unknown().optional(),
+    calendar: inputJsonValueSchema.optional(),
+    services: inputJsonValueSchema.optional(),
     sector: z.string().optional(),
-    terminology: z.unknown().optional(),
-    ui_preferences: z.unknown().optional(),
+    terminology: inputJsonValueSchema.optional(),
+    ui_preferences: inputJsonValueSchema.optional(),
   })
   .optional();
+
+export const adminLoginSchema = z.object({
+  email: z
+    .string({
+      required_error: 'E-posta ve şifre zorunludur',
+      invalid_type_error: 'E-posta metin olmalıdır',
+    })
+    .trim()
+    .min(1, 'E-posta ve şifre zorunludur'),
+  password: z
+    .string({
+      required_error: 'E-posta ve şifre zorunludur',
+      invalid_type_error: 'Şifre metin olmalıdır',
+    })
+    .min(1, 'E-posta ve şifre zorunludur'),
+});
 
 const setupSchema = z.object({
   email: z.string().trim().email('Geçerli bir e-posta adresi giriniz'),
@@ -68,11 +90,7 @@ export class AdminController {
 
   static async login(req: Request, res: Response, next: NextFunction) {
     try {
-      const { email, password } = req.body;
-      if (!email || !password) {
-        res.status(400).json({ success: false, error: 'E-posta ve şifre zorunludur' });
-        return;
-      }
+      const { email, password } = adminLoginSchema.parse(req.body ?? {});
       const result = await AdminService.login(email, password);
       if (result.token) {
         res.cookie(ADMIN_AUTH_COOKIE_NAME, result.token, getAuthCookieOptions(ADMIN_TOKEN_MAX_AGE_MS));
@@ -99,8 +117,8 @@ export class AdminController {
 
   static async listTenants(req: Request, res: Response, next: NextFunction) {
     try {
-      const search = req.query.search as string | undefined;
-      const durum = req.query.durum as string | undefined;
+      const search = extractQueryString(req.query.search);
+      const durum = extractQueryString(req.query.durum);
       const result = await AdminService.listTenants(search, durum);
       res.json(result);
     } catch (err) {

@@ -7,6 +7,14 @@ import { prisma } from '../config/prisma.js';
 
 const IDEMPOTENT_PG_CODES = new Set(['42P07', '42710', '42701']);
 
+export interface TenantSettingsInput {
+  calendar?: Prisma.InputJsonValue;
+  services?: Prisma.InputJsonValue;
+  sector?: string;
+  terminology?: Prisma.InputJsonValue;
+  ui_preferences?: Prisma.InputJsonValue;
+}
+
 /**
  * Postgres DDL sorgularında yalnızca "zaten var" (duplicate_table, duplicate_object, duplicate_column)
  * hatalarının idempotent olarak yutulup yutulamayacağını kontrol eder.
@@ -15,7 +23,11 @@ export function isIdempotentDdlError(err: unknown): boolean {
   if (!err || typeof err !== 'object') {
     return false;
   }
-  const e = err as Record<string, any>;
+  const e = err as {
+    meta?: { code?: unknown };
+    cause?: { code?: unknown };
+    code?: unknown;
+  };
   const candidates = [e.meta?.code, e.cause?.code, e.code];
   return candidates.some((code) => typeof code === 'string' && IDEMPOTENT_PG_CODES.has(code));
 }
@@ -25,9 +37,9 @@ export class AdminService {
    * Süper Admin ve Multi-tenant tablolarının/kolonlarının varlığını garantiye alır.
    */
   static async ensureSchema() {
-    const queries = [
-      `CREATE EXTENSION IF NOT EXISTS "pgcrypto"`,
-      `CREATE TABLE IF NOT EXISTS public.tenants (
+    const statements: Array<() => Promise<unknown>> = [
+      () => prisma.$executeRaw`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`,
+      () => prisma.$executeRaw`CREATE TABLE IF NOT EXISTS public.tenants (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         salon_adi VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
@@ -41,7 +53,7 @@ export class AdminService {
         plan_bitis_tarihi TIMESTAMPTZ(6),
         created_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP
       )`,
-      `CREATE TABLE IF NOT EXISTS public.clients (
+      () => prisma.$executeRaw`CREATE TABLE IF NOT EXISTS public.clients (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         ad_soyad VARCHAR(255) NOT NULL,
         telefon VARCHAR(50) NOT NULL,
@@ -54,7 +66,7 @@ export class AdminService {
         created_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
         tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE
       )`,
-      `CREATE TABLE IF NOT EXISTS public.appointments (
+      () => prisma.$executeRaw`CREATE TABLE IF NOT EXISTS public.appointments (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         hasta_id UUID REFERENCES public.clients(id) ON DELETE SET NULL,
         tarih VARCHAR(20) NOT NULL,
@@ -68,21 +80,21 @@ export class AdminService {
         deleted_at TIMESTAMPTZ(6),
         tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE
       )`,
-      `CREATE TABLE IF NOT EXISTS public.hasta_notlari (
+      () => prisma.$executeRaw`CREATE TABLE IF NOT EXISTS public.hasta_notlari (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         hasta_id UUID REFERENCES public.clients(id) ON DELETE CASCADE,
         not_metni TEXT NOT NULL,
         tarih TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
         tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE
       )`,
-      `CREATE TABLE IF NOT EXISTS public.app_settings (
+      () => prisma.$executeRaw`CREATE TABLE IF NOT EXISTS public.app_settings (
         setting_key VARCHAR(100) NOT NULL,
         tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
         setting_value JSONB NOT NULL,
         updated_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (setting_key, tenant_id)
       )`,
-      `CREATE TABLE IF NOT EXISTS public.conversation_states (
+      () => prisma.$executeRaw`CREATE TABLE IF NOT EXISTS public.conversation_states (
         conversation_id VARCHAR(255) PRIMARY KEY,
         phone_number VARCHAR(50) NOT NULL,
         current_intent VARCHAR(100),
@@ -92,33 +104,33 @@ export class AdminService {
         tenant_id UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
         updated_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP
       )`,
-      `CREATE TABLE IF NOT EXISTS public.super_admins (
+      () => prisma.$executeRaw`CREATE TABLE IF NOT EXISTS public.super_admins (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         email VARCHAR(255) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
         ad_soyad VARCHAR(255) NOT NULL,
         created_at TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP
       )`,
-      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS whatsapp_phone VARCHAR(50)`,
-      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS n8n_webhook_url VARCHAR(500)`,
-      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS chatwoot_inbox_id VARCHAR(100)`,
-      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS api_key VARCHAR(100)`,
-      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS durum VARCHAR(20) DEFAULT 'Aktif'`,
-      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_tipi VARCHAR(50) DEFAULT 'Standart'`,
-      `ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_bitis_tarihi TIMESTAMPTZ(6)`,
-      `ALTER TABLE public.conversation_states ADD COLUMN IF NOT EXISTS tenant_id UUID`,
-      `CREATE INDEX IF NOT EXISTS idx_clients_tenant ON public.clients(tenant_id)`,
-      `CREATE INDEX IF NOT EXISTS idx_clients_tenant_telefon ON public.clients(tenant_id, telefon)`,
-      `CREATE INDEX IF NOT EXISTS idx_appointments_tenant_tarih ON public.appointments(tenant_id, tarih)`,
-      `CREATE INDEX IF NOT EXISTS idx_appointments_tenant_deleted ON public.appointments(tenant_id, deleted_at)`,
-      `CREATE INDEX IF NOT EXISTS idx_hasta_notlari_tenant_hasta ON public.hasta_notlari(tenant_id, hasta_id)`,
-      `CREATE INDEX IF NOT EXISTS idx_conv_phone ON public.conversation_states(phone_number)`,
-      `CREATE INDEX IF NOT EXISTS idx_conv_tenant ON public.conversation_states(tenant_id)`
+      () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS whatsapp_phone VARCHAR(50)`,
+      () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS n8n_webhook_url VARCHAR(500)`,
+      () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS chatwoot_inbox_id VARCHAR(100)`,
+      () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS api_key VARCHAR(100)`,
+      () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS durum VARCHAR(20) DEFAULT 'Aktif'`,
+      () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_tipi VARCHAR(50) DEFAULT 'Standart'`,
+      () => prisma.$executeRaw`ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan_bitis_tarihi TIMESTAMPTZ(6)`,
+      () => prisma.$executeRaw`ALTER TABLE public.conversation_states ADD COLUMN IF NOT EXISTS tenant_id UUID`,
+      () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_clients_tenant ON public.clients(tenant_id)`,
+      () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_clients_tenant_telefon ON public.clients(tenant_id, telefon)`,
+      () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_appointments_tenant_tarih ON public.appointments(tenant_id, tarih)`,
+      () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_appointments_tenant_deleted ON public.appointments(tenant_id, deleted_at)`,
+      () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_hasta_notlari_tenant_hasta ON public.hasta_notlari(tenant_id, hasta_id)`,
+      () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_conv_phone ON public.conversation_states(phone_number)`,
+      () => prisma.$executeRaw`CREATE INDEX IF NOT EXISTS idx_conv_tenant ON public.conversation_states(tenant_id)`,
     ];
 
-    for (const sql of queries) {
+    for (const runStatement of statements) {
       try {
-        await prisma.$executeRawUnsafe(sql);
+        await runStatement();
       } catch (e) {
         if (isIdempotentDdlError(e)) {
           continue;
@@ -284,7 +296,7 @@ export class AdminService {
    */
   static async listTenants(search?: string, durum?: string) {
     await AdminService.ensureSchema();
-    const where: any = {};
+    const where: Prisma.TenantWhereInput = {};
 
     if (durum && durum !== 'Tümü') {
       where.durum = durum;
@@ -343,13 +355,7 @@ export class AdminService {
     n8n_webhook_url?: string;
     chatwoot_inbox_id?: string;
     durum?: string;
-    settings?: {
-      calendar?: any;
-      services?: any;
-      sector?: string;
-      terminology?: any;
-      ui_preferences?: any;
-    };
+    settings?: TenantSettingsInput;
   }) {
     if (!data.salon_adi || !data.email || !data.password) {
       throw { status: 400, message: 'Salon adı, e-posta ve şifre zorunludur' };
@@ -463,13 +469,7 @@ export class AdminService {
       n8n_webhook_url?: string;
       chatwoot_inbox_id?: string;
       durum?: string;
-      settings?: {
-        calendar?: any;
-        services?: any;
-        sector?: string;
-        terminology?: any;
-        ui_preferences?: any;
-      };
+      settings?: TenantSettingsInput;
     }
   ) {
     const tenant = await prisma.tenant.findUnique({ where: { id } });
@@ -477,7 +477,7 @@ export class AdminService {
       throw { status: 404, message: 'İşletme bulunamadı' };
     }
 
-    const updatePayload: any = {};
+    const updatePayload: Prisma.TenantUpdateInput = {};
     if (data.salon_adi) updatePayload.salon_adi = data.salon_adi.trim();
     if (data.email) {
       const emailLower = data.email.trim().toLowerCase();
@@ -512,9 +512,14 @@ export class AdminService {
 
     // Eğer settings geldiyse app_settings güncelle
     if (data.settings) {
-      const settingKeys = ['calendar', 'services', 'sector', 'terminology', 'ui_preferences'];
-      for (const k of settingKeys) {
-        const val = (data.settings as any)[k];
+      const settingEntries: Array<[keyof TenantSettingsInput, Prisma.InputJsonValue | undefined]> = [
+        ['calendar', data.settings.calendar],
+        ['services', data.settings.services],
+        ['sector', data.settings.sector],
+        ['terminology', data.settings.terminology],
+        ['ui_preferences', data.settings.ui_preferences],
+      ];
+      for (const [k, val] of settingEntries) {
         if (val !== undefined) {
           await prisma.appSetting.upsert({
             where: {
@@ -551,8 +556,15 @@ export class AdminService {
       await prisma.conversationState.deleteMany({
         where: { tenant_id: id },
       });
-    } catch (e) {
-      console.warn('Conversation states cleanup note:', e);
+    } catch (e: unknown) {
+      const isMissingTable =
+        (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2021') ||
+        (typeof e === 'object' && e !== null && (e as { code?: unknown }).code === 'P2021');
+      if (isMissingTable) {
+        console.warn('Conversation states cleanup note (table missing):', e);
+      } else {
+        throw e;
+      }
     }
 
     // Cascade ile ilişkili clients, appointments, hasta_notlari, app_settings otomatik silinir

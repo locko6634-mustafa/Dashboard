@@ -7,16 +7,41 @@ import {
   updateAppointmentSchema,
 } from '../services/appointment.service.js';
 
+export function extractQueryString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
 export class AppointmentController {
   static async getAppointments(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = req.tenantId!;
       const body = req.body?.payload || req.body || {};
-      const dateStr = (req.query.date || req.query.tarih || body.date || body.tarih) as string;
-      const viewMode = (req.query.view || req.query.gorunum || body.view || body.gorunum || 'week') as string;
-      const startDate = (req.query.startDate || req.query.start_date || req.query.baslangic || body.startDate || body.start_date || body.baslangic) as string;
-      const endDate = (req.query.endDate || req.query.end_date || req.query.bitis || body.endDate || body.end_date || body.bitis) as string;
-      const lastSync = (body.last_sync || req.query.last_sync) as string;
+      const dateStr =
+        extractQueryString(req.query.date) ||
+        extractQueryString(req.query.tarih) ||
+        extractQueryString(body.date) ||
+        extractQueryString(body.tarih);
+      const viewMode =
+        extractQueryString(req.query.view) ||
+        extractQueryString(req.query.gorunum) ||
+        extractQueryString(body.view) ||
+        extractQueryString(body.gorunum) ||
+        'week';
+      const startDate =
+        extractQueryString(req.query.startDate) ||
+        extractQueryString(req.query.start_date) ||
+        extractQueryString(req.query.baslangic) ||
+        extractQueryString(body.startDate) ||
+        extractQueryString(body.start_date) ||
+        extractQueryString(body.baslangic);
+      const endDate =
+        extractQueryString(req.query.endDate) ||
+        extractQueryString(req.query.end_date) ||
+        extractQueryString(req.query.bitis) ||
+        extractQueryString(body.endDate) ||
+        extractQueryString(body.end_date) ||
+        extractQueryString(body.bitis);
+      const lastSync = extractQueryString(body.last_sync) || extractQueryString(req.query.last_sync);
 
       const appointments = await AppointmentService.getAppointments(tenantId, dateStr, viewMode, lastSync, startDate, endDate);
       res.json(appointments);
@@ -94,7 +119,7 @@ export class AppointmentController {
   static async getClientAppointments(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = req.tenantId!;
-      const clientId = (req.query.id as string) || (req.query.hasta_id as string) || req.params.id;
+      const clientId = extractQueryString(req.query.id) || extractQueryString(req.query.hasta_id) || req.params.id;
 
       if (!clientId) {
         res.status(400).json({ success: false, error: 'Müşteri ID zorunludur' });

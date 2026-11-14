@@ -2,20 +2,20 @@ function resolveApiBase() {
     if (typeof window === 'undefined') {
         return 'http://localhost:3000/webhook/';
     }
-    // Geliştirici ortamı için özel override imkanı
-    try {
-        const customApi = window.localStorage ? window.localStorage.getItem('SZ_API_URL') : null;
-        if (customApi && customApi.startsWith('http')) {
-            return customApi.endsWith('/') ? customApi : `${customApi}/`;
-        }
-    } catch {
-        // localStorage erişim kısıtlaması koruması
-    }
-
     const host = window.location.hostname || '';
     const isLocal = ['localhost', '127.0.0.1', ''].includes(host);
 
     if (isLocal) {
+        // Geliştirici ortamı için özel override imkanı (yalnızca yerelde)
+        try {
+            const customApi = window.localStorage ? window.localStorage.getItem('SZ_API_URL') : null;
+            if (customApi && customApi.startsWith('http')) {
+                return customApi.endsWith('/') ? customApi : `${customApi}/`;
+            }
+        } catch {
+            // localStorage erişim kısıtlaması koruması
+        }
+
         // Yerelde doğrudan backend portunda (3000) çalışıyorsa
         if (window.location.port === '3000') {
             return `${window.location.origin}/webhook/`;

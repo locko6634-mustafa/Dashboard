@@ -1,12 +1,17 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
 import { ClientService, createClientSchema, updateClientSchema } from '../services/client.service.js';
+import { extractQueryString } from './appointment.controller.js';
 
 export class ClientController {
   static async searchClients(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = req.tenantId!;
-      const query = (req.query.q as string) || (req.query.ad_soyad as string) || (req.query.query as string) || '';
+      const query =
+        extractQueryString(req.query.q) ||
+        extractQueryString(req.query.ad_soyad) ||
+        extractQueryString(req.query.query) ||
+        '';
 
       const clients = await ClientService.searchClients(tenantId, query);
       res.json(clients);

@@ -1,6 +1,112 @@
 import { Response, NextFunction } from 'express';
+import { Prisma } from '@prisma/client';
+import { z } from 'zod';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
 import { ChatbotService } from '../services/chatbot.service.js';
+import { extractQueryString } from './appointment.controller.js';
+
+const optionalPositiveIntSchema = z
+  .union([z.number(), z.string(), z.null(), z.undefined()])
+  .transform((val, ctx): number | undefined => {
+    if (val === undefined || val === null) {
+      return undefined;
+    }
+    if (typeof val === 'string') {
+      const trimmed = val.trim();
+      if (!trimmed) {
+        return undefined;
+      }
+      if (!/^\d+$/.test(trimmed)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Süre pozitif bir tam sayı olmalıdır',
+        });
+        return z.NEVER;
+      }
+      const parsed = Number.parseInt(trimmed, 10);
+      if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Süre 0’dan büyük olmalıdır',
+        });
+        return z.NEVER;
+      }
+      return parsed;
+    }
+    if (typeof val === 'number') {
+      if (!Number.isInteger(val) || val <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Süre pozitif bir tam sayı olmalıdır',
+        });
+        return z.NEVER;
+      }
+      return val;
+    }
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Geçersiz süre formatı',
+    });
+    return z.NEVER;
+  });
+
+const jsonValueSchema = z.custom<Prisma.InputJsonValue>(
+  (val) => val !== undefined && val !== null,
+  { message: 'Geçersiz JSON değeri' }
+);
+
+export const chatbotBookSchema = z.object({
+  ad_soyad: z.string({ invalid_type_error: 'Ad soyad metin olmalıdır' }).optional(),
+  telefon: z.string({ invalid_type_error: 'Telefon metin olmalıdır' }).trim().optional(),
+  tarih: z.string({ invalid_type_error: 'Tarih metin olmalıdır' }).trim().optional(),
+  saat: z.string({ invalid_type_error: 'Saat metin olmalıdır' }).trim().optional(),
+  hizmet: z.string({ invalid_type_error: 'Hizmet metin olmalıdır' }).optional(),
+  sure: optionalPositiveIntSchema.optional(),
+  tenant_id: z.string().optional(),
+});
+
+export const chatbotCancelSchema = z.object({
+  appointment_id: z.string({ invalid_type_error: 'Randevu ID metin olmalıdır' }).trim().optional(),
+  id: z.string({ invalid_type_error: 'Randevu ID metin olmalıdır' }).trim().optional(),
+  telefon: z.string({ invalid_type_error: 'Telefon metin olmalıdır' }).trim().optional(),
+  phone: z.string({ invalid_type_error: 'Telefon metin olmalıdır' }).trim().optional(),
+  tenant_id: z.string().optional(),
+});
+
+export const chatbotRescheduleSchema = z.object({
+  appointment_id: z.string({ invalid_type_error: 'Randevu ID metin olmalıdır' }).trim().optional(),
+  id: z.string({ invalid_type_error: 'Randevu ID metin olmalıdır' }).trim().optional(),
+  tarih: z.string({ invalid_type_error: 'Tarih metin olmalıdır' }).trim().optional(),
+  date: z.string({ invalid_type_error: 'Tarih metin olmalıdır' }).trim().optional(),
+  saat: z.string({ invalid_type_error: 'Saat metin olmalıdır' }).trim().optional(),
+  time: z.string({ invalid_type_error: 'Saat metin olmalıdır' }).trim().optional(),
+  telefon: z.string({ invalid_type_error: 'Telefon metin olmalıdır' }).trim().optional(),
+  phone: z.string({ invalid_type_error: 'Telefon metin olmalıdır' }).trim().optional(),
+  tenant_id: z.string().optional(),
+});
+
+export const chatbotSetStateSchema = z.object({
+  conversation_id: z.string({ invalid_type_error: 'conversation_id metin olmalıdır' }).trim().optional(),
+  conversationId: z.string({ invalid_type_error: 'conversationId metin olmalıdır' }).trim().optional(),
+  phone: z.string({ invalid_type_error: 'Telefon metin olmalıdır' }).trim().optional(),
+  telefon: z.string({ invalid_type_error: 'Telefon metin olmalıdır' }).trim().optional(),
+  intent: z.string({ invalid_type_error: 'intent metin olmalıdır' }).optional(),
+  current_intent: z.string({ invalid_type_error: 'current_intent metin olmalıdır' }).optional(),
+  stage: z.string({ invalid_type_error: 'stage metin olmalıdır' }).optional(),
+  current_stage: z.string({ invalid_type_error: 'current_stage metin olmalıdır' }).optional(),
+  context: jsonValueSchema.optional(),
+  context_data: jsonValueSchema.optional(),
+  tenant_id: z.string().optional(),
+});
+
+export const chatbotDeleteStateSchema = z
+  .object({
+    conversation_id: z.string({ invalid_type_error: 'conversation_id metin olmalıdır' }).trim().optional(),
+    conversationId: z.string({ invalid_type_error: 'conversationId metin olmalıdır' }).trim().optional(),
+    phone: z.string({ invalid_type_error: 'Telefon metin olmalıdır' }).trim().optional(),
+    tenant_id: z.string().optional(),
+  })
+  .optional();
 
 /**
  * Multi-tenant safe tenant resolution for chatbot requests.
@@ -14,9 +120,9 @@ function resolveTenantId(req: AuthenticatedRequest): string {
   }
 
   const explicit =
-    (req.headers['x-tenant-id'] as string) ||
-    (req.query.tenant_id as string) ||
-    (req.body?.tenant_id as string);
+    extractQueryString(req.headers['x-tenant-id']) ||
+    extractQueryString(req.query.tenant_id) ||
+    extractQueryString(req.body?.tenant_id);
 
   if (explicit && explicit.trim() && explicit.trim() !== authTenantId) {
     throw { status: 403, message: 'Farklı bir tenant adına işlem yapma yetkiniz yok' };
@@ -87,13 +193,21 @@ export class ChatbotController {
     try {
       const tenantId = resolveTenantId(req);
 
-      const date = (req.query.date as string) || (req.query.tarih as string);
+      const date = extractQueryString(req.query.date) || extractQueryString(req.query.tarih);
       if (!date) {
         res.status(400).json({ success: false, error: 'Tarih zorunludur (YYYY-MM-DD)' });
         return;
       }
 
-      const duration = parseInt((req.query.duration as string) || (req.query.sure as string) || '30', 10);
+      const rawDuration = extractQueryString(req.query.duration) || extractQueryString(req.query.sure);
+      let duration = 30;
+      if (rawDuration !== undefined && rawDuration.trim() !== '') {
+        if (!/^\d+$/.test(rawDuration.trim())) {
+          res.status(400).json({ success: false, error: 'Süre pozitif bir tam sayı olmalıdır' });
+          return;
+        }
+        duration = Number.parseInt(rawDuration.trim(), 10);
+      }
       const result = await ChatbotService.getAvailableSlots(date, duration, tenantId);
       res.json(result);
     } catch (err) {
@@ -105,13 +219,13 @@ export class ChatbotController {
     try {
       const resolvedTenantId = resolveTenantId(req);
 
-      const { ad_soyad, telefon, tarih, saat, hizmet, sure } = req.body;
+      const { ad_soyad, telefon, tarih, saat, hizmet, sure } = chatbotBookSchema.parse(req.body ?? {});
       if (!telefon || !tarih || !saat) {
         res.status(400).json({ success: false, error: 'Telefon, tarih ve saat zorunludur' });
         return;
       }
 
-      const cleaned = String(telefon).replace(/\D/g, '');
+      const cleaned = telefon.replace(/\D/g, '');
       if (cleaned.length < 10) {
         res.status(400).json({
           success: false,
@@ -121,12 +235,12 @@ export class ChatbotController {
       }
 
       const result = await ChatbotService.bookAppointment({
-        ad_soyad,
+        ad_soyad: ad_soyad ?? '',
         telefon,
         tarih,
         saat,
         hizmet,
-        sure: sure ? parseInt(sure, 10) : undefined,
+        sure,
         tenant_id: resolvedTenantId,
       });
       res.json(result);
@@ -139,7 +253,7 @@ export class ChatbotController {
     try {
       const resolvedTenantId = resolveTenantId(req);
 
-      const { appointment_id, id, telefon, phone } = req.body;
+      const { appointment_id, id, telefon, phone } = chatbotCancelSchema.parse(req.body ?? {});
       const aptId = appointment_id || id;
       const ph = telefon || phone;
 
@@ -148,7 +262,7 @@ export class ChatbotController {
         return;
       }
 
-      const cleaned = String(ph).replace(/\D/g, '');
+      const cleaned = ph.replace(/\D/g, '');
       if (cleaned.length < 10) {
         res.status(400).json({
           success: false,
@@ -168,7 +282,9 @@ export class ChatbotController {
     try {
       const resolvedTenantId = resolveTenantId(req);
 
-      const { appointment_id, id, tarih, date, saat, time, telefon, phone } = req.body;
+      const { appointment_id, id, tarih, date, saat, time, telefon, phone } = chatbotRescheduleSchema.parse(
+        req.body ?? {}
+      );
       const aptId = appointment_id || id;
       const newDate = tarih || date;
       const newTime = saat || time;
@@ -180,7 +296,7 @@ export class ChatbotController {
       }
 
       if (ph) {
-        const cleaned = String(ph).replace(/\D/g, '');
+        const cleaned = ph.replace(/\D/g, '');
         if (cleaned.length < 10) {
           res.status(400).json({
             success: false,
@@ -258,7 +374,7 @@ export class ChatbotController {
         current_stage,
         context,
         context_data,
-      } = req.body;
+      } = chatbotSetStateSchema.parse(req.body ?? {});
 
       const identifier = conversation_id || conversationId || phone || telefon;
       if (!identifier) {
@@ -267,7 +383,7 @@ export class ChatbotController {
       }
 
       const state = await ChatbotService.setConversationState(
-        String(identifier),
+        identifier,
         {
           intent,
           current_intent,
@@ -288,13 +404,15 @@ export class ChatbotController {
   static async deleteState(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
       const tenantId = resolveTenantId(req);
+      const parsedBody = chatbotDeleteStateSchema.parse(req.body);
 
       const identifier =
-        (req.body?.conversation_id as string) ||
-        (req.body?.conversationId as string) ||
-        (req.query?.conversation_id as string) ||
-        (req.body?.phone as string) ||
-        (req.query?.phone as string);
+        parsedBody?.conversation_id ||
+        parsedBody?.conversationId ||
+        extractQueryString(req.query?.conversation_id) ||
+        parsedBody?.phone ||
+        extractQueryString(req.query?.phone) ||
+        '';
 
       const result = await ChatbotService.deleteConversationState(identifier, tenantId);
       res.json(result);

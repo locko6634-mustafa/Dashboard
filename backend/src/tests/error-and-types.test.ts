@@ -53,7 +53,7 @@ describe('AdminService.ensureSchema error handling', () => {
   test('ensureSchema ignores idempotent Postgres codes (42P07, 42710, 42701)', async (t) => {
     let callCount = 0;
     const codes = ['42P07', '42710', '42701'];
-    const restoreRaw = stubMethod(prisma, '$executeRawUnsafe', (async () => {
+    const restoreRaw = stubMethod(prisma, '$executeRaw', (async () => {
       const code = codes[callCount % codes.length];
       callCount += 1;
       const err: any = new Error('Already exists');
@@ -72,7 +72,7 @@ describe('AdminService.ensureSchema error handling', () => {
   });
 
   test('ensureSchema logs and rethrows real DDL errors', async (t) => {
-    const restoreRaw = stubMethod(prisma, '$executeRawUnsafe', (async () => {
+    const restoreRaw = stubMethod(prisma, '$executeRaw', (async () => {
       const err: any = new Error('permission denied for schema public');
       err.code = 'P2010';
       err.meta = { code: '42501' };
